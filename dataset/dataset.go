@@ -52,8 +52,9 @@ func genPatterns(gt *gogo.GameTree) []string {
 			fh2 := board.FeatureHash(gogo.MakePoint(p.X(), p.Y(), cur.Color()))
 			for j := len(pat2) - 1; j >= 0; j-- {
 				if (pat2[j] ^ fh2) == (pat[j] ^ fh) {
-					line := "0\t" + strconv.Itoa(k) + "\t" + strconv.FormatInt(pat[k]^fh, 10)
+					line := "0\t" + strconv.Itoa(j) + "\t" + strconv.FormatInt(pat[j]^fh, 10)
 					ret = append(ret, line)
+					break
 				}
 			}
 		}
