@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	PATTERN_SIZE = 14
+	PATTERN_SIZE = 15
 )
 
 type Board struct {

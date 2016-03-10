@@ -34,11 +34,27 @@ func genPatterns(gt *gogo.GameTree) []string {
 		if nil == pat {
 			break
 		}
-		line := ""
+
 		for k, v := range pat {
-			line += strconv.Itoa(k) + ":" + strconv.FormatInt(v, 10) + "\t"
+			line := "1\t" + strconv.Itoa(k) + "\t" + strconv.FormatInt(v, 10)
+			ret = append(ret, line)
 		}
-		ret = append(ret, line)
+
+		for k, p := range board.W() {
+			if p.Color() != gogo.GRAY {
+				continue
+			}
+			if p.X() == cur.X() && p.Y() == cur.Y() {
+				continue
+			}
+			pat2 := board.GetPatternHash(k)
+			for k := len(pat2) - 1; k >= 0; k-- {
+				if pat2[k] == pat[k] {
+					line := "0\t" + strconv.Itoa(k) + "\t" + strconv.FormatInt(pat[k], 10)
+					ret = append(ret, line)
+				}
+			}
+		}
 		board.Put(cur.X(), cur.Y(), cur.Color())
 	}
 	return ret
