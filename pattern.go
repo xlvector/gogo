@@ -32,7 +32,7 @@ func (p *PointDistanceMap) PointDistance(q, d int) []int {
 }
 
 func (b *Board) ColorHash(p Point) int64 {
-	h := int64(p.x*882377 + p.y*104729)
+	h := int64(p.x*17674494770905 + p.y*13174494670911)
 	if p.color == GRAY {
 		return 4367440637090516 ^ h
 	} else if p.color == BLACK {
