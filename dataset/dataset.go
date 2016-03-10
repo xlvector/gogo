@@ -19,6 +19,14 @@ type Sample struct {
 	NextStep gogo.Point
 }
 
+func patternString(label int, pat []int64, h int64) string {
+	ret := strconv.Itoa(label)
+	for k, v := range pat {
+		ret += "\t" + strconv.Itoa(k) + ":" + strconv.FormatInt(v^h, 10)
+	}
+	return ret
+}
+
 func genPatterns(gt *gogo.GameTree) []string {
 	path := gt.Path2Root()
 	board := gogo.NewBoard(gt.SGFSize())
@@ -30,33 +38,22 @@ func genPatterns(gt *gogo.GameTree) []string {
 		if !board.Valid(cur) {
 			break
 		}
-		fh := board.FeatureHash(cur)
-		pat := board.GetPatternHash(board.Index(cur))
-		if nil == pat {
-			break
-		}
-
-		for k, v := range pat {
-			line := "1\t" + strconv.Itoa(k) + "\t" + strconv.FormatInt(v^fh, 10)
-			ret = append(ret, line)
-		}
 
 		for k, p := range board.W() {
 			if p.Color() != gogo.GRAY {
 				continue
 			}
+			label := 0
 			if p.X() == cur.X() && p.Y() == cur.Y() {
-				continue
-			}
-			pat2 := board.GetPatternHash(k)
-			fh2 := board.FeatureHash(gogo.MakePoint(p.X(), p.Y(), cur.Color()))
-			for j := len(pat2) - 1; j >= 0; j-- {
-				if (pat2[j] ^ fh2) == (pat[j] ^ fh) {
-					line := "0\t" + strconv.Itoa(j) + "\t" + strconv.FormatInt(pat[j]^fh, 10)
-					ret = append(ret, line)
-					break
+				label = 1
+			} else {
+				if rand.Float64() > 0.1 {
+					continue
 				}
 			}
+			pat := board.GetPatternHash(k)
+			h := board.FeatureHash(gogo.MakePoint(p.X(), p.Y(), cur.Color()))
+			ret = append(ret, patternString(label, pat, h))
 		}
 		board.Put(cur.X(), cur.Y(), cur.Color())
 	}
