@@ -57,6 +57,14 @@ func (w *Worm) Add(p int) {
 	w.Points.Add(p)
 }
 
+func (b *Board) WormContainsPointBeforePut(p int, stone Color) *Worm {
+	oldColor := b.w[p].color
+	b.w[p].color = stone
+	ret := b.WormContainsPoint(p)
+	b.w[p].color = oldColor
+	return ret
+}
+
 func (b *Board) WormContainsPoint(p int) *Worm {
 	worm := NewWorm()
 	qe := make([]int, 0, 5)

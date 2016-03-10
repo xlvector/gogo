@@ -30,13 +30,14 @@ func genPatterns(gt *gogo.GameTree) []string {
 		if !board.Valid(cur) {
 			break
 		}
+		fh := board.FeatureHash(cur)
 		pat := board.GetPatternHash(board.Index(cur))
 		if nil == pat {
 			break
 		}
 
 		for k, v := range pat {
-			line := "1\t" + strconv.Itoa(k) + "\t" + strconv.FormatInt(v, 10)
+			line := "1\t" + strconv.Itoa(k) + "\t" + strconv.FormatInt(v^fh, 10)
 			ret = append(ret, line)
 		}
 
@@ -48,9 +49,10 @@ func genPatterns(gt *gogo.GameTree) []string {
 				continue
 			}
 			pat2 := board.GetPatternHash(k)
-			for k := len(pat2) - 1; k >= 0; k-- {
-				if pat2[k] == pat[k] {
-					line := "0\t" + strconv.Itoa(k) + "\t" + strconv.FormatInt(pat[k], 10)
+			fh2 := board.FeatureHash(gogo.MakePoint(p.X(), p.Y(), cur.Color()))
+			for j := len(pat2) - 1; j >= 0; j-- {
+				if (pat2[j] ^ fh2) == (pat[j] ^ fh) {
+					line := "0\t" + strconv.Itoa(k) + "\t" + strconv.FormatInt(pat[k]^fh, 10)
 					ret = append(ret, line)
 				}
 			}

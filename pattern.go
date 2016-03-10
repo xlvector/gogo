@@ -43,6 +43,47 @@ func (b *Board) ColorHash(p Point) int64 {
 	}
 }
 
+func (b *Board) WormLibertyHash(p Point) int64 {
+	worm := b.WormContainsPointBeforePut(b.index(p.x, p.y), p.color)
+	if worm.Liberty == 0 {
+		return 3206711325013931
+	} else if worm.Liberty == 1 {
+		return 9276203850101530
+	} else if worm.Liberty == 2 {
+		return 6205803458038581
+	} else {
+		return 7947284651543957
+	}
+}
+
+func (b *Board) WormOpLibertyHash(p Point) int64 {
+	b.w[b.index(p.x, p.y)].color = p.color
+	n4 := b.Neighbor4(p.x, p.y)
+	minLiberty := 1000
+	for _, q := range n4 {
+		if q.color != OppColor(p.color) {
+			continue
+		}
+		wq := b.WormContainsPoint(b.index(q.x, q.y))
+		if minLiberty > wq.Liberty {
+			minLiberty = wq.Liberty
+		}
+	}
+	b.w[b.index(p.x, p.y)].color = GRAY
+	if minLiberty == 1000 {
+		return 0
+	}
+	if minLiberty == 0 {
+		return 3206715901513931
+	} else if minLiberty == 1 {
+		return 5950185085038146
+	} else if minLiberty == 2 {
+		return 8475973460138600
+	} else {
+		return 3690804538037502
+	}
+}
+
 func (b *Board) PointLibertyHash(p Point) int64 {
 	n := b.PointLiberty(p)
 	if n == 0 {
@@ -79,9 +120,14 @@ func (b *Board) KoHash(p Point) int64 {
 
 func (b *Board) PointHash(p Point) int64 {
 	ret := b.ColorHash(p)
-	ret ^= b.PointLibertyHash(p)
-	ret ^= b.KoHash(p)
+	return ret
+}
+
+func (b *Board) FeatureHash(p Point) int64 {
+	ret := b.KoHash(p)
 	ret ^= b.EdgeDisHash(p)
+	ret ^= b.WormLibertyHash(p)
+	ret ^= b.WormOpLibertyHash(p)
 	return ret
 }
 

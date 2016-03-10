@@ -11,6 +11,10 @@ type Point struct {
 	color Color
 }
 
+func MakePoint(x, y int, c Color) Point {
+	return Point{x, y, c}
+}
+
 func (p Point) X() int {
 	return p.x
 }
