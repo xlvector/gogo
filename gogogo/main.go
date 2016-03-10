@@ -132,7 +132,6 @@ func getAllFiles(root, ext string, ch chan string) {
 	close(sgfCh)
 }
 
-/*
 func patternAllFiles(root, ext string, ch chan string) {
 	q := list.New()
 	q.PushBack(root)
@@ -143,11 +142,8 @@ func patternAllFiles(root, ext string, ch chan string) {
 		go func() {
 			for buf := range sgfCh {
 				patterns := dataset.GenPatternFromSGF(buf)
-				for _, sample := range samples {
-					fs := sample.FeatureString()
-					for _, f := range fs {
-						ch <- strconv.Itoa(sample.K) + "\t" + f
-					}
+				for _, pat := range patterns {
+					ch <- pat
 				}
 			}
 		}()
@@ -171,7 +167,7 @@ func patternAllFiles(root, ext string, ch chan string) {
 		})
 	}
 	close(sgfCh)
-}*/
+}
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -279,15 +275,18 @@ func main() {
 		gt := combineSGFs(*sgfFolder, ".sgf")
 		ioutil.WriteFile(*output, []byte(gt.WriteSGF()), 0655)
 	} else if *mode == "pattern" {
-		buf, _ := ioutil.ReadFile(*sgfFile)
-		pats := dataset.GenPatternFromSGF(string(buf))
-		for i, pat := range pats {
-			if i > 10 {
-				break
+		ch := make(chan string, 1000)
+		go func() {
+			fout, _ := os.Create(*output)
+			defer fout.Close()
+			writer := bufio.NewWriter(fout)
+			for line := range ch {
+				writer.WriteString(line)
+				writer.WriteString("\n")
 			}
-			fmt.Println(pat.Second)
-			gogo.PrintPattern(pat.First)
-		}
+		}()
+		patternAllFiles(*sgfFolder, ".sgf", ch)
+
 	} else if *mode == "simple-feature" {
 		ch := make(chan string, 1000)
 		go func() {

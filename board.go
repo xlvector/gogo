@@ -35,6 +35,14 @@ func NewBoard(size int) *Board {
 	return b
 }
 
+func (b *Board) GetPatternHash(p int) []int64 {
+	if p < 0 || p >= len(b.patternHash) {
+		fmt.Println("GetPatternHash", p, len(b.patternHash))
+		return nil
+	}
+	return b.patternHash[p]
+}
+
 func (b *Board) SetPointDistanceMap(pdm *PointDistanceMap) {
 	b.pdm = pdm
 	b.InitPatternHash(pdm)
@@ -255,6 +263,10 @@ func (b *Board) NeighDiamond(x, y int) []Point {
 		ret = append(ret, p)
 	}
 	return ret
+}
+
+func (b *Board) Valid(p Point) bool {
+	return b.valid(p.color, p.x, p.y)
 }
 
 func (b *Board) valid(stone Color, x, y int) bool {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/rand"
-	"sort"
+	"strconv"
 
 	"github.com/xlvector/gogo"
 	"github.com/xlvector/hector/core"
@@ -19,33 +19,32 @@ type Sample struct {
 	NextStep gogo.Point
 }
 
-func genPatterns(gt *gogo.GameTree) gogo.StringIntPairList {
+func genPatterns(gt *gogo.GameTree) []string {
 	path := gt.Path2Root()
 	board := gogo.NewBoard(gt.SGFSize())
-	ret := make(map[string]int)
+	pdm := gogo.NewPointDistanceMap(board, gogo.PATTERN_SIZE)
+	board.SetPointDistanceMap(pdm)
+	ret := []string{}
 	for i := len(path) - 1; i >= 0; i-- {
 		cur := path[i].Point()
-		if !cur.Valid() {
+		if !board.Valid(cur) {
 			break
 		}
-		pat3 := board.PatternString(cur.X(), cur.Y(), cur.Color(), 1)
-		c, ok := ret[pat3]
-		if !ok {
-			ret[pat3] = 1
-		} else {
-			ret[pat3] = c + 1
+		pat := board.GetPatternHash(board.Index(cur))
+		if nil == pat {
+			break
 		}
+		line := ""
+		for k, v := range pat {
+			line += strconv.Itoa(k) + ":" + strconv.FormatInt(v, 10) + "\t"
+		}
+		ret = append(ret, line)
 		board.Put(cur.X(), cur.Y(), cur.Color())
 	}
-	retList := make(gogo.StringIntPairList, 0, len(ret))
-	for k, v := range ret {
-		retList = append(retList, gogo.StringIntPair{k, v})
-	}
-	sort.Sort(sort.Reverse(retList))
-	return retList
+	return ret
 }
 
-func GenPatternFromSGF(buf string) gogo.StringIntPairList {
+func GenPatternFromSGF(buf string) []string {
 	gt := &gogo.GameTree{}
 	gt.ParseSGF(buf)
 	return genPatterns(gt)

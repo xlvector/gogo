@@ -438,6 +438,8 @@ func TestPatternHash(t *testing.T) {
 			if dh[d] != newDh[d] {
 				t.Error(dh[d], newDh[d])
 			}
+
+			fmt.Println(g.B.w[p].String(), d, dh[d])
 		}
 	}
 
