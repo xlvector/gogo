@@ -119,7 +119,7 @@ func genSimpleSamples(gt *gogo.GameTree) []string {
 
 	for i := len(path) - 2; i >= 1; i-- {
 		cur := path[i].Point()
-		if !cur.Valid() {
+		if !board.Valid(cur) {
 			break
 		}
 		fs := board.GenSimpleFeatures(lastPattern, cur)

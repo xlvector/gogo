@@ -16,6 +16,9 @@ const (
 )
 
 func (b *Board) PointSimpleFeature(p Point, stone Color) []int64 {
+	if !p.Valid() {
+		return nil
+	}
 	fh := b.FeatureHash(MakePoint(p.x, p.y, stone))
 	if fh < 0 {
 		return nil
