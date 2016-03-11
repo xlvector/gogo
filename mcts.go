@@ -21,11 +21,12 @@ func (b *Board) GenSimpleFeatures(last, cur Point) map[int]map[int64]byte {
 		if b.w[i].Color() != GRAY {
 			continue
 		}
+		h1 := b.FeatureHash(MakePoint(b.w[i].x, b.w[i].y, cur.Color()))
 		fs := make(map[int64]byte)
 		fh := int64(0)
-		for i, h := range ph {
+		for _, h := range ph {
 			fh ^= h
-			fs[fh*100+int64(i)] = 1
+			fs[fh^h1] = 1
 		}
 		ret[i] = fs
 	}
