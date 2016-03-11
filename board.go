@@ -40,7 +40,13 @@ func (b *Board) GetPatternHash(p int) []int64 {
 		fmt.Println("GetPatternHash", p, len(b.patternHash))
 		return nil
 	}
-	return b.patternHash[p]
+	ret := make([]int64, PATTERN_SIZE)
+	h := int64(0)
+	for i, ph := range b.patternHash[p] {
+		h ^= ph
+		ret[i] = h
+	}
+	return ret
 }
 
 func (b *Board) SetPointDistanceMap(pdm *PointDistanceMap) {
