@@ -101,10 +101,10 @@ func genSamples(gt *gogo.GameTree, stone gogo.Color) []*Sample {
 	return ret
 }
 
-func SimpleFeatureString(label, index int, f map[int64]byte) string {
+func SimpleFeatureString(label, index int, f []int64) string {
 	ret := fmt.Sprintf("%d", label)
-	for k, v := range f {
-		ret += fmt.Sprintf("\t%d:%d", k*1000+int64(index), int(v))
+	for _, v := range f {
+		ret += fmt.Sprintf("\t%d:1", v*1000+int64(index))
 	}
 	return ret
 }
@@ -115,28 +115,23 @@ func genSimpleSamples(gt *gogo.GameTree) []string {
 	board := gogo.NewBoard(gt.SGFSize())
 	pdm := gogo.NewPointDistanceMap(board, gogo.PATTERN_SIZE)
 	board.SetPointDistanceMap(pdm)
-	last := gogo.InvalidPoint()
-	for i := len(path) - 1; i >= 1; i-- {
+	lastPattern := []int64{}
+
+	for i := len(path) - 2; i >= 1; i-- {
 		cur := path[i].Point()
 		if !cur.Valid() {
 			break
 		}
-		fs := board.GenSimpleFeatures(last, cur)
-		ratio := 15.0 / float64(len(fs))
-		for k, p := range board.W() {
-			if p.Color() != gogo.GRAY {
-				continue
-			}
-			if k == board.Index(cur) {
-				ret = append(ret, SimpleFeatureString(1, k, fs))
+		fs := board.GenSimpleFeatures(lastPattern, cur)
+		for p, pat := range fs {
+			if p == board.Index(cur) {
+				ret = append(ret, SimpleFeatureString(1, p, pat))
 			} else {
-				if rand.Float64() < ratio {
-					ret = append(ret, SimpleFeatureString(0, k, fs))
-				}
+				ret = append(ret, SimpleFeatureString(0, p, pat))
 			}
 		}
+		lastPattern = board.PointSimpleFeature(cur)
 		board.Put(cur.X(), cur.Y(), cur.Color())
-		last = cur
 	}
 	return ret
 }
@@ -235,7 +230,7 @@ func evaluateLRModel(gt *gogo.GameTree, model *lr.LogisticRegression) (int, int)
 	board := gogo.NewBoard(gt.SGFSize())
 	pdm := gogo.NewPointDistanceMap(board, gogo.PATTERN_SIZE)
 	board.SetPointDistanceMap(pdm)
-	last := gogo.InvalidPoint()
+	lastPattern := []int64{}
 	hit := 0
 	total := 0
 	for i := len(path) - 2; i >= 1; i-- {
@@ -243,15 +238,16 @@ func evaluateLRModel(gt *gogo.GameTree, model *lr.LogisticRegression) (int, int)
 		if !cur.Valid() {
 			break
 		}
-		fs := board.GenSimpleFeatures(last, cur)
-		rank := make(gogo.IntFloatPairList, 0, len(fs))
+		rank := make(gogo.IntFloatPairList, 0, 50)
 		for j, p := range board.W() {
 			if p.Color() != gogo.GRAY {
 				continue
 			}
 			s := core.NewSample()
-			for k, v := range fs {
-				s.AddFeature(core.Feature{k*1000 + int64(j), float64(v)})
+			pat := board.PointSimpleFeature(p)
+			pat = append(pat, lastPattern...)
+			for _, v := range pat {
+				s.AddFeature(core.Feature{v*1000 + int64(j), 1.0})
 			}
 			prob := model.Predict(s)
 			rank = append(rank, gogo.IntFloatPair{j, prob})
@@ -265,8 +261,8 @@ func evaluateLRModel(gt *gogo.GameTree, model *lr.LogisticRegression) (int, int)
 		}
 		total += 1
 		fmt.Println(cur.String(), board.W()[rank[0].First].String(), rank[0].Second)
+		lastPattern = board.PointSimpleFeature(cur)
 		board.Put(cur.X(), cur.Y(), cur.Color())
-		last = cur
 	}
 	fmt.Println(hit, total, float64(hit)/float64(total))
 	return hit, total

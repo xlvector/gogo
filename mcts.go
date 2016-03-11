@@ -15,19 +15,28 @@ const (
 	FS_EDGE_DIS_Y
 )
 
-func (b *Board) GenSimpleFeatures(last, cur Point) map[int64]byte {
-	fs := make(map[int64]byte)
+func (b *Board) PointSimpleFeature(p Point) []int64 {
+	fh := b.FeatureHash(MakePoint(p.x, p.y, p.color))
+	ph := b.GetPatternHash(b.index(p.x, p.y))
+	for i := 0; i < len(ph); i++ {
+		ph[i] ^= fh
+	}
+	return ph
+}
+
+func (b *Board) GenSimpleFeatures(lastPat []int64, cur Point) map[int][]int64 {
+	ret := make(map[int][]int64)
 	for i, p := range b.w {
 		if p.color != GRAY {
 			continue
 		}
-		fh := b.FeatureHash(MakePoint(b.w[i].x, b.w[i].y, cur.Color()))
-		ph := b.GetPatternHash(i)
-		for _, h := range ph {
-			fs[fh^h] = 1
+		if (p.x == cur.x && p.y == cur.y) || rand.Float64() < 0.03 {
+			pat := b.PointSimpleFeature(p)
+			pat = append(pat, lastPat...)
+			ret[i] = pat
 		}
 	}
-	return fs
+	return ret
 }
 
 func NewBoardFromPath(size int, path []*GameTreeNode) *Board {
