@@ -255,7 +255,7 @@ func evaluateLRModel(gt *gogo.GameTree, model *lr.LogisticRegression) (int, int)
 			hit += 1
 		}
 		total += 1
-		fmt.Println(cur.String(), board.W()[best].String())
+		fmt.Println(cur.String(), board.W()[best].String(), maxProb)
 		board.Put(cur.X(), cur.Y(), cur.Color())
 		last = cur
 	}
