@@ -47,7 +47,7 @@ func genPatterns(gt *gogo.GameTree) []string {
 			if p.X() == cur.X() && p.Y() == cur.Y() {
 				label = 1
 			} else {
-				if rand.Float64() > 0.1 {
+				if rand.Float64() > 0.03 {
 					continue
 				}
 			}
