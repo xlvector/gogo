@@ -233,7 +233,7 @@ func evaluateLRModel(gt *gogo.GameTree, model *lr.LogisticRegression) (int, int)
 	last := gogo.InvalidPoint()
 	hit := 0
 	total := 0
-	for i := len(path) - 1; i >= 1; i-- {
+	for i := len(path) - 2; i >= 1; i-- {
 		cur := path[i].Point()
 		if !cur.Valid() {
 			break
