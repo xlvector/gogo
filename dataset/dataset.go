@@ -130,7 +130,7 @@ func genSimpleSamples(gt *gogo.GameTree) []string {
 				ret = append(ret, SimpleFeatureString(0, p, pat))
 			}
 		}
-		lastPattern = board.PointSimpleFeature(cur)
+		lastPattern = board.PointSimpleFeature(cur, cur.Color())
 		board.Put(cur.X(), cur.Y(), cur.Color())
 	}
 	return ret
@@ -244,7 +244,7 @@ func evaluateLRModel(gt *gogo.GameTree, model *lr.LogisticRegression) (int, int)
 				continue
 			}
 			s := core.NewSample()
-			pat := board.PointSimpleFeature(p)
+			pat := board.PointSimpleFeature(p, cur.Color())
 			pat = append(pat, lastPattern...)
 			for _, v := range pat {
 				s.AddFeature(core.Feature{v*1000 + int64(j), 1.0})
@@ -261,7 +261,7 @@ func evaluateLRModel(gt *gogo.GameTree, model *lr.LogisticRegression) (int, int)
 		}
 		total += 1
 		fmt.Println(cur.String(), board.W()[rank[0].First].String(), rank[0].Second)
-		lastPattern = board.PointSimpleFeature(cur)
+		lastPattern = board.PointSimpleFeature(cur, cur.Color())
 		board.Put(cur.X(), cur.Y(), cur.Color())
 		if i%20 == 0 {
 			fmt.Println(board.String(cur))

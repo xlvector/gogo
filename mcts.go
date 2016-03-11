@@ -15,8 +15,11 @@ const (
 	FS_EDGE_DIS_Y
 )
 
-func (b *Board) PointSimpleFeature(p Point) []int64 {
-	fh := b.FeatureHash(MakePoint(p.x, p.y, p.color))
+func (b *Board) PointSimpleFeature(p Point, stone Color) []int64 {
+	fh := b.FeatureHash(MakePoint(p.x, p.y, stone))
+	if fh < 0 {
+		return nil
+	}
 	ph := b.GetPatternHash(b.index(p.x, p.y))
 	for i := 0; i < len(ph); i++ {
 		ph[i] ^= fh
@@ -31,7 +34,10 @@ func (b *Board) GenSimpleFeatures(lastPat []int64, cur Point) map[int][]int64 {
 			continue
 		}
 		if (p.x == cur.x && p.y == cur.y) || rand.Float64() < 0.03 {
-			pat := b.PointSimpleFeature(p)
+			pat := b.PointSimpleFeature(p, cur.color)
+			if pat == nil {
+				continue
+			}
 			pat = append(pat, lastPat...)
 			ret[i] = pat
 		}

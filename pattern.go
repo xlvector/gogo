@@ -47,7 +47,7 @@ func (b *Board) ColorHash(p Point) int64 {
 func (b *Board) WormLibertyHash(p Point) int64 {
 	worm := b.WormContainsPointBeforePut(b.index(p.x, p.y), p.color)
 	if worm.Liberty == 0 {
-		return 206711325013931
+		return -1
 	} else if worm.Liberty == 1 {
 		return 276203850101530
 	} else if worm.Liberty == 2 {
@@ -125,9 +125,14 @@ func (b *Board) PointHash(p Point) int64 {
 }
 
 func (b *Board) FeatureHash(p Point) int64 {
-	ret := b.KoHash(p)
+	if b.StableEye(p.x, p.y, p.color) {
+		return -1
+	}
+	ret := b.WormLibertyHash(p)
+	if ret < 0 {
+		return ret
+	}
 	ret ^= b.EdgeDisHash(p)
-	ret ^= b.WormLibertyHash(p)
 	ret ^= b.WormOpLibertyHash(p)
 	return ret
 }
