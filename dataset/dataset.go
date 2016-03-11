@@ -253,7 +253,7 @@ func evaluateLRModel(gt *gogo.GameTree, model *lr.LogisticRegression) (int, int)
 			rank = append(rank, gogo.IntFloatPair{j, prob})
 		}
 		sort.Sort(sort.Reverse(rank))
-		for k := 0; k < 5 && k < len(rank); k++ {
+		for k := 0; k < 1 && k < len(rank); k++ {
 			if rank[k].First == board.Index(cur) {
 				hit += 1
 				break
