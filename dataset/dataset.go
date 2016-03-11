@@ -230,6 +230,8 @@ func evalPattern(gt *gogo.GameTree, pat string) (int, int) {
 func evaluateLRModel(gt *gogo.GameTree, model *lr.LogisticRegression) (int, int) {
 	path := gt.Path2Root()
 	board := gogo.NewBoard(gt.SGFSize())
+	pdm := gogo.NewPointDistanceMap(board, gogo.PATTERN_SIZE)
+	board.SetPointDistanceMap(pdm)
 	last := gogo.InvalidPoint()
 	hit := 0
 	total := 0
