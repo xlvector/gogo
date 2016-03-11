@@ -1,10 +1,14 @@
 package dataset
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
+	"os"
+	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/xlvector/gogo"
 	"github.com/xlvector/hector/core"
@@ -144,6 +148,79 @@ func EvaluateLRModel(sgfPath, modelPath string) (int, int) {
 	buf, _ := ioutil.ReadFile(sgfPath)
 	gt.ParseSGF(string(buf))
 	return evaluateLRModel(gt, model)
+}
+
+func loadPatternModel(pat string) []map[int64]float64 {
+	f, _ := os.Open(pat)
+	reader := bufio.NewReader(f)
+	ret := make([]map[int64]float64, gogo.PATTERN_SIZE)
+	for i := 0; i < gogo.PATTERN_SIZE; i++ {
+		ret[i] = make(map[int64]float64)
+	}
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			break
+		}
+		tks := strings.Split(line, "\t")
+		k, _ := strconv.Atoi(tks[0])
+		p, _ := strconv.ParseInt(tks[1], 10, 64)
+		v, _ := strconv.ParseFloat(tks[2], 64)
+		ret[k][p] = v
+	}
+	return ret
+}
+
+func EvaluatePattern(sgfPath, modelPath string) (int, int) {
+	gt := &gogo.GameTree{}
+	buf, _ := ioutil.ReadFile(sgfPath)
+	gt.ParseSGF(string(buf))
+	return evalPattern(gt, modelPath)
+}
+
+func evalPattern(gt *gogo.GameTree, pat string) (int, int) {
+	path := gt.Path2Root()
+	board := gogo.NewBoard(gt.SGFSize())
+	patModel := loadPatternModel(pat)
+	hit := 0
+	total := 0
+	for i := len(path) - 1; i >= 1; i-- {
+		cur := path[i].Point()
+		if !cur.Valid() {
+			break
+		}
+		st := make([]gogo.IntFloatPairList, gogo.PATTERN_SIZE)
+		for k := 0; k < gogo.PATTERN_SIZE; k++ {
+			st[k] = make(gogo.IntFloatPairList, 0, 20)
+		}
+		for k, p := range board.W() {
+			if p.Color() != gogo.GRAY {
+				continue
+			}
+			pat := board.GetPatternHash(k)
+			h := board.FeatureHash(gogo.MakePoint(p.X(), p.Y(), cur.Color()))
+			for j := gogo.PATTERN_SIZE - 1; j >= 0; j-- {
+				hh := pat[j] ^ h
+				if v, ok := patModel[j][hh]; ok {
+					st[j] = append(st[j], gogo.IntFloatPair{k, v})
+					break
+				}
+			}
+		}
+		for j := gogo.PATTERN_SIZE - 1; j >= 0; j-- {
+			if len(st[j]) == 0 {
+				continue
+			}
+			sort.Sort(st[j])
+			if st[j][0].First == board.Index(cur) {
+				hit += 1
+			}
+		}
+		total += 1
+		board.Put(cur.X(), cur.Y(), cur.Color())
+	}
+	fmt.Println(hit, total, float64(hit)/float64(total))
+	return hit, total
 }
 
 func evaluateLRModel(gt *gogo.GameTree, model *lr.LogisticRegression) (int, int) {

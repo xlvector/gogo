@@ -301,5 +301,7 @@ func main() {
 		getSimpleFeatures(*sgfFolder, ".sgf", ch)
 	} else if *mode == "eval-lr" {
 		dataset.EvaluateLRModel(*sgfFile, *model)
+	} else if *mode == "eval-pat" {
+		dataset.EvaluatePattern(*sgfFile, *model)
 	}
 }
