@@ -263,6 +263,9 @@ func evaluateLRModel(gt *gogo.GameTree, model *lr.LogisticRegression) (int, int)
 		fmt.Println(cur.String(), board.W()[rank[0].First].String(), rank[0].Second)
 		lastPattern = board.PointSimpleFeature(cur)
 		board.Put(cur.X(), cur.Y(), cur.Color())
+		if i%20 == 0 {
+			fmt.Println(board.String(cur))
+		}
 	}
 	fmt.Println(hit, total, float64(hit)/float64(total))
 	return hit, total
