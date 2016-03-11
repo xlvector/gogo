@@ -17,16 +17,15 @@ const (
 
 func (b *Board) GenSimpleFeatures(last, cur Point) map[int]map[int64]byte {
 	ret := make(map[int]map[int64]byte)
-	for i, ph := range b.patternHash {
-		if b.w[i].Color() != GRAY {
+	for i, p := range b.w {
+		if p.color != GRAY {
 			continue
 		}
-		h1 := b.FeatureHash(MakePoint(b.w[i].x, b.w[i].y, cur.Color()))
+		fh := b.FeatureHash(MakePoint(b.w[i].x, b.w[i].y, cur.Color()))
 		fs := make(map[int64]byte)
-		fh := int64(0)
+		ph := b.GetPatternHash(i)
 		for _, h := range ph {
-			fh ^= h
-			fs[fh^h1] = 1
+			fs[fh^h] = 1
 		}
 		ret[i] = fs
 	}
