@@ -439,7 +439,7 @@ func TestPatternHash(t *testing.T) {
 				t.Error(dh[d], newDh[d])
 			}
 
-			fmt.Println(g.B.w[p].String(), d, dh[d])
+			//fmt.Println(g.B.w[p].String(), d, dh[d])
 		}
 	}
 
