@@ -213,11 +213,11 @@ func evalPattern(gt *gogo.GameTree, pat string) (int, int) {
 			if len(st[j]) == 0 {
 				continue
 			}
-			sort.Sort(st[j])
+			sort.Sort(sort.Reverse(st[j]))
 			if st[j][0].First == board.Index(cur) {
 				hit += 1
 			}
-			fmt.Println(j, board.W()[st[j][0].First].String(), st[j][0].Second, st[j])
+			fmt.Println(j, board.W()[st[j][0].First].String(), st[j][0].Second)
 			break
 		}
 		total += 1
