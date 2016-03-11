@@ -32,28 +32,28 @@ func (p *PointDistanceMap) PointDistance(q, d int) []int {
 }
 
 func (b *Board) ColorHash(p Point) int64 {
-	h := int64(p.x*17674494770905 + p.y*13174494670911)
+	h := int64(p.x*7674494770905 + p.y*3174494670911)
 	if p.color == GRAY {
-		return 4367440637090516 ^ h
+		return 367440637090516 ^ h
 	} else if p.color == BLACK {
-		return 7534508431030358 ^ h
+		return 534508431030358 ^ h
 	} else if p.color == WHITE {
-		return 3401485023080138 ^ h
+		return 401485023080138 ^ h
 	} else {
-		return 6231701002348503 ^ h
+		return 231701002348503 ^ h
 	}
 }
 
 func (b *Board) WormLibertyHash(p Point) int64 {
 	worm := b.WormContainsPointBeforePut(b.index(p.x, p.y), p.color)
 	if worm.Liberty == 0 {
-		return 3206711325013931
+		return 206711325013931
 	} else if worm.Liberty == 1 {
-		return 9276203850101530
+		return 276203850101530
 	} else if worm.Liberty == 2 {
-		return 6205803458038581
+		return 205803458038581
 	} else {
-		return 7947284651543957
+		return 947284651543957
 	}
 }
 
@@ -75,47 +75,47 @@ func (b *Board) WormOpLibertyHash(p Point) int64 {
 		return 0
 	}
 	if minLiberty == 0 {
-		return 3206715901513931
+		return 206715901513931
 	} else if minLiberty == 1 {
-		return 5950185085038146
+		return 950185085038146
 	} else if minLiberty == 2 {
-		return 8475973460138600
+		return 475973460138600
 	} else {
-		return 3690804538037502
+		return 690804538037502
 	}
 }
 
 func (b *Board) PointLibertyHash(p Point) int64 {
 	n := b.PointLiberty(p)
 	if n == 0 {
-		return 4206701385013581
+		return 420670185013581
 	} else if n == 1 {
-		return 7305135150381401
+		return 730515150381401
 	} else if n == 2 {
-		return 2763013808356791
+		return 276301380356791
 	} else {
-		return 4150754907001058
+		return 415075407001058
 	}
 }
 
 func (b *Board) EdgeDisHash(p Point) int64 {
 	n := p.EdgeDis(b.size)
 	if n <= 3 {
-		return 4395792752175943
+		return 439572752175943
 	} else if n == 4 {
-		return 5672153418394501
+		return 567215341894501
 	} else if n == 5 {
-		return 9798437591759191
+		return 979843759759191
 	} else {
-		return 5788787957979347
+		return 578787957979347
 	}
 }
 
 func (b *Board) KoHash(p Point) int64 {
 	if p.x == b.ko.x && p.y == b.ko.y {
-		return 6739755730475491
+		return 673975730475491
 	} else {
-		return 9486794256091760
+		return 948679425691760
 	}
 }
 
