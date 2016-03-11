@@ -251,6 +251,7 @@ func evaluateLRModel(gt *gogo.GameTree, model *lr.LogisticRegression) (int, int)
 			prob := model.Predict(s)
 			if maxProb < prob {
 				best = p
+				maxProb = prob
 			}
 		}
 		if best == board.Index(cur) {
