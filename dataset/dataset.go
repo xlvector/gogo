@@ -217,6 +217,8 @@ func evalPattern(gt *gogo.GameTree, pat string) (int, int) {
 			if st[j][0].First == board.Index(cur) {
 				hit += 1
 			}
+			fmt.Println(j, st[j][0])
+			break
 		}
 		total += 1
 		board.Put(cur.X(), cur.Y(), cur.Color())
