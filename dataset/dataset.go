@@ -181,6 +181,8 @@ func EvaluatePattern(sgfPath, modelPath string) (int, int) {
 func evalPattern(gt *gogo.GameTree, pat string) (int, int) {
 	path := gt.Path2Root()
 	board := gogo.NewBoard(gt.SGFSize())
+	pdm := gogo.NewPointDistanceMap(board, gogo.PATTERN_SIZE)
+	board.SetPointDistanceMap(pdm)
 	patModel := loadPatternModel(pat)
 	hit := 0
 	total := 0
