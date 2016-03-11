@@ -241,8 +241,6 @@ func evaluateLRModel(gt *gogo.GameTree, model *lr.LogisticRegression) (int, int)
 			break
 		}
 		fs := board.GenSimpleFeatures(last, cur)
-		best := -1
-		maxProb := 0.0
 		rank := make(gogo.IntFloatPairList, 0, len(fs))
 		for p, f := range fs {
 			s := core.NewSample()
@@ -260,7 +258,7 @@ func evaluateLRModel(gt *gogo.GameTree, model *lr.LogisticRegression) (int, int)
 			}
 		}
 		total += 1
-		fmt.Println(cur.String(), board.W()[best].String(), maxProb)
+		fmt.Println(cur.String(), board.W()[rank[0].First].String(), rank[0].Second)
 		board.Put(cur.X(), cur.Y(), cur.Color())
 		last = cur
 	}
