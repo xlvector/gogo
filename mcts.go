@@ -32,11 +32,12 @@ func (b *Board) PointSimpleFeature(p Point, stone Color) []int64 {
 
 func (b *Board) GenSimpleFeatures(lastPat []int64, cur Point) map[int][]int64 {
 	ret := make(map[int][]int64)
+	pr := 3.0 / math.Max(3.0, float64(361-b.step))
 	for i, p := range b.w {
 		if p.color != GRAY {
 			continue
 		}
-		if (p.x == cur.x && p.y == cur.y) || rand.Float64() < 0.03 {
+		if (p.x == cur.x && p.y == cur.y) || rand.Float64() < pr {
 			pat := b.PointSimpleFeature(p, cur.color)
 			if pat == nil {
 				continue
