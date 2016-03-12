@@ -461,7 +461,7 @@ func (b *Board) GenMove(lastMove Point, stone Color) Point {
 	maxPr := 0.0
 	best := InvalidPoint()
 	for i, p := range b.w {
-		if p.color == GRAY {
+		if p.color != GRAY {
 			continue
 		}
 		fe := b.PointSimpleFeature(p, stone)
