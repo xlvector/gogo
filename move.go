@@ -548,7 +548,7 @@ func (b *Board) QuickCandidateMoves(lastMove Point, stone Color, n int) map[int]
 }
 
 func (b *Board) GenQuickMove(lastMove Point, stone Color) Point {
-	movs := b.QuickCandidateMoves(lastMove, stone, 10)
+	movs := b.QuickCandidateMoves(lastMove, stone, 16)
 	psum := 0.0
 	for _, v := range movs {
 		psum += v

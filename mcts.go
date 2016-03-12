@@ -147,11 +147,11 @@ func (g *Game) singleSimulate(newBoard *Board, gn *GameTreeNode, pm Point, ch ch
 
 func (g *Game) MCTSMove(stone Color) {
 	root := g.GT.Current
-	for root.visit < 1000 {
+	for root.visit < 500 {
 		fmt.Println(root.visit)
 		node := g.MCTreePolicy()
 		board := NewBoardFromPath(g.B.size, node.Path2Root(), g.B)
-		cand := board.QuickCandidateMoves(Point{node.x, node.y, node.stone}, OppColor(node.stone), 16)
+		cand := board.QuickCandidateMoves(Point{node.x, node.y, node.stone}, OppColor(node.stone), 5)
 		ch := make(chan SingleBattleResult, len(cand)+1)
 		n := 0
 		for m, v := range cand {
