@@ -475,7 +475,10 @@ func (b *Board) GenMove(lastMove Point, stone Color) Point {
 		for _, k := range b.lastMoveHash {
 			sample.AddFeature(core.Feature{k*1000 + int64(i), 1.0})
 		}
-		pr := b.model.Predict(sample)
+		pr := 0.5
+		if b.model != nil {
+			pr = b.model.Predict(sample)
+		}
 		if maxPr < pr {
 			maxPr = pr
 			best = p
@@ -514,66 +517,53 @@ func (b *Board) StableEye(x, y int, stone Color) bool {
 
 func (b *Board) QuickCandidateMoves(lastMove Point, stone Color, n int) map[int]float64 {
 	ret := make(map[int]float64)
-	n4 := b.Neighbor4Color(lastMove.x, lastMove.y, GRAY)
 
-	if rand.Float64() < 0.7 {
-		pl := rand.Perm(len(n4))
-		for _, k := range pl {
-			p := n4[k]
-			if b.StableEye(p.x, p.y, stone) {
-				continue
-			}
-			ret[b.index(p.x, p.y)] = 1.0
+	rank := make(IntFloatPairList, 0, 100)
+	for i, p := range b.w {
+		if p.color != GRAY {
+			continue
 		}
+		fe := b.PointSimpleFeature(p, stone)
+		if fe == nil || len(fe) == 0 {
+			continue
+		}
+		sample := core.NewSample()
+		for _, k := range fe {
+			sample.AddFeature(core.Feature{k*1000 + int64(i), 1.0})
+		}
+		for _, k := range b.lastMoveHash {
+			sample.AddFeature(core.Feature{k*1000 + int64(i), 1.0})
+		}
+		pr := 0.5
+		if b.model != nil {
+			pr = b.model.Predict(sample)
+		}
+		rank = append(rank, IntFloatPair{i, pr})
 	}
-
-	pl := rand.Perm(len(b.w))
-	for _, k := range pl {
-		p := b.w[k]
-		if p.Color() != GRAY {
-			continue
-		}
-
-		if b.StableEye(p.x, p.y, stone) {
-			continue
-		}
-		ret[b.index(p.x, p.y)] = 1.0
-		if len(ret) > n {
-			break
-		}
+	sort.Sort(sort.Reverse(rank))
+	for i := 0; i < n && i < len(rank); i++ {
+		ret[rank[i].First] = rank[i].Second
 	}
 	return ret
 }
 
 func (b *Board) GenQuickMove(lastMove Point, stone Color) Point {
-	n4 := b.Neighbor4Color(lastMove.x, lastMove.y, GRAY)
-
-	if rand.Float64() < 0.7 {
-		pl := rand.Perm(len(n4))
-		for _, k := range pl {
-			p := n4[k]
-			if b.StableEye(p.x, p.y, stone) {
-				continue
-			}
-			if err := b.Put(p.x, p.y, stone); err == nil {
-				return p
-			}
-		}
+	movs := b.QuickCandidateMoves(lastMove, stone, 10)
+	psum := 0.0
+	for _, v := range movs {
+		psum += v
 	}
 
-	pl := rand.Perm(len(b.w))
-	for _, k := range pl {
-		p := b.w[k]
-		if p.Color() != GRAY {
-			continue
-		}
-
-		if b.StableEye(p.x, p.y, stone) {
-			continue
-		}
-
-		if err := b.Put(p.x, p.y, stone); err == nil {
-			return p
+	for t := 0; t < 5; t++ {
+		pr := rand.Float64() * psum
+		for k, v := range movs {
+			pr -= v
+			if psum <= 0.0 {
+				p := b.w[k]
+				if err := b.Put(p.x, p.y, stone); err == nil {
+					return p
+				}
+			}
 		}
 	}
 	return InvalidPoint()
