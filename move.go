@@ -1,6 +1,7 @@
 package gogo
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
 	"sort"
@@ -462,6 +463,7 @@ func (b *Board) GenMove(lastMove Point, stone Color) Point {
 	log.Println(le)
 	maxPr := 0.0
 	best := InvalidPoint()
+	fmt.Println(b.String(InvalidPoint()))
 	for i, p := range b.w {
 		if p.color != GRAY {
 			continue
