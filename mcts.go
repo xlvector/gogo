@@ -2,7 +2,6 @@ package gogo
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -69,21 +68,16 @@ func (b *Board) SelfBattle(lastMove Point, color Color) Color {
 		lastMove = b.GenQuickMove(lastMove, color)
 		if !lastMove.Valid() {
 			pass += 1
-		} else {
-			log.Println(lastMove.String())
 		}
 
 		lastMove = b.GenQuickMove(lastMove, OppColor(color))
 		if !lastMove.Valid() {
 			pass += 1
-		} else {
-			log.Println(lastMove.String())
 		}
 		if pass >= 2 {
 			break
 		}
 	}
-	fmt.Println(b.String(InvalidPoint()))
 	score := b.Score()
 	if score > 0 {
 		return BLACK
@@ -153,11 +147,11 @@ func (g *Game) singleSimulate(newBoard *Board, gn *GameTreeNode, pm Point, ch ch
 
 func (g *Game) MCTSMove(stone Color) {
 	root := g.GT.Current
-	for root.visit < 1 {
+	for root.visit < 1000 {
 		fmt.Println(root.visit)
 		node := g.MCTreePolicy()
 		board := NewBoardFromPath(g.B.size, node.Path2Root(), g.B)
-		cand := board.QuickCandidateMoves(Point{node.x, node.y, node.stone}, OppColor(node.stone), 1)
+		cand := board.QuickCandidateMoves(Point{node.x, node.y, node.stone}, OppColor(node.stone), 16)
 		ch := make(chan SingleBattleResult, len(cand)+1)
 		n := 0
 		for m, v := range cand {
@@ -172,7 +166,7 @@ func (g *Game) MCTSMove(stone Color) {
 			}
 			gn := NewGameTreeNode(pm.color, pm.x, pm.y)
 			node.AddChild(gn)
-			for i := 0; i < 1; i++ {
+			for i := 0; i < 5; i++ {
 				n += 1
 				go g.singleSimulate(newBoard, gn, pm, ch)
 			}
