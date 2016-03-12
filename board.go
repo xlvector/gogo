@@ -100,19 +100,19 @@ func (b *Board) Copy() *Board {
 	ret.patternHash = make([][]int64, b.size*b.size)
 	ret.lastMoveHash = make([]int64, 0, 20)
 
-	for _, v := range b.pointHash {
-		ret.pointHash = append(ret.pointHash, v)
+	for i, v := range b.pointHash {
+		ret.pointHash[i] = v
 	}
 	for _, v := range b.lastMoveHash {
 		ret.lastMoveHash = append(ret.lastMoveHash, v)
 	}
 
-	for _, ph := range b.patternHash {
+	for i, ph := range b.patternHash {
 		tmp := []int64{}
 		for _, v := range ph {
 			tmp = append(tmp, v)
 		}
-		ret.patternHash = append(ret.patternHash, tmp)
+		ret.patternHash[i] = tmp
 	}
 	for _, p := range b.w {
 		ret.w = append(ret.w, p)
