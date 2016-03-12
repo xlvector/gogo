@@ -476,13 +476,16 @@ func (b *Board) GenMove(lastMove Point, stone Color) Point {
 			sample.AddFeature(core.Feature{k*1000 + int64(i), 1.0})
 		}
 		pr := b.model.Predict(sample)
-		//log.Println(p.String(), pr, maxPr)
 		if maxPr < pr {
 			maxPr = pr
 			best = p
 		}
 	}
-	b.Put(best.x, best.y, stone)
+	log.Println(best.String(), maxPr)
+	if err := b.Put(best.x, best.y, stone); err != nil {
+		log.Println(err)
+		return InvalidPoint()
+	}
 	return best
 }
 
