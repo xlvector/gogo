@@ -86,16 +86,33 @@ func (b *Board) Model() *lr.LogisticRegression {
 
 func (b *Board) Copy() *Board {
 	ret := &Board{
-		size:         b.size,
-		w:            make([]Point, 0, 1+len(b.w)),
-		komi:         b.komi,
-		takeBlack:    b.takeBlack,
-		takeWhite:    b.takeWhite,
-		ko:           b.ko,
-		model:        b.model,
-		step:         b.step,
-		pdm:          b.pdm,
-		lastMoveHash: b.lastMoveHash,
+		size:      b.size,
+		w:         make([]Point, 0, 1+len(b.w)),
+		komi:      b.komi,
+		takeBlack: b.takeBlack,
+		takeWhite: b.takeWhite,
+		ko:        b.ko,
+		model:     b.model,
+		step:      b.step,
+		pdm:       b.pdm,
+	}
+	ret.pointHash = make([]int64, b.size*b.size)
+	ret.patternHash = make([][]int64, b.size*b.size)
+	ret.lastMoveHash = make([]int64, 0, 20)
+
+	for _, v := range b.pointHash {
+		ret.pointHash = append(ret.pointHash, v)
+	}
+	for _, v := range b.lastMoveHash {
+		ret.lastMoveHash = append(ret.lastMoveHash, v)
+	}
+
+	for _, ph := range b.patternHash {
+		tmp := []int64{}
+		for _, v := range ph {
+			tmp = append(tmp, v)
+		}
+		b.patternHash = append(b.patternHash, tmp)
 	}
 	for _, p := range b.w {
 		ret.w = append(ret.w, p)
