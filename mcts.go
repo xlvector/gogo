@@ -78,6 +78,7 @@ func (b *Board) SelfBattle(lastMove Point, color Color) Color {
 			break
 		}
 	}
+	fmt.Println(b.String(InvalidPoint()))
 	score := b.Score()
 	if score > 0 {
 		return BLACK
@@ -151,7 +152,7 @@ func (g *Game) MCTSMove(stone Color) {
 		fmt.Println(root.visit)
 		node := g.MCTreePolicy()
 		board := NewBoardFromPath(g.B.size, node.Path2Root(), g.B)
-		cand := board.QuickCandidateMoves(Point{node.x, node.y, node.stone}, OppColor(node.stone), 20)
+		cand := board.QuickCandidateMoves(Point{node.x, node.y, node.stone}, OppColor(node.stone), 1)
 		ch := make(chan SingleBattleResult, len(cand)+1)
 		n := 0
 		for m, v := range cand {
