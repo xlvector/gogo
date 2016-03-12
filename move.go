@@ -460,7 +460,6 @@ func (b *Board) CollectBoardInfo(lastMove Point) *BoardInfo {
 func (b *Board) GenMove(lastMove Point, stone Color) Point {
 	maxPr := 0.0
 	best := InvalidPoint()
-	bestHash := []int64{}
 	for i, p := range b.w {
 		if p.color != GRAY {
 			continue
@@ -480,11 +479,9 @@ func (b *Board) GenMove(lastMove Point, stone Color) Point {
 		if maxPr < pr {
 			maxPr = pr
 			best = p
-			bestHash = fe
 		}
 	}
 	log.Println(best.String(), maxPr)
-	b.lastMoveHash = bestHash
 	if err := b.Put(best.x, best.y, stone); err != nil {
 		log.Println(err)
 		return InvalidPoint()

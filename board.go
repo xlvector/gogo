@@ -150,6 +150,7 @@ func (b *Board) Put(x, y int, stone Color) error {
 	}
 	b.ko = InvalidPoint()
 	i := b.index(x, y)
+	b.lastMoveHash = b.PointSimpleFeature(b.w[i], stone)
 	prevWi := b.w[i]
 	b.w[i] = Point{x, y, stone}
 	b.UpdateHash(x, y, stone, b.pdm)
