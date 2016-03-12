@@ -47,6 +47,7 @@ func (g *Game) Put(stone Color, x, y int) error {
 
 func (g *Game) GenMove(stone Color) (int, int) {
 	lastStep := Point{g.GT.Current.x, g.GT.Current.y, g.GT.Current.stone}
+	fmt.Println("last move", lastStep.String())
 	next := g.B.GenMove(lastStep, stone)
 	g.GT.Add(NewGameTreeNode(stone, next.x, next.y))
 	return next.x, next.y
