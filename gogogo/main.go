@@ -170,6 +170,7 @@ func patternAllFiles(root, ext string, ch chan string) {
 }
 
 func main() {
+	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	mode := flag.String("mode", "simple", "mode")
 	sgfFile := flag.String("sgf-file", "", "sgf file path")
@@ -219,6 +220,7 @@ func main() {
 			}
 			fmt.Println(x, y)
 			game.Put(gogo.BLACK, x, y)
+			game.Print()
 			if *mcts != "1" {
 				game.GenMove(gogo.WHITE)
 			} else {
@@ -231,19 +233,6 @@ func main() {
 			buf, _ := ioutil.ReadFile(*sgfFile)
 			game.Init(19)
 			game.GT.ParseSGF(string(buf))
-			/*
-				game.ResetBoardFromGT()
-				game.Print()
-				path := game.GT.Path2Root()
-				for i := len(path) - 1; i >= 0; i-- {
-					fmt.Println(path[i].Point().String())
-				}
-
-					samples := dataset.GenSamplesFromSGF(string(buf), gogo.WHITE)
-					for _, smp := range samples {
-						fmt.Println(smp.Board.String(gogo.InvalidPoint()))
-					}
-			*/
 			return
 		}
 		if len(*sgfFolder) > 0 {

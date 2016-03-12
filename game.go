@@ -2,6 +2,7 @@ package gogo
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/xlvector/hector/lr"
 )
@@ -39,6 +40,7 @@ func (g *Game) Clear() {
 
 func (g *Game) Put(stone Color, x, y int) error {
 	if err := g.B.Put(x, y, stone); err != nil {
+		log.Println(err)
 		return err
 	}
 	g.GT.Add(NewGameTreeNode(stone, x, y))
