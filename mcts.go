@@ -2,6 +2,7 @@ package gogo
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"time"
@@ -68,11 +69,15 @@ func (b *Board) SelfBattle(lastMove Point, color Color) Color {
 		lastMove = b.GenQuickMove(lastMove, color)
 		if !lastMove.Valid() {
 			pass += 1
+		} else {
+			log.Println(lastMove.String())
 		}
 
 		lastMove = b.GenQuickMove(lastMove, OppColor(color))
 		if !lastMove.Valid() {
 			pass += 1
+		} else {
+			log.Println(lastMove.String())
 		}
 		if pass >= 2 {
 			break
