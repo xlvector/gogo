@@ -554,15 +554,14 @@ func (b *Board) GenQuickMove(lastMove Point, stone Color) Point {
 		psum += v
 	}
 
-	for t := 0; t < 5; t++ {
-		pr := rand.Float64() * psum
-		for k, v := range movs {
-			pr -= v
-			if psum <= 0.0 {
-				p := b.w[k]
-				if err := b.Put(p.x, p.y, stone); err == nil {
-					return p
-				}
+	pr := rand.Float64() * psum
+	for k, v := range movs {
+		log.Println(k, v)
+		pr -= v
+		if psum <= 0.0 {
+			p := b.w[k]
+			if err := b.Put(p.x, p.y, stone); err == nil {
+				return p
 			}
 		}
 	}
