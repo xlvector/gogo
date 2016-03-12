@@ -534,7 +534,7 @@ func (b *Board) QuickCandidateMoves(lastMove Point, stone Color, n int) map[int]
 		for _, k := range b.lastMoveHash {
 			sample.AddFeature(core.Feature{k*1000 + int64(i), 1.0})
 		}
-		pr := 0.5
+		pr := 0.51
 		if b.model != nil {
 			pr = b.model.Predict(sample)
 		}

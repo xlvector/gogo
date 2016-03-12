@@ -49,11 +49,18 @@ func (b *Board) GenSimpleFeatures(lastPat []int64, cur Point) map[int][]int64 {
 	return ret
 }
 
-func NewBoardFromPath(size int, path []*GameTreeNode) *Board {
+func NewBoardFromPath(size int, path []*GameTreeNode, oldBoard *Board) *Board {
 	ret := NewBoard(size)
 	for i := len(path) - 1; i >= 0; i-- {
 		v := path[i]
 		ret.Put(v.x, v.y, v.stone)
+	}
+	if oldBoard != nil {
+		copyBoard := oldBoard.Copy()
+		ret.model = copyBoard.model
+		ret.pdm = copyBoard.pdm
+		ret.pointHash = copyBoard.pointHash
+		ret.patternHash = copyBoard.patternHash
 	}
 	return ret
 }
@@ -148,10 +155,10 @@ func (g *Game) MCTSMove(stone Color) {
 	for root.visit < 1000 {
 		fmt.Println(root.visit)
 		node := g.MCTreePolicy()
-		board := NewBoardFromPath(g.B.size, node.Path2Root())
-		//info := board.CollectBoardInfo(InvalidPoint())
+		board := NewBoardFromPath(g.B.size, node.Path2Root(), g.B)
+		board.model = g.B.model
+		board.pdm = g.B.pdm
 		cand := board.QuickCandidateMoves(Point{node.x, node.y, node.stone}, OppColor(node.stone), 20)
-		//cand := info.CandidateMoves(Point{node.x, node.y, node.stone}, OppColor(node.stone), g.B.Model(), 5)
 		ch := make(chan SingleBattleResult, len(cand)+1)
 		n := 0
 		for m, v := range cand {
