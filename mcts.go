@@ -156,8 +156,6 @@ func (g *Game) MCTSMove(stone Color) {
 		fmt.Println(root.visit)
 		node := g.MCTreePolicy()
 		board := NewBoardFromPath(g.B.size, node.Path2Root(), g.B)
-		board.model = g.B.model
-		board.pdm = g.B.pdm
 		cand := board.QuickCandidateMoves(Point{node.x, node.y, node.stone}, OppColor(node.stone), 20)
 		ch := make(chan SingleBattleResult, len(cand)+1)
 		n := 0

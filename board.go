@@ -112,7 +112,7 @@ func (b *Board) Copy() *Board {
 		for _, v := range ph {
 			tmp = append(tmp, v)
 		}
-		b.patternHash = append(b.patternHash, tmp)
+		ret.patternHash = append(b.patternHash, tmp)
 	}
 	for _, p := range b.w {
 		ret.w = append(ret.w, p)
