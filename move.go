@@ -1,6 +1,7 @@
 package gogo
 
 import (
+	"log"
 	"math/rand"
 	"sort"
 
@@ -458,6 +459,7 @@ func (b *Board) CollectBoardInfo(lastMove Point) *BoardInfo {
 
 func (b *Board) GenMove(lastMove Point, stone Color) Point {
 	le := b.PointSimpleFeature(lastMove, lastMove.color)
+	log.Println(le)
 	maxPr := 0.0
 	best := InvalidPoint()
 	for i, p := range b.w {
