@@ -58,6 +58,7 @@ func (b *Board) WormLibertyHash(p Point) int64 {
 }
 
 func (b *Board) WormOpLibertyHash(p Point) int64 {
+	oldColor := b.w[b.index(p.x, p.y)].color
 	b.w[b.index(p.x, p.y)].color = p.color
 	n4 := b.Neighbor4(p.x, p.y)
 	minLiberty := 1000
@@ -70,7 +71,7 @@ func (b *Board) WormOpLibertyHash(p Point) int64 {
 			minLiberty = wq.Liberty
 		}
 	}
-	b.w[b.index(p.x, p.y)].color = GRAY
+	b.w[b.index(p.x, p.y)].color = oldColor
 	if minLiberty == 1000 {
 		return 0
 	}

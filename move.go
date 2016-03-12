@@ -1,7 +1,6 @@
 package gogo
 
 import (
-	"fmt"
 	"log"
 	"math/rand"
 	"sort"
@@ -459,11 +458,9 @@ func (b *Board) CollectBoardInfo(lastMove Point) *BoardInfo {
 }
 
 func (b *Board) GenMove(lastMove Point, stone Color) Point {
-	le := b.PointSimpleFeature(lastMove, lastMove.color)
-	log.Println(le)
 	maxPr := 0.0
 	best := InvalidPoint()
-	fmt.Println(b.String(InvalidPoint()))
+	bestHash := []int64{}
 	for i, p := range b.w {
 		if p.color != GRAY {
 			continue
@@ -472,18 +469,22 @@ func (b *Board) GenMove(lastMove Point, stone Color) Point {
 		if fe == nil || len(fe) == 0 {
 			continue
 		}
-		fe = append(fe, le...)
 		sample := core.NewSample()
 		for _, k := range fe {
+			sample.AddFeature(core.Feature{k*1000 + int64(i), 1.0})
+		}
+		for _, k := range b.lastMoveHash {
 			sample.AddFeature(core.Feature{k*1000 + int64(i), 1.0})
 		}
 		pr := b.model.Predict(sample)
 		if maxPr < pr {
 			maxPr = pr
 			best = p
+			bestHash = fe
 		}
 	}
 	log.Println(best.String(), maxPr)
+	b.lastMoveHash = bestHash
 	if err := b.Put(best.x, best.y, stone); err != nil {
 		log.Println(err)
 		return InvalidPoint()

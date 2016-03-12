@@ -15,18 +15,19 @@ const (
 )
 
 type Board struct {
-	size        int
-	w           []Point
-	komi        float64
-	ko          Point
-	takeBlack   int
-	takeWhite   int
-	model       *lr.LogisticRegression
-	step        int
-	info        *BoardInfo
-	pdm         *PointDistanceMap
-	pointHash   []int64
-	patternHash [][]int64
+	size         int
+	w            []Point
+	komi         float64
+	ko           Point
+	takeBlack    int
+	takeWhite    int
+	model        *lr.LogisticRegression
+	step         int
+	info         *BoardInfo
+	pdm          *PointDistanceMap
+	pointHash    []int64
+	patternHash  [][]int64
+	lastMoveHash []int64
 }
 
 func NewBoard(size int) *Board {
@@ -59,6 +60,7 @@ func (b *Board) Clear(size int) {
 	b.w = make([]Point, size*size)
 	b.pointHash = make([]int64, size*size)
 	b.patternHash = make([][]int64, size*size)
+	b.lastMoveHash = make([]int64, 0, 20)
 	b.ko = InvalidPoint()
 	i := 0
 	for y := 0; y < size; y++ {
@@ -84,15 +86,16 @@ func (b *Board) Model() *lr.LogisticRegression {
 
 func (b *Board) Copy() *Board {
 	ret := &Board{
-		size:      b.size,
-		w:         make([]Point, 0, 1+len(b.w)),
-		komi:      b.komi,
-		takeBlack: b.takeBlack,
-		takeWhite: b.takeWhite,
-		ko:        b.ko,
-		model:     b.model,
-		step:      b.step,
-		pdm:       b.pdm,
+		size:         b.size,
+		w:            make([]Point, 0, 1+len(b.w)),
+		komi:         b.komi,
+		takeBlack:    b.takeBlack,
+		takeWhite:    b.takeWhite,
+		ko:           b.ko,
+		model:        b.model,
+		step:         b.step,
+		pdm:          b.pdm,
+		lastMoveHash: b.lastMoveHash,
 	}
 	for _, p := range b.w {
 		ret.w = append(ret.w, p)
