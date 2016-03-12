@@ -479,6 +479,7 @@ func (b *Board) GenMove(lastMove Point, stone Color) Point {
 			best = p
 		}
 	}
+	b.Put(best.x, best.y, stone)
 	return best
 }
 
