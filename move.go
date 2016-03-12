@@ -457,35 +457,29 @@ func (b *Board) CollectBoardInfo(lastMove Point) *BoardInfo {
 }
 
 func (b *Board) GenMove(lastMove Point, stone Color) Point {
-	info := b.CollectBoardInfo(lastMove)
-	cand := info.CandidateMoves(lastMove, stone, b.Model(), 5)
-	psum := 0.0
-	for _, v := range cand {
-		psum += v
-	}
-	for len(cand) > 0 {
-		rd := rand.Float64() * psum
-		pd := -1
-		for p, v := range cand {
-			pd = p
-			rd -= v
-			if rd <= 0.0 {
-				break
-			}
-		}
-		if pd < 0 {
-			break
-		}
-		c := b.w[pd]
-		err := b.Put(c.x, c.y, stone)
-		if err != nil {
-			delete(cand, pd)
+	le := b.PointSimpleFeature(lastMove, lastMove.color)
+	maxPr := 0.0
+	best := InvalidPoint()
+	for i, p := range b.w {
+		if p.color == GRAY {
 			continue
 		}
-		c.color = stone
-		return c
+		fe := b.PointSimpleFeature(p, stone)
+		if fe == nil || len(fe) == 0 {
+			continue
+		}
+		fe = append(fe, le...)
+		sample := core.NewSample()
+		for _, k := range fe {
+			sample.AddFeature(core.Feature{k*1000 + int64(i), 1.0})
+		}
+		pr := b.model.Predict(sample)
+		if maxPr < pr {
+			maxPr = pr
+			best = p
+		}
 	}
-	return InvalidPoint()
+	return best
 }
 
 func (b *Board) StableEye(x, y int, stone Color) bool {

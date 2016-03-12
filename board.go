@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xlvector/hector/dt"
+	"github.com/xlvector/hector/lr"
 )
 
 const (
@@ -21,7 +21,7 @@ type Board struct {
 	ko          Point
 	takeBlack   int
 	takeWhite   int
-	models      []*dt.RandomForest
+	model       *lr.LogisticRegression
 	step        int
 	info        *BoardInfo
 	pdm         *PointDistanceMap
@@ -78,39 +78,8 @@ func (b *Board) W() []Point {
 	return b.w
 }
 
-func (b *Board) Model() *dt.RandomForest {
-	step := b.step
-	if b.models == nil || len(b.models) == 0 {
-		return nil
-	}
-	if len(b.models) == 1 {
-		return b.models[0]
-	} else if len(b.models) == 2 {
-		if step < 50 {
-			return b.models[0]
-		} else {
-			return b.models[1]
-		}
-	} else if len(b.models) == 3 {
-		if step < 20 {
-			return b.models[0]
-		} else if step >= 20 && step < 100 {
-			return b.models[1]
-		} else {
-			return b.models[2]
-		}
-	} else {
-		if step < 20 {
-			return b.models[0]
-		} else if step >= 20 && step < 60 {
-			return b.models[1]
-		} else if step >= 60 && step < 140 {
-			return b.models[2]
-		} else {
-			return b.models[3]
-		}
-	}
-
+func (b *Board) Model() *lr.LogisticRegression {
+	return b.model
 }
 
 func (b *Board) Copy() *Board {
@@ -121,7 +90,7 @@ func (b *Board) Copy() *Board {
 		takeBlack: b.takeBlack,
 		takeWhite: b.takeWhite,
 		ko:        b.ko,
-		models:    b.models,
+		model:     b.model,
 		step:      b.step,
 		pdm:       b.pdm,
 	}

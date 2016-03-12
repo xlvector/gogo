@@ -16,7 +16,7 @@ import (
 
 	"github.com/xlvector/gogo"
 	"github.com/xlvector/gogo/dataset"
-	"github.com/xlvector/hector/dt"
+	"github.com/xlvector/hector/lr"
 )
 
 func combineSGFs(root, ext string) *gogo.GameTree {
@@ -176,7 +176,6 @@ func main() {
 	sgfFolder := flag.String("sgf-folder", "", "sgf folder path")
 	output := flag.String("output", "", "output path")
 	model := flag.String("model", "", "model path")
-	qipu := flag.String("qipu", "", "qipu path")
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
 	mcts := flag.String("mcts", "", "use mcts")
 	flag.Parse()
@@ -196,19 +195,9 @@ func main() {
 	} else if *mode == "simple" {
 		game.Init(19)
 		if len(*model) > 0 {
-			models := []*dt.RandomForest{}
-			tks := strings.Split(*model, ",")
-			for _, tk := range tks {
-				rf := &dt.RandomForest{}
-				rf.LoadModel(tk)
-				models = append(models, rf)
-			}
-			game.SetModel(models)
-		}
-		if len(*qipu) > 0 {
-			game.QipuGT = &gogo.GameTree{}
-			buf, _ := ioutil.ReadFile(*qipu)
-			game.QipuGT.ParseSGF(string(buf))
+			m := &lr.LogisticRegression{}
+			m.LoadModel(*model)
+			game.SetModel(m)
 		}
 		reader := bufio.NewReader(os.Stdin)
 		game.Print()

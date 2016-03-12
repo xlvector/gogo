@@ -3,14 +3,13 @@ package gogo
 import (
 	"fmt"
 
-	"github.com/xlvector/hector/dt"
+	"github.com/xlvector/hector/lr"
 )
 
 type Game struct {
-	B      *Board
-	GT     *GameTree
-	QipuGT *GameTree
-	Komi   float64
+	B    *Board
+	GT   *GameTree
+	Komi float64
 }
 
 func NewGame(size int) *Game {
@@ -20,8 +19,8 @@ func NewGame(size int) *Game {
 	}
 }
 
-func (g *Game) SetModel(models []*dt.RandomForest) {
-	g.B.models = models
+func (g *Game) SetModel(model *lr.LogisticRegression) {
+	g.B.model = model
 }
 
 func (g *Game) Init(size int) {
@@ -47,21 +46,6 @@ func (g *Game) Put(stone Color, x, y int) error {
 }
 
 func (g *Game) GenMove(stone Color) (int, int) {
-	//from qipu
-	if g.QipuGT != nil {
-		nexts := g.GT.NextMoveByQipu(g.QipuGT)
-		for _, next := range nexts {
-			if next.hit < 5 {
-				continue
-			}
-			err := g.Put(next.stone, next.x, next.y)
-			if err != nil {
-				continue
-			}
-			fmt.Println("use qipu")
-			return next.x, next.y
-		}
-	}
 	lastStep := Point{g.GT.Current.x, g.GT.Current.y, g.GT.Current.stone}
 	next := g.B.GenMove(lastStep, stone)
 	g.GT.Add(NewGameTreeNode(stone, next.x, next.y))
