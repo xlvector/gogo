@@ -26,6 +26,11 @@ func (p *GameTreeNode) GetAttr(key string) (string, bool) {
 	return ret, ok
 }
 
+func (p *GameTreeNode) HasAttr(key string) bool {
+	_, ok := p.attr[key]
+	return ok
+}
+
 func (p *GameTreeNode) Point() Point {
 	return Point{p.x, p.y, p.stone}
 }
@@ -188,6 +193,13 @@ func NewGameTree(size int) *GameTree {
 	ret.Root = NewGameTreeNode(GRAY, -1, -1).AddAttr("FF", "4").AddAttr("GM", "1").AddAttr("SZ", strconv.Itoa(size))
 	ret.Current = ret.Root
 	return ret
+}
+
+func (t *GameTree) HasHandicap() bool {
+	if t.Root.HasAttr("AB") || t.Root.HasAttr("AW") {
+		return true
+	}
+	return false
 }
 
 func (t *GameTree) SGFSize() int {

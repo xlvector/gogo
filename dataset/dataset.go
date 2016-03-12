@@ -274,6 +274,9 @@ func evaluateLRModel(gt *gogo.GameTree, model *lr.LogisticRegression) (int, int)
 func GenSimpleSamplesFromSGF(buf string) []string {
 	gt := &gogo.GameTree{}
 	gt.ParseSGF(buf)
+	if gt.HasHandicap() {
+		return []string{}
+	}
 	return genSimpleSamples(gt)
 }
 
