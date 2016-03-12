@@ -195,6 +195,8 @@ func main() {
 		game.GTP()
 	} else if *mode == "simple" {
 		game.Init(19)
+		pdm := gogo.NewPointDistanceMap(game.B, gogo.PATTERN_SIZE)
+		game.B.SetPointDistanceMap(pdm)
 		if len(*model) > 0 {
 			m := &lr.LogisticRegression{}
 			m.LoadModel(*model)
