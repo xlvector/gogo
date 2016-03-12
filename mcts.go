@@ -51,17 +51,11 @@ func (b *Board) GenSimpleFeatures(lastPat []int64, cur Point) map[int][]int64 {
 
 func NewBoardFromPath(size int, path []*GameTreeNode, oldBoard *Board) *Board {
 	ret := NewBoard(size)
+	ret.model = oldBoard.model
+	ret.SetPointDistanceMap(oldBoard.pdm)
 	for i := len(path) - 1; i >= 0; i-- {
 		v := path[i]
 		ret.Put(v.x, v.y, v.stone)
-	}
-	if oldBoard != nil {
-		copyBoard := oldBoard.Copy()
-		ret.model = copyBoard.model
-		ret.pdm = copyBoard.pdm
-		ret.pointHash = copyBoard.pointHash
-		ret.patternHash = copyBoard.patternHash
-		ret.lastMoveHash = copyBoard.lastMoveHash
 	}
 	return ret
 }
