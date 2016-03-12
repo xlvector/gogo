@@ -61,6 +61,7 @@ func NewBoardFromPath(size int, path []*GameTreeNode, oldBoard *Board) *Board {
 		ret.pdm = copyBoard.pdm
 		ret.pointHash = copyBoard.pointHash
 		ret.patternHash = copyBoard.patternHash
+		ret.lastMoveHash = copyBoard.lastMoveHash
 	}
 	return ret
 }
