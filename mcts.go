@@ -166,7 +166,7 @@ func (g *Game) MCTSMove(stone Color) {
 			}
 			gn := NewGameTreeNode(pm.color, pm.x, pm.y)
 			node.AddChild(gn)
-			for i := 0; i < 20; i++ {
+			for i := 0; i < 40; i++ {
 				n += 1
 				go g.singleSimulate(newBoard, gn, pm, ch)
 			}
@@ -191,7 +191,7 @@ func (g *Game) MCTSMove(stone Color) {
 	bestMove := root.Children[0]
 
 	for _, child := range root.Children {
-		winrate := float64(child.win) / float64(child.visit)
+		winrate := float64(child.win) / (10.0 + float64(child.visit))
 		fmt.Println(string(LX[child.x]), child.y+1, child.win, child.visit, winrate)
 		if winrate > maxRate {
 			maxRate = winrate
