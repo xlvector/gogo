@@ -151,7 +151,7 @@ func (g *Game) MCTSMove(stone Color) {
 		fmt.Println(root.visit)
 		node := g.MCTreePolicy()
 		board := NewBoardFromPath(g.B.size, node.Path2Root(), g.B)
-		cand := board.QuickCandidateMoves(Point{node.x, node.y, node.stone}, OppColor(node.stone), 25)
+		cand := board.QuickCandidateMoves(Point{node.x, node.y, node.stone}, OppColor(node.stone), 10)
 		ch := make(chan SingleBattleResult, len(cand)+1)
 		n := 0
 		for m, v := range cand {
@@ -191,7 +191,7 @@ func (g *Game) MCTSMove(stone Color) {
 	bestMove := root.Children[0]
 
 	for _, child := range root.Children {
-		winrate := float64(child.win) / (10.0 + float64(child.visit))
+		winrate := float64(child.win) / (3.0 + float64(child.visit))
 		fmt.Println(string(LX[child.x]), child.y+1, child.win, child.visit, winrate)
 		if winrate > maxRate {
 			maxRate = winrate
