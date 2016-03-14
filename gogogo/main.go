@@ -14,12 +14,10 @@ import (
 
 func GenPatterns(path string, ch chan string) {
 	log.Println(path)
-	for r := 0; r < 8; r++ {
-		board := gogo.NewBoard()
-		pats := board.GenPattern(path, r)
-		for _, pat := range pats {
-			ch <- pat.String()
-		}
+	board := gogo.NewBoard()
+	pats := board.GenPattern(path, 0)
+	for _, pat := range pats {
+		ch <- pat.String()
 	}
 }
 
@@ -64,7 +62,7 @@ func main() {
 				} else {
 					n = 0
 				}
-				if n > 10 {
+				if n > 60 {
 					close(patCh)
 				}
 			}
