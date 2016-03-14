@@ -49,7 +49,7 @@ func main() {
 	if *mode == "gen-pattern" {
 		paths := gogo.TreeDir(*input, "sgf")
 		patCh := make(chan string, 1000)
-		finsh := make(chan byte, 16)
+		finish := make(chan byte, 16)
 		go GenPatternsThread(paths, 16, 0, patCh, finish)
 		go GenPatternsThread(paths, 16, 1, patCh, finish)
 		go GenPatternsThread(paths, 16, 2, patCh, finish)
@@ -67,7 +67,7 @@ func main() {
 		go GenPatternsThread(paths, 16, 14, patCh, finish)
 		go GenPatternsThread(paths, 16, 15, patCh, finish)
 		n := 0
-		for _ = range finsh {
+		for _ = range finish {
 			n += 1
 			if n == 16 {
 				close(patCh)
