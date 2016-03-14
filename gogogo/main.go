@@ -53,6 +53,7 @@ func main() {
 		board := gogo.NewBoard()
 		board.Model = &lr.LogisticRegression{}
 		board.Model.LoadModel(*model)
-		board.EvaluateModel(*input)
+		hit, total := board.EvaluateModel(*input)
+		log.Println(hit, total, float64(hit)/float64(total))
 	}
 }
