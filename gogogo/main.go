@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/xlvector/gogo"
 	"github.com/xlvector/hector/lr"
@@ -40,6 +41,13 @@ func main() {
 		go func() {
 			for _, path := range paths {
 				go GenPatterns(path, patCh)
+			}
+			tc := time.NewTicker(time.Second * 5)
+			for _ = range tc.C {
+				if len(patCh) == 0 {
+					close(patCh)
+					break
+				}
 			}
 		}()
 		f, _ := os.Create(*output)
