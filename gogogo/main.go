@@ -8,6 +8,7 @@ import (
 	"runtime"
 
 	"github.com/xlvector/gogo"
+	"github.com/xlvector/hector/lr"
 )
 
 func GenPatterns(path string, ch chan string) {
@@ -19,12 +20,19 @@ func GenPatterns(path string, ch chan string) {
 	}
 }
 
+func EvalModel(sgf string, model *lr.LogisticRegression) {
+	board := gogo.NewBoard()
+	board.Model = model
+}
+
 func main() {
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	mode := flag.String("mode", "", "mode")
 	input := flag.String("input", "", "input")
 	output := flag.String("output", "", "output")
+	model := flag.String("model", "", "model path")
 	flag.Parse()
+
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	if *mode == "gen-pattern" {
 		paths := gogo.TreeDir(*input, "sgf")
@@ -41,5 +49,10 @@ func main() {
 			w.WriteString(pat)
 			w.WriteString("\n")
 		}
+	} else if *mode == "eval" {
+		board := gogo.NewBoard()
+		board.Model = &lr.LogisticRegression{}
+		board.Model.LoadModel(*model)
+		board.EvaluateModel(*input)
 	}
 }

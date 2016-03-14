@@ -2,8 +2,12 @@ package gogo
 
 import (
 	"io/ioutil"
+	"log"
 	"math/rand"
+	"sort"
 	"strconv"
+
+	"github.com/xlvector/hector/core"
 )
 
 type PatternSample struct {
@@ -53,7 +57,7 @@ func (b *Board) GenPattern(sgf string) []PatternSample {
 	for i := len(path) - 2; i >= 0; i-- {
 		cur := path[i]
 		if PosOutBoard(cur.x, cur.y) {
-			break
+			continue
 		}
 		curK := PosIndex(cur.x, cur.y)
 		curPat := b.FinalPatternHash(curK, cur.stone)
@@ -74,4 +78,48 @@ func (b *Board) GenPattern(sgf string) []PatternSample {
 		}
 	}
 	return ret
+}
+
+func (b *Board) EvaluateModel(sgf string) (int, int) {
+	buf, _ := ioutil.ReadFile(sgf)
+	gt := NewGameTree(SIZE)
+	gt.ParseSGF(string(buf))
+	path := gt.Path2Root()
+	lastPat := []int64{}
+	hit := 0
+	total := 0
+	for i := len(path) - 2; i >= 0; i-- {
+		cur := path[i]
+		if PosOutBoard(cur.x, cur.y) {
+			continue
+		}
+
+		rank := make(IntFloatPairList, 0, 100)
+		for p, _ := range b.Points {
+			if ok, _ := b.CanPut(p, cur.stone); !ok {
+				continue
+			}
+			pat := b.FinalPatternHash(p, cur.stone)
+			spat := b.PatternFeature(p, lastPat, pat)
+			sample := core.NewSample()
+			for _, f := range spat {
+				sample.AddFeature(core.Feature{f, 1.0})
+			}
+			pr := b.Model.Predict(sample)
+			rank = append(rank, IntFloatPair{p, pr})
+		}
+		sort.Sort(sort.Reverse(rank))
+		x1, y1 := IndexPos(rank[0].First)
+		log.Println(PointString(cur.x, cur.y, cur.stone), PointString(x1, y1, cur.stone), rank[0].Second)
+		if rank[0].First == PosIndex(cur.x, cur.y) {
+			hit += 1
+		}
+		total += 1
+		lastPat = b.FinalPatternHash(PosIndex(cur.x, cur.y), cur.stone)
+		ok := b.Put(PosIndex(cur.x, cur.y), cur.stone)
+		if !ok {
+			break
+		}
+	}
+	return hit, total
 }

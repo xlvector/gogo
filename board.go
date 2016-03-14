@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/xlvector/hector/lr"
 )
 
 type Color byte
@@ -38,6 +40,15 @@ func init() {
 			}
 		}
 	}
+}
+
+func PointString(x, y int, c Color) string {
+	ret := ColorMark(c)
+	ret += "["
+	ret += string(LX[x])
+	ret += strconv.Itoa(y + 1)
+	ret += "]"
+	return ret
 }
 
 func ParseAction(k int) (int, int, Color) {
@@ -155,6 +166,7 @@ func IndexOutBoard(k int) bool {
 type Board struct {
 	Points      []Color
 	KoIndex     int
+	Model       *lr.LogisticRegression
 	PointHash   []int64
 	PatternHash [][]int64
 	Actions     []int
@@ -175,6 +187,7 @@ func (b *Board) Clear() {
 		b.Points[i] = GRAY
 	}
 	b.KoIndex = -1
+	b.Model = nil
 	b.InitHash()
 }
 
@@ -185,6 +198,7 @@ func (b *Board) Copy() *Board {
 		PointHash:   make([]int64, len(b.PointHash)),
 		PatternHash: make([][]int64, len(b.PatternHash)),
 		Actions:     make([]int, len(b.Actions)),
+		Model:       b.Model,
 	}
 	for i, v := range b.Points {
 		ret.Points[i] = v
