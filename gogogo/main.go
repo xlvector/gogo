@@ -13,6 +13,7 @@ import (
 )
 
 func GenPatterns(path string, ch chan string) {
+	log.Println(path)
 	for r := 0; r < 8; r++ {
 		board := gogo.NewBoard()
 		pats := board.GenPattern(path, r)
