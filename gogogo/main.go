@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"time"
 
 	"github.com/xlvector/gogo"
 	"github.com/xlvector/hector/lr"
@@ -21,6 +20,16 @@ func GenPatterns(path string, ch chan string) {
 			ch <- pat.String()
 		}
 	}
+}
+
+func GenPatternsThread(paths []string, total, split int, ch chan string, finish chan byte) {
+	for i, path := range paths {
+		if i%total != split {
+			continue
+		}
+		GenPatterns(path, ch)
+	}
+	finish <- 1
 }
 
 func EvalModel(sgf string, model *lr.LogisticRegression) {
@@ -40,18 +49,31 @@ func main() {
 	if *mode == "gen-pattern" {
 		paths := gogo.TreeDir(*input, "sgf")
 		patCh := make(chan string, 1000)
-		go func() {
-			for _, path := range paths {
-				go GenPatterns(path, patCh)
+		finsh := make(chan byte, 16)
+		go GenPatternsThread(paths, 16, 0, patCh, finish)
+		go GenPatternsThread(paths, 16, 1, patCh, finish)
+		go GenPatternsThread(paths, 16, 2, patCh, finish)
+		go GenPatternsThread(paths, 16, 3, patCh, finish)
+		go GenPatternsThread(paths, 16, 4, patCh, finish)
+		go GenPatternsThread(paths, 16, 5, patCh, finish)
+		go GenPatternsThread(paths, 16, 6, patCh, finish)
+		go GenPatternsThread(paths, 16, 7, patCh, finish)
+		go GenPatternsThread(paths, 16, 8, patCh, finish)
+		go GenPatternsThread(paths, 16, 9, patCh, finish)
+		go GenPatternsThread(paths, 16, 10, patCh, finish)
+		go GenPatternsThread(paths, 16, 11, patCh, finish)
+		go GenPatternsThread(paths, 16, 12, patCh, finish)
+		go GenPatternsThread(paths, 16, 13, patCh, finish)
+		go GenPatternsThread(paths, 16, 14, patCh, finish)
+		go GenPatternsThread(paths, 16, 15, patCh, finish)
+		n := 0
+		for _ = range finsh {
+			n += 1
+			if n == 16 {
+				close(patCh)
+				break
 			}
-			tc := time.NewTicker(time.Second * 5)
-			for _ = range tc.C {
-				if len(patCh) == 0 {
-					close(patCh)
-					break
-				}
-			}
-		}()
+		}
 		f, _ := os.Create(*output)
 		defer f.Close()
 		w := bufio.NewWriter(f)
