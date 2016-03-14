@@ -24,6 +24,7 @@ func GenPatterns(path string, ch chan string) {
 }
 
 func GenPatternsThread(paths []string, total, split int, ch chan string) {
+	log.Println("begin split:", split)
 	for i, path := range paths {
 		if i%total != split {
 			continue
@@ -49,22 +50,9 @@ func main() {
 	if *mode == "gen-pattern" {
 		paths := gogo.TreeDir(*input, "sgf")
 		patCh := make(chan string, 1000)
-		go GenPatternsThread(paths, 16, 0, patCh)
-		go GenPatternsThread(paths, 16, 1, patCh)
-		go GenPatternsThread(paths, 16, 2, patCh)
-		go GenPatternsThread(paths, 16, 3, patCh)
-		go GenPatternsThread(paths, 16, 4, patCh)
-		go GenPatternsThread(paths, 16, 5, patCh)
-		go GenPatternsThread(paths, 16, 6, patCh)
-		go GenPatternsThread(paths, 16, 7, patCh)
-		go GenPatternsThread(paths, 16, 8, patCh)
-		go GenPatternsThread(paths, 16, 9, patCh)
-		go GenPatternsThread(paths, 16, 10, patCh)
-		go GenPatternsThread(paths, 16, 11, patCh)
-		go GenPatternsThread(paths, 16, 12, patCh)
-		go GenPatternsThread(paths, 16, 13, patCh)
-		go GenPatternsThread(paths, 16, 14, patCh)
-		go GenPatternsThread(paths, 16, 15, patCh)
+		for i := 0; i < 32; i++ {
+			go GenPatternsThread(paths, 32, i, patCh)
+		}
 
 		go func() {
 			tc := time.NewTicker(time.Second)
