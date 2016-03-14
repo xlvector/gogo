@@ -15,7 +15,7 @@ import (
 func GenPatterns(path string, ch chan string) {
 	for r := 0; r < 8; r++ {
 		board := gogo.NewBoard()
-		pats := board.GenPattern(path)
+		pats := board.GenPattern(path, r)
 		for _, pat := range pats {
 			ch <- pat.String()
 		}
