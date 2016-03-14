@@ -137,7 +137,11 @@ func (b *Board) EvaluateModel(sgf string) (int, int) {
 		x1, y1 := IndexPos(rank[0].First)
 		log.Println(PointString(cur.x, cur.y, cur.stone), PointString(x1, y1, cur.stone), rank[0].Second)
 		if i%10 == 0 {
-			log.Println(b.String())
+			mark := make(map[int]string)
+			for k := 0; k < 5 && k < len(rank); k++ {
+				mark[rank[k].First] = strconv.Itoa(k + 1)
+			}
+			log.Println(b.String(mark))
 		}
 		if rank[0].First == PosIndex(cur.x, cur.y) {
 			hit += 1

@@ -418,7 +418,10 @@ func FormatColor(c Color) string {
 	return ""
 }
 
-func (b *Board) String() string {
+func (b *Board) String(mark map[int]string) string {
+	if mark == nil {
+		mark = make(map[int]string)
+	}
 	ret := "\n"
 	ret += "   "
 	for _, ch := range LX[0:SIZE] {
@@ -432,7 +435,12 @@ func (b *Board) String() string {
 				ret += fmt.Sprintf("%2.f ", float64(SIZE-y))
 			}
 			ret += " "
-			ret += ColorMark(b.Points[PosIndex(x, SIZE-y-1)])
+			k := PosIndex(x, SIZE-y-1)
+			if mk, ok := mark[k]; ok {
+				ret += mk
+			} else {
+				ret += ColorMark(b.Points[PosIndex(x, SIZE-y-1)])
+			}
 		}
 		ret += "\n"
 	}

@@ -6,10 +6,10 @@ import (
 
 func TestRules(t *testing.T) {
 	b := NewBoard()
-	t.Log(b.String())
+	t.Log(b.String(nil))
 
 	b.PutLabel("BC3")
-	t.Log(b.String())
+	t.Log(b.String(nil))
 
 	if ok := b.PutLabel("WC3"); ok {
 		t.Error()
@@ -18,7 +18,7 @@ func TestRules(t *testing.T) {
 	b.PutLabel("BD2")
 	b.PutLabel("BE3")
 	b.PutLabel("BD4")
-	t.Log(b.String())
+	t.Log(b.String(nil))
 
 	/*
 		white D3 is invalid
@@ -76,16 +76,16 @@ func TestRules(t *testing.T) {
 	b.PutLabel("WE4")
 	b.PutLabel("WF3")
 	b.PutLabel("WE2")
-	t.Log(b.String())
+	t.Log(b.String(nil))
 	if ok := b.PutLabel("WD3"); !ok {
 		t.Error()
 	}
-	t.Log(b.String())
+	t.Log(b.String(nil))
 
 	if ok := b.PutLabel("BE3"); ok {
 		t.Error()
 	}
-	t.Log(b.String())
+	t.Log(b.String(nil))
 
 	/*
 		stable eye shoud not fill, D3 should not fill, but J3 can
@@ -122,7 +122,7 @@ func TestRules(t *testing.T) {
 	b.PutLabel("BK3")
 	b.PutLabel("WH4")
 	b.PutLabel("WK2")
-	t.Log(b.String())
+	t.Log(b.String(nil))
 	if ok := b.StableEye(PosIndex(3, 2), BLACK); !ok {
 		t.Error()
 	}
@@ -169,7 +169,7 @@ func TestAtari(t *testing.T) {
 	b.PutLabel("BD4")
 	b.PutLabel("WD3")
 
-	t.Log(b.String())
+	t.Log(b.String(nil))
 
 	if !b.EscapeAtari(PosIndex(4, 2), WHITE) {
 		t.Error()
@@ -208,7 +208,7 @@ func TestAtari(t *testing.T) {
 	b.PutLabel("BF3")
 	b.PutLabel("WE3")
 	b.PutLabel("WE2")
-	t.Log(b.String())
+	t.Log(b.String(nil))
 	if b.EscapeAtari(PosIndex(4, 0), WHITE) {
 		t.Error()
 	}
@@ -289,12 +289,12 @@ func TestHash(t *testing.T) {
 	b.PutLabel("BD4")
 	b.PutLabel("WD3")
 	b.PutLabel("WE3")
-	t.Log(b.String())
+	t.Log(b.String(nil))
 	b.PutLabel("BE4")
-	t.Log(b.String())
+	t.Log(b.String(nil))
 	b.PutLabel("BA2")
 	b.PutLabel("BB1")
-	t.Log(b.String())
+	t.Log(b.String(nil))
 	tmpPatternHash := make([][]int64, NPOINT)
 
 	b2 := b.Copy()
