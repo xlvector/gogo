@@ -102,6 +102,60 @@ func (b *Board) EscapeAtari(k int, c Color) bool {
 	}
 }
 
+func (b *Board) LocalFeature(k int, c Color) int64 {
+	myNWorms := b.NeighWorms(k, c, c)
+	opNWorms := b.NeighWorms(k, c, OpColor(c))
+	worm := b.WormFromPoint(k, c)
+
+	f := int64(0)
+	minLiberty := 10000
+	for _, w := range myNWorms {
+		if minLiberty > w.Liberty {
+			minLiberty = w.Liberty
+		}
+	}
+
+	if minLiberty == 1 {
+		if worm.Liberty == 1 {
+			//escape capture
+			f ^= 493570158105
+		} else if worm.Liberty == 2 {
+			f ^= 159084081432
+		} else if worm.Liberty == 3 {
+			f ^= 897325971018
+		} else if worm.Liberty > 3 {
+			f ^= 291850148415
+		}
+	} else if minLiberty == 2 {
+		if worm.Liberty == 1 {
+			//escape capture
+			f ^= 932759347016
+		} else if worm.Liberty == 2 {
+			f ^= 758724359874
+		} else if worm.Liberty == 3 {
+			f ^= 238146923179
+		} else if worm.Liberty > 3 {
+			f ^= 945876927621
+		}
+	}
+
+	//op
+	minLiberty = 10000
+	for _, w := range opNWorms {
+		if minLiberty > w.Liberty {
+			minLiberty = w.Liberty
+		}
+	}
+	if minLiberty == 1 {
+		f ^= 787401927621
+	} else if minLiberty == 2 {
+		f ^= 304580158101
+	}
+
+	f ^= b.EdgeDisHash(k)
+	return f
+}
+
 func (b *Board) NeighWorms(k int, c, wc Color) []*Worm {
 	n4 := Neigh4(k)
 	ret := []*Worm{}

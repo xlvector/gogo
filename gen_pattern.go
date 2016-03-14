@@ -25,7 +25,7 @@ func (p *PatternSample) String() string {
 	return ret
 }
 
-func (b *Board) PatternFeature(k int, last, cur []int64) []int64 {
+func (b *Board) PatternFeature(k int, c Color, last, cur []int64) []int64 {
 	ret := make([]int64, 0, len(last)+len(cur))
 	for _, v := range last {
 		ret = append(ret, v*1000+int64(k))
@@ -33,6 +33,7 @@ func (b *Board) PatternFeature(k int, last, cur []int64) []int64 {
 	for _, v := range cur {
 		ret = append(ret, v*1000+int64(k))
 	}
+	ret = append(ret, b.LocalFeature(k, c))
 	return ret
 }
 
@@ -85,7 +86,7 @@ func (b *Board) GenPattern(sgf string, rotate int) []PatternSample {
 		cur.x, cur.y = b.Rotate(cur.x, cur.y, rotate)
 		curK := PosIndex(cur.x, cur.y)
 		curPat := b.FinalPatternHash(curK, cur.stone)
-		ret = append(ret, PatternSample{b.PatternFeature(curK, lastPat, curPat), 1})
+		ret = append(ret, PatternSample{b.PatternFeature(curK, cur.stone, lastPat, curPat), 1})
 
 		vps := b.RandomSelectValidPoint(2, cur.stone)
 		for p, _ := range vps {
@@ -93,7 +94,7 @@ func (b *Board) GenPattern(sgf string, rotate int) []PatternSample {
 				continue
 			}
 			pat := b.FinalPatternHash(p, cur.stone)
-			ret = append(ret, PatternSample{b.PatternFeature(p, lastPat, pat), 0})
+			ret = append(ret, PatternSample{b.PatternFeature(p, cur.stone, lastPat, pat), 0})
 		}
 		lastPat = curPat
 		ok := b.Put(PosIndex(cur.x, cur.y), cur.stone)
@@ -124,7 +125,7 @@ func (b *Board) EvaluateModel(sgf string) (int, int) {
 				continue
 			}
 			pat := b.FinalPatternHash(p, cur.stone)
-			spat := b.PatternFeature(p, lastPat, pat)
+			spat := b.PatternFeature(p, cur.stone, lastPat, pat)
 			sample := core.NewSample()
 			for _, f := range spat {
 				sample.AddFeature(core.Feature{f, 1.0})
