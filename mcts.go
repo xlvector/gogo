@@ -213,7 +213,7 @@ func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board) {
 		x, y := IndexPos(child.First)
 		cnode := NewGameTreeNode(oc, x, y)
 		node.AddChild(cnode)
-		tt := int(100.0*(child.Second/sum) + 0.5)
+		tt := int(500.0*(child.Second/sum) + 0.5)
 		for s := 0; s < tt; s++ {
 			go MCTSSimulation(board.Copy(), cnode, wc, sg)
 			n += 1
