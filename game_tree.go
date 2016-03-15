@@ -14,6 +14,7 @@ const (
 type GameTreeNode struct {
 	Father     *GameTreeNode
 	Children   []*GameTreeNode
+	prior      float64
 	x, y       int
 	stone      Color
 	attr       map[string]string

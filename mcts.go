@@ -149,8 +149,7 @@ func (p *GameTreeNode) UCTValue() float64 {
 	if p.Father != nil && p.Father.visit > 0 {
 		np = float64(p.Father.visit)
 	}
-	ret += 2 * math.Sqrt(math.Log(np)/float64(p.visit))
-	ret += 0.0001 * rand.Float64()
+	ret += 2 * p.prior * math.Sqrt(np) / float64(1+p.visit)
 	return ret
 }
 
@@ -223,6 +222,7 @@ func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board) {
 	for _, child := range topn {
 		x, y := IndexPos(child.First)
 		cnode := NewGameTreeNode(oc, x, y)
+		cnode.prior = child.Second
 		node.AddChild(cnode)
 		tt := int(500.0*(child.Second/sum) + 0.5)
 		for s := 0; s < tt; s++ {
