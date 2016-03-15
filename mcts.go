@@ -82,8 +82,12 @@ func (b *Board) CandidateMoves(c Color, rank map[int]float64) map[int]float64 {
 	if rand.Float64() < 0.1 || rank == nil {
 		rank = make(map[int]float64)
 	}
+	simple := false
+	if len(rank) == 0 {
+		simple = true
+	}
 	for k, _ := range b.Points {
-		if len(rank) > 0 && last >= 0 && Distance(k, last) > 3 {
+		if simple && last >= 0 && Distance(k, last) > 3 {
 			continue
 		}
 		if ok, _ := b.CanPut(k, c); ok {
