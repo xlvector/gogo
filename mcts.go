@@ -87,8 +87,9 @@ func (b *Board) CandidateMoves(c Color, rank map[int]float64) map[int]float64 {
 		calcAll = true
 	}
 	for k, _ := range b.Points {
-		calc := false
+		calc := true
 		if !calcAll {
+			calc = false
 			if last >= 0 && Distance(k, last) < 3 {
 				calc = true
 			} else {
