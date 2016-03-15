@@ -145,6 +145,7 @@ func (b *Board) MCTSMove(c Color, gt *GameTree) bool {
 		node := MCTSSelection(gt)
 		MCTSExpand(node, c, b)
 		log.Println(i, root.visit)
+		time.Sleep(time.Second * 60)
 	}
 	var best *GameTreeNode
 	robust := 0.0
@@ -207,6 +208,7 @@ func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board) {
 	}
 	for _, child := range topn {
 		x, y := IndexPos(child.First)
+		log.Println("expand node: ", x, y)
 		cnode := NewGameTreeNode(oc, x, y)
 		node.AddChild(cnode)
 		tt := int(100.0*(child.Second/sum) + 0.5)
