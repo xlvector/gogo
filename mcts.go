@@ -149,7 +149,6 @@ func (b *Board) MCTSMove(c Color, gt *GameTree) bool {
 		node := MCTSSelection(gt)
 		MCTSExpand(node, c, b)
 		log.Println(i, root.visit)
-		time.Sleep(time.Second * 60)
 	}
 	var best *GameTreeNode
 	robust := 0.0
