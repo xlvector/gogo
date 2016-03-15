@@ -217,7 +217,7 @@ func TestAtari(t *testing.T) {
 	if len(nworms) != 1 {
 		t.Error()
 	}
-	if len(nworms[0].Points) != 3 {
+	if nworms[0].Size() != 3 {
 		t.Error()
 	}
 	if nworms[0].Liberty != 1 {
