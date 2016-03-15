@@ -102,7 +102,8 @@ func main() {
 			}
 			line = strings.ToUpper(line)
 			if ok := board.PutLabel("B" + line); !ok {
-				break
+				log.Println("invalid")
+				continue
 			}
 			last, c := board.LastMove()
 			x, y := gogo.IndexPos(last)
