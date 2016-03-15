@@ -269,8 +269,8 @@ func (b *Board) CanPut(k int, c Color) (bool, map[int]Color) {
 	nworms := b.NeighWorms(k, c, oc, 1)
 	for _, nw := range nworms {
 		if nw.Liberty == 1 {
-			for p, c1 := range nw.Points {
-				take[p] = c1
+			for _, p := range nw.Points.Points {
+				take[p] = nw.Color
 			}
 		}
 	}
@@ -329,28 +329,31 @@ func (b *Board) LastMove() (int, Color) {
 }
 
 type Worm struct {
-	Points      map[int]Color
+	Points      *PointMap
 	Liberty     int
 	Color       Color
 	BorderColor Color
 }
 
-func NewWorm() *Worm {
+func NewWorm(c Color) *Worm {
 	return &Worm{
-		Points:      make(map[int]Color),
+		Points:      NewPointMap(10),
 		Liberty:     0,
-		Color:       INVALID_COLOR,
+		Color:       c,
 		BorderColor: INVALID_COLOR,
 	}
 }
 
-func (w *Worm) AddPoint(p int, c Color) {
-	w.Points[p] = c
+func (w *Worm) AddPoint(p int) {
+	w.Points.Add(p)
 }
 
 func (w *Worm) IncludePoint(p int) bool {
-	_, ok := w.Points[p]
-	return ok
+	return w.Points.Exist(p)
+}
+
+func (w *Worm) Size() int {
+	return w.Points.Size()
 }
 
 func (b *Board) WormFromPoint(k int, c Color, stopLiberty int) *Worm {
@@ -358,8 +361,7 @@ func (b *Board) WormFromPoint(k int, c Color, stopLiberty int) *Worm {
 	if c == INVALID_COLOR {
 		c = b.Points[k]
 	}
-	worm := NewWorm()
-	worm.Color = c
+	worm := NewWorm(c)
 	queue := make([]int, 0, 10)
 	start := 0
 	queue = append(queue, k)
@@ -376,7 +378,7 @@ func (b *Board) WormFromPoint(k int, c Color, stopLiberty int) *Worm {
 		if worm.IncludePoint(v) {
 			continue
 		}
-		worm.AddPoint(v, c)
+		worm.AddPoint(v)
 		n4 := Neigh4(v)
 		for _, nv := range n4 {
 			if worm.IncludePoint(nv) {

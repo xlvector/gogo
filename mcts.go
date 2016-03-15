@@ -49,7 +49,7 @@ func (b *Board) MakeWorms() []*Worm {
 		for k, _ := range nodes {
 			worm := b.WormFromPoint(k, b.Points[k], -1)
 			ret = append(ret, worm)
-			for p, _ := range worm.Points {
+			for _, p := range worm.Points.Points {
 				delete(nodes, p)
 			}
 			break
@@ -63,14 +63,14 @@ func (b *Board) Score() float64 {
 	ret := 0.0
 	for _, w := range worms {
 		if w.Color == BLACK {
-			ret += float64(len(w.Points))
+			ret += float64(w.Size())
 		} else if w.Color == WHITE {
-			ret -= float64(len(w.Points))
+			ret -= float64(w.Size())
 		} else {
 			if w.BorderColor == BLACK {
-				ret += float64(len(w.Points))
+				ret += float64(w.Size())
 			} else if w.BorderColor == WHITE {
-				ret -= float64(len(w.Points))
+				ret -= float64(w.Size())
 			}
 		}
 	}
