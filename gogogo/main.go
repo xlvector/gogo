@@ -126,5 +126,28 @@ func main() {
 			}
 			log.Println(board.String(nil))
 		}
+	} else if *mode == "self" {
+		board := gogo.NewBoard()
+		if len(*model) > 0 {
+			board.Model = &lr.LogisticRegression{}
+			board.Model.LoadModel(*model)
+		}
+		log.Println(board.String(nil))
+		gt := gogo.NewGameTree(gogo.SIZE)
+		for {
+			if ok := board.GenBestMove(gogo.BLACK); !ok {
+				break
+			}
+			last, c := board.LastMove()
+			x, y := gogo.IndexPos(last)
+			gt.Add(gogo.NewGameTreeNode(c, x, y))
+			log.Println(board.String(nil))
+
+			if ok := board.MCTSMove(gogo.WHITE, gt); !ok {
+				break
+			}
+			log.Println(board.String(nil))
+		}
+		log.Println(board.Score())
 	}
 }

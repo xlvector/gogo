@@ -140,6 +140,15 @@ func (b *Board) GenMove(c Color, rank map[int]float64) (int, map[int]float64) {
 	return pf, rank
 }
 
+func (b *Board) GenBestMove(c Color) bool {
+	rank := b.CandidateMoves(c, nil)
+	cands := TopN(rank, 1)
+	if len(cands) == 0 {
+		return false
+	}
+	return b.Put(cands[0].First, c)
+}
+
 func (p *GameTreeNode) UCTValue() float64 {
 	if p.visit == 0 {
 		return rand.Float64()
@@ -155,7 +164,7 @@ func (p *GameTreeNode) UCTValue() float64 {
 
 func (b *Board) MCTSMove(c Color, gt *GameTree) bool {
 	root := gt.Current
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 10; i++ {
 		node := MCTSSelection(gt)
 		MCTSExpand(node, c, b)
 		log.Println(i, root.visit)
@@ -164,7 +173,7 @@ func (b *Board) MCTSMove(c Color, gt *GameTree) bool {
 	robust := 0.0
 	for _, child := range root.Children {
 		winrate := float64(child.win) / float64(10+child.visit)
-		log.Println(string(LX[child.x]), child.y+1, ColorMark(child.stone), winrate, child.win, child.visit)
+		log.Println(string(LX[child.x]), child.y+1, ColorMark(child.stone), winrate, child.win, child.visit, child.prior)
 		if robust < winrate {
 			robust = winrate
 			best = child
