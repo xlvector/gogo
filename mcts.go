@@ -79,15 +79,25 @@ func (b *Board) Score() float64 {
 
 func (b *Board) CandidateMoves(c Color, rank map[int]float64) map[int]float64 {
 	last, _ := b.LastMove()
-	if rand.Float64() < 0.1 || rank == nil {
+	if rank == nil {
 		rank = make(map[int]float64)
 	}
-	simple := true
+	calcAll := false
 	if len(rank) == 0 {
-		simple = false
+		calcAll = true
 	}
 	for k, _ := range b.Points {
-		if simple && last >= 0 && Distance(k, last) > 3 {
+		calc := false
+		if !calcAll {
+			if last >= 0 && Distance(k, last) < 3 {
+				calc = true
+			} else {
+				if pr, ok := rank[k]; ok && pr > 0.8 {
+					calc = true
+				}
+			}
+		}
+		if !calc {
 			continue
 		}
 		if ok, _ := b.CanPut(k, c); ok {
