@@ -140,19 +140,10 @@ func (p *GameTreeNode) UCTValue() float64 {
 
 func (b *Board) MCTSMove(c Color, gt *GameTree) bool {
 	root := gt.Current
-	sg := make(chan byte, 20)
-	for i := 0; i < 100; i++ {
-		if len(sg) < 20 && i < 20 {
-			log.Println(len(sg))
-			node := MCTSSelection(gt)
-			MCTSExpand(node, c, sg)
-		}
-		log.Println(root.visit, len(sg))
-		if len(sg) == 0 {
-			close(sg)
-			break
-		}
-		time.Sleep(time.Second * 3)
+	for i := 0; i < 20; i++ {
+		node := MCTSSelection(gt)
+		MCTSExpand(node, c)
+		log.Println(i, root.visit)
 	}
 	var best *GameTreeNode
 	robust := 0.0
@@ -201,24 +192,38 @@ func NewBoardFromPath(path []*GameTreeNode) *Board {
 	return ret
 }
 
-func MCTSExpand(node *GameTreeNode, wc Color, sg chan byte) {
+func MCTSExpand(node *GameTreeNode, wc Color) {
 	board := NewBoardFromPath(node.Path2Root())
 	oc := OpColor(node.stone)
 	rank := make(map[int]float64)
 	rank = board.CandidateMoves(oc, rank)
-	topn := TopN(rank, 15)
+	topn := TopN(rank, 30)
+	n := 0
+	sg := make(chan byte, 100)
+	sum := 0.0
+	for _, child := range topn {
+		sum += child.Second
+	}
 	for _, child := range topn {
 		x, y := IndexPos(child.First)
 		cnode := NewGameTreeNode(oc, x, y)
 		node.AddChild(cnode)
-		for s := 0; s < 5; s++ {
+		tt := int(100.0*(child.Second/sum) + 0.5)
+		for s := 0; s < tt; s++ {
 			go MCTSSimulation(board.Copy(), cnode, wc, sg)
+			n += 1
 		}
 	}
+	for _ = range sg {
+		n -= 1
+		if n == 0 {
+			break
+		}
+	}
+	close(sg)
 }
 
 func MCTSSimulation(b *Board, next *GameTreeNode, wc Color, sg chan byte) {
-	sg <- 1
 	b.Put(PosIndex(next.x, next.y), next.stone)
 	b.SelfBattle(OpColor(next.stone))
 	s := b.Score()
@@ -227,7 +232,7 @@ func MCTSSimulation(b *Board, next *GameTreeNode, wc Color, sg chan byte) {
 	} else {
 		MCTSBackProp(next, 0)
 	}
-	<-sg
+	sg <- 1
 }
 
 func MCTSBackProp(node *GameTreeNode, win int) {
