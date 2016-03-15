@@ -15,10 +15,11 @@ var MCTSLock = &sync.Mutex{}
 func (b *Board) SelfBattle(c Color) int {
 	rand.Seed(time.Now().UnixNano())
 	rank := make(map[int]float64)
+	p := -1
 	n := 0
 	for {
 		pass := 0
-		p, rank := b.GenMove(c, rank)
+		p, rank = b.GenMove(c, rank)
 		if p < 0 {
 			pass += 1
 		}
@@ -77,14 +78,14 @@ func (b *Board) Score() float64 {
 }
 
 func (b *Board) CandidateMoves(c Color, rank map[int]float64) map[int]float64 {
-	//last, _ := b.LastMove()
-	//if rand.Float64() < 0.1 || rank == nil {
-	rank = make(map[int]float64)
-	//}
+	last, _ := b.LastMove()
+	if rand.Float64() < 0.1 || rank == nil {
+		rank = make(map[int]float64)
+	}
 	for k, _ := range b.Points {
-		//if len(rank) > 0 && last >= 0 && Distance(k, last) > 3 {
-		//	continue
-		//}
+		if len(rank) > 0 && last >= 0 && Distance(k, last) > 3 {
+			continue
+		}
 		if ok, _ := b.CanPut(k, c); ok {
 			pr := rand.Float64() * 0.1
 			if b.Model != nil {
@@ -196,8 +197,7 @@ func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board) {
 	board := NewBoardFromPath(node.Path2Root())
 	board.Model = oBoard.Model
 	oc := OpColor(node.stone)
-	rank := make(map[int]float64)
-	rank = board.CandidateMoves(oc, rank)
+	rank := board.CandidateMoves(oc, nil)
 	topn := TopN(rank, 30)
 	n := 0
 	sg := make(chan byte, 100)
