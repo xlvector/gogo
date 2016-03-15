@@ -97,8 +97,6 @@ func (b *Board) CandidateMoves(c Color, rank map[int]float64) map[int]float64 {
 				pr = b.Model.Predict(sample)
 			}
 			rank[k] = pr
-			x, y := IndexPos(k)
-			log.Println(x, y, pr)
 		}
 	}
 	return rank
@@ -115,6 +113,8 @@ func (b *Board) GenMove(c Color, rank map[int]float64) (int, map[int]float64) {
 	pr := rand.Float64() * psum
 	pf := -1
 	for _, v := range cands {
+		x, y := IndexPos(v.First)
+		log.Println(x, y, v.Second)
 		pr -= v.Second
 		if pr <= 0.0 {
 			pf = v.First
