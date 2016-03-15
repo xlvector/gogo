@@ -257,9 +257,10 @@ func (b *Board) FeatureHash(k int, c Color) int64 {
 func (b *Board) FinalPatternHash(k int, c Color) []int64 {
 	ret := make([]int64, PATTERN_SIZE)
 	h := int64(0)
+	fh := b.FeatureHash(k, c)
 	for d := 0; d < PATTERN_SIZE; d++ {
 		h ^= b.PatternHash[k][d]
-		ret[d] = h ^ b.FeatureHash(k, c)
+		ret[d] = h ^ fh
 	}
 	return ret
 }
