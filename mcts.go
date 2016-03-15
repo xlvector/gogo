@@ -97,6 +97,8 @@ func (b *Board) CandidateMoves(c Color, rank map[int]float64) map[int]float64 {
 				pr = b.Model.Predict(sample)
 			}
 			rank[k] = pr
+			x, y := IndexPos(k)
+			log.Println(x, y, pr)
 		}
 	}
 	return rank
