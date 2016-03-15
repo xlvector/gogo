@@ -140,13 +140,18 @@ func (b *Board) GenMove(c Color, rank map[int]float64) (int, map[int]float64) {
 	return pf, rank
 }
 
-func (b *Board) GenBestMove(c Color) bool {
+func (b *Board) GenBestMove(c Color, gt *GameTree) bool {
 	rank := b.CandidateMoves(c, nil)
 	cands := TopN(rank, 1)
 	if len(cands) == 0 {
 		return false
 	}
-	return b.Put(cands[0].First, c)
+	if ok := b.Put(cands[0].First, c); ok {
+		x, y := IndexPos(cands[0].First)
+		gt.Add(NewGameTreeNode(c, x, y))
+		return true
+	}
+	return false
 }
 
 func (p *GameTreeNode) UCTValue() float64 {
@@ -164,7 +169,7 @@ func (p *GameTreeNode) UCTValue() float64 {
 
 func (b *Board) MCTSMove(c Color, gt *GameTree) bool {
 	root := gt.Current
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 1; i++ {
 		node := MCTSSelection(gt)
 		MCTSExpand(node, c, b)
 		log.Println(i, root.visit)
@@ -233,7 +238,7 @@ func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board) {
 		cnode := NewGameTreeNode(oc, x, y)
 		cnode.prior = child.Second
 		node.AddChild(cnode)
-		tt := int(500.0*(child.Second/sum) + 0.5)
+		tt := int(2000.0*(child.Second/sum) + 0.5)
 		for s := 0; s < tt; s++ {
 			go MCTSSimulation(board.Copy(), cnode, wc, sg)
 			n += 1
