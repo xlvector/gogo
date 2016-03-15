@@ -77,7 +77,7 @@ func (b *Board) Score() float64 {
 }
 
 func (b *Board) CandidateMoves(c Color, rank map[int]float64) map[int]float64 {
-	last, _ := b.LastMove()
+	//last, _ := b.LastMove()
 	//if rand.Float64() < 0.1 || rank == nil {
 	rank = make(map[int]float64)
 	//}
