@@ -113,7 +113,6 @@ func (b *Board) GenMove(c Color, rank map[int]float64) (int, map[int]float64) {
 	pr := rand.Float64() * psum
 	pf := -1
 	for _, v := range cands {
-		x, y := IndexPos(v.First)
 		pr -= v.Second
 		if pr <= 0.0 {
 			pf = v.First
