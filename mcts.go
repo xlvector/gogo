@@ -114,7 +114,6 @@ func (b *Board) GenMove(c Color, rank map[int]float64) (int, map[int]float64) {
 	pf := -1
 	for _, v := range cands {
 		x, y := IndexPos(v.First)
-		log.Println(x, y, v.Second)
 		pr -= v.Second
 		if pr <= 0.0 {
 			pf = v.First
