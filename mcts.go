@@ -95,7 +95,6 @@ func (b *Board) CandidateMoves(c Color, rank map[int]float64) map[int]float64 {
 					sample.AddFeature(core.Feature{v, 1.0})
 				}
 				pr = b.Model.Predict(sample)
-				log.Println(pr)
 			}
 			rank[k] = pr
 		}
@@ -143,7 +142,7 @@ func (b *Board) MCTSMove(c Color, gt *GameTree) bool {
 	root := gt.Current
 	for i := 0; i < 20; i++ {
 		node := MCTSSelection(gt)
-		MCTSExpand(node, c)
+		MCTSExpand(node, c, b)
 		log.Println(i, root.visit)
 	}
 	var best *GameTreeNode
@@ -193,8 +192,9 @@ func NewBoardFromPath(path []*GameTreeNode) *Board {
 	return ret
 }
 
-func MCTSExpand(node *GameTreeNode, wc Color) {
+func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board) {
 	board := NewBoardFromPath(node.Path2Root())
+	board = oBoard.Model
 	oc := OpColor(node.stone)
 	rank := make(map[int]float64)
 	rank = board.CandidateMoves(oc, rank)
