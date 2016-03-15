@@ -95,6 +95,7 @@ func (b *Board) CandidateMoves(c Color, rank map[int]float64) map[int]float64 {
 					sample.AddFeature(core.Feature{v, 1.0})
 				}
 				pr = b.Model.Predict(sample)
+				log.Println(pr)
 			}
 			rank[k] = pr
 		}
