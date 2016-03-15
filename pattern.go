@@ -38,7 +38,7 @@ func (b *Board) EdgeDisHash(k int) int64 {
 }
 
 func (b *Board) SelfWormHash(k int, c Color) int64 {
-	worm := b.WormFromPoint(k, c, 3)
+	worm := b.WormFromPoint(k, c, 2)
 	if worm.Liberty == 0 {
 		return 34025815894375
 	} else if worm.Liberty == 1 {
@@ -51,7 +51,7 @@ func (b *Board) SelfWormHash(k int, c Color) int64 {
 }
 
 func (b *Board) OpWormHash(k int, c Color) int64 {
-	nworms := b.NeighWorms(k, c, OpColor(c), 3)
+	nworms := b.NeighWorms(k, c, OpColor(c), 2)
 	if len(nworms) == 0 {
 		return 0
 	}
@@ -84,7 +84,7 @@ func (b *Board) PointLiberty(k int) int {
 }
 
 func (b *Board) EscapeAtari(k int, c Color) bool {
-	nworms := b.NeighWorms(k, c, c, 3)
+	nworms := b.NeighWorms(k, c, c, 2)
 	minLiberty := 10000
 	for _, w := range nworms {
 		if minLiberty > w.Liberty {
@@ -94,7 +94,7 @@ func (b *Board) EscapeAtari(k int, c Color) bool {
 	if minLiberty > 2 {
 		return false
 	} else {
-		worm := b.WormFromPoint(k, c, 3)
+		worm := b.WormFromPoint(k, c, 2)
 		if worm.Liberty > 2 {
 			return true
 		}

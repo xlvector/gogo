@@ -266,7 +266,7 @@ func (b *Board) CanPut(k int, c Color) (bool, map[int]Color) {
 
 	take := make(map[int]Color)
 	oc := OpColor(c)
-	nworms := b.NeighWorms(k, c, oc, 2)
+	nworms := b.NeighWorms(k, c, oc, 1)
 	for _, nw := range nworms {
 		if nw.Liberty == 1 {
 			for p, c1 := range nw.Points {
