@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/xlvector/gogo"
@@ -81,5 +82,37 @@ func main() {
 		board.Model.LoadModel(*model)
 		hit, total := board.EvaluateModel(*input)
 		log.Println(hit, total, float64(hit)/float64(total))
+	} else if *mode == "simple" {
+		board := gogo.NewBoard()
+		if len(*model) > 0 {
+			board.Model = &lr.LogisticRegression{}
+			board.Model.LoadModel(*model)
+		}
+		log.Println(board.String(nil))
+		gt := gogo.NewGameTree(gogo.SIZE)
+		reader := bufio.NewReader(os.Stdin)
+		for {
+			line, err := reader.ReadString('\n')
+			if err != nil {
+				break
+			}
+			line = strings.TrimSpace(line)
+			if line == "pass" {
+				break
+			}
+			line = strings.ToUpper(line)
+			if ok := board.PutLabel("B" + line); !ok {
+				break
+			}
+			last, c := board.LastMove()
+			x, y := gogo.IndexPos(last)
+			gt.Add(gogo.NewGameTreeNode(c, x, y))
+			log.Println(board.String(nil))
+
+			if ok := board.MCTSMove(gogo.WHITE, gt); !ok {
+				break
+			}
+			log.Println(board.String(nil))
+		}
 	}
 }

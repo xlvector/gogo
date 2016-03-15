@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -53,4 +54,16 @@ func (p IntFloatPairList) Less(i, j int) bool {
 
 func (p IntFloatPairList) Swap(i, j int) {
 	p[j], p[i] = p[i], p[j]
+}
+
+func TopN(rank map[int]float64, n int) IntFloatPairList {
+	ret := make(IntFloatPairList, 0, len(rank)+1)
+	for k, v := range rank {
+		ret = append(ret, IntFloatPair{k, v})
+	}
+	sort.Sort(sort.Reverse(ret))
+	if len(ret) < n {
+		return ret
+	}
+	return ret[0:n]
 }

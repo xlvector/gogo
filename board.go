@@ -17,7 +17,7 @@ const (
 	BLACK         Color = 1
 	WHITE         Color = 2
 	INVALID_COLOR Color = 3
-	PATTERN_SIZE        = 14
+	PATTERN_SIZE        = 12
 	LX                  = "ABCDEFGHJKLMNOPQRSTUVWXYZ"
 )
 
@@ -170,6 +170,7 @@ type Board struct {
 	PointHash   []int64
 	PatternHash [][]int64
 	Actions     []int
+	LastPattern []int64
 }
 
 func NewBoard() *Board {
@@ -198,6 +199,7 @@ func (b *Board) Copy() *Board {
 		PointHash:   make([]int64, len(b.PointHash)),
 		PatternHash: make([][]int64, len(b.PatternHash)),
 		Actions:     make([]int, len(b.Actions)),
+		LastPattern: make([]int64, len(b.LastPattern)),
 		Model:       b.Model,
 	}
 	for i, v := range b.Points {
@@ -208,6 +210,9 @@ func (b *Board) Copy() *Board {
 	}
 	for i, v := range b.Actions {
 		ret.Actions[i] = v
+	}
+	for i, v := range b.LastPattern {
+		ret.LastPattern[i] = v
 	}
 	for i, a := range b.PatternHash {
 		tmp := make([]int64, len(a))
@@ -261,7 +266,7 @@ func (b *Board) CanPut(k int, c Color) (bool, map[int]Color) {
 
 	take := make(map[int]Color)
 	oc := OpColor(c)
-	nworms := b.NeighWorms(k, c, oc)
+	nworms := b.NeighWorms(k, c, oc, 2)
 	for _, nw := range nworms {
 		if nw.Liberty == 1 {
 			for p, c1 := range nw.Points {
@@ -270,16 +275,17 @@ func (b *Board) CanPut(k int, c Color) (bool, map[int]Color) {
 		}
 	}
 
-	worm := b.WormFromPoint(k, c)
+	if len(take) > 0 {
+		return true, take
+	}
+
+	worm := b.WormFromPoint(k, c, 1)
 
 	if worm.BorderColor == oc {
-		if len(take) > 0 {
-			return true, take
-		} else {
-			return false, nil
-		}
+		return false, nil
 	}
-	return true, take
+
+	return true, nil
 }
 
 func (b *Board) PutLabel(buf string) bool {
@@ -295,6 +301,7 @@ func (b *Board) Put(k int, c Color) bool {
 	if !ok {
 		return false
 	}
+	b.LastPattern = b.FinalPatternHash(k, c)
 	b.KoIndex = -1
 	if len(take) > 0 {
 		for p, _ := range take {
@@ -313,21 +320,27 @@ func (b *Board) Put(k int, c Color) bool {
 	return true
 }
 
+func (b *Board) LastMove() (int, Color) {
+	if len(b.Actions) == 0 {
+		return -1, INVALID_COLOR
+	}
+	a := b.Actions[len(b.Actions)-1]
+	return ParseIndexAction(a)
+}
+
 type Worm struct {
-	Points       map[int]Color
-	BorderPoints map[int]Color
-	Liberty      int
-	Color        Color
-	BorderColor  Color
+	Points      map[int]Color
+	Liberty     int
+	Color       Color
+	BorderColor Color
 }
 
 func NewWorm() *Worm {
 	return &Worm{
-		Points:       make(map[int]Color),
-		BorderPoints: make(map[int]Color),
-		Liberty:      0,
-		Color:        INVALID_COLOR,
-		BorderColor:  INVALID_COLOR,
+		Points:      make(map[int]Color),
+		Liberty:     0,
+		Color:       INVALID_COLOR,
+		BorderColor: INVALID_COLOR,
 	}
 }
 
@@ -335,16 +348,12 @@ func (w *Worm) AddPoint(p int, c Color) {
 	w.Points[p] = c
 }
 
-func (w *Worm) AddBorder(p int, c Color) {
-	w.BorderPoints[p] = c
-}
-
 func (w *Worm) IncludePoint(p int) bool {
 	_, ok := w.Points[p]
 	return ok
 }
 
-func (b *Board) WormFromPoint(k int, c Color) *Worm {
+func (b *Board) WormFromPoint(k int, c Color, stopLiberty int) *Worm {
 	// if pass invalid color, means use color in point k of board, otherwise, use specified color c
 	if c == INVALID_COLOR {
 		c = b.Points[k]
@@ -354,8 +363,12 @@ func (b *Board) WormFromPoint(k int, c Color) *Worm {
 	queue := make([]int, 0, 10)
 	start := 0
 	queue = append(queue, k)
+	lb := make(map[int]byte)
 	for {
 		if start >= len(queue) {
+			break
+		}
+		if stopLiberty > 0 && len(lb) > stopLiberty {
 			break
 		}
 		v := queue[start]
@@ -372,22 +385,20 @@ func (b *Board) WormFromPoint(k int, c Color) *Worm {
 			if b.Points[nv] == c {
 				queue = append(queue, nv)
 			} else {
-				worm.AddBorder(nv, b.Points[nv])
+				if b.Points[nv] == GRAY {
+					lb[nv] = 1
+				}
+				if worm.BorderColor == INVALID_COLOR {
+					worm.BorderColor = b.Points[nv]
+				} else if worm.BorderColor == GRAY {
+					worm.BorderColor = GRAY
+				} else if worm.BorderColor != b.Points[nv] {
+					worm.BorderColor = GRAY
+				}
 			}
 		}
 	}
-
-	for _, c := range worm.BorderPoints {
-		if c == GRAY {
-			worm.Liberty += 1
-			worm.BorderColor = GRAY
-		} else {
-			if worm.BorderColor != GRAY {
-				worm.BorderColor = c
-			}
-		}
-	}
-
+	worm.Liberty = len(lb)
 	return worm
 }
 

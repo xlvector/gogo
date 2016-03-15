@@ -213,7 +213,7 @@ func TestAtari(t *testing.T) {
 		t.Error()
 	}
 
-	nworms := b.NeighWorms(PosIndex(4, 0), WHITE, WHITE)
+	nworms := b.NeighWorms(PosIndex(4, 0), WHITE, WHITE, -1)
 	if len(nworms) != 1 {
 		t.Error()
 	}
@@ -328,4 +328,10 @@ func TestHash(t *testing.T) {
 		}
 	}
 
+}
+
+func TestSelfBattle(t *testing.T) {
+	b := NewBoard()
+	b.SelfBattle(BLACK)
+	t.Log(b.String(nil))
 }

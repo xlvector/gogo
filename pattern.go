@@ -38,7 +38,7 @@ func (b *Board) EdgeDisHash(k int) int64 {
 }
 
 func (b *Board) SelfWormHash(k int, c Color) int64 {
-	worm := b.WormFromPoint(k, c)
+	worm := b.WormFromPoint(k, c, 3)
 	if worm.Liberty == 0 {
 		return 34025815894375
 	} else if worm.Liberty == 1 {
@@ -51,7 +51,7 @@ func (b *Board) SelfWormHash(k int, c Color) int64 {
 }
 
 func (b *Board) OpWormHash(k int, c Color) int64 {
-	nworms := b.NeighWorms(k, c, OpColor(c))
+	nworms := b.NeighWorms(k, c, OpColor(c), 3)
 	if len(nworms) == 0 {
 		return 0
 	}
@@ -84,7 +84,7 @@ func (b *Board) PointLiberty(k int) int {
 }
 
 func (b *Board) EscapeAtari(k int, c Color) bool {
-	nworms := b.NeighWorms(k, c, c)
+	nworms := b.NeighWorms(k, c, c, 3)
 	minLiberty := 10000
 	for _, w := range nworms {
 		if minLiberty > w.Liberty {
@@ -94,7 +94,7 @@ func (b *Board) EscapeAtari(k int, c Color) bool {
 	if minLiberty > 2 {
 		return false
 	} else {
-		worm := b.WormFromPoint(k, c)
+		worm := b.WormFromPoint(k, c, 3)
 		if worm.Liberty > 2 {
 			return true
 		}
@@ -103,9 +103,9 @@ func (b *Board) EscapeAtari(k int, c Color) bool {
 }
 
 func (b *Board) LocalFeature(k int, c Color) int64 {
-	myNWorms := b.NeighWorms(k, c, c)
-	opNWorms := b.NeighWorms(k, c, OpColor(c))
-	worm := b.WormFromPoint(k, c)
+	myNWorms := b.NeighWorms(k, c, c, 3)
+	opNWorms := b.NeighWorms(k, c, OpColor(c), 3)
+	worm := b.WormFromPoint(k, c, 3)
 
 	f := int64(0)
 	minLiberty := 10000
@@ -153,10 +153,35 @@ func (b *Board) LocalFeature(k int, c Color) int64 {
 	}
 
 	f ^= b.EdgeDisHash(k)
+
+	nMy := int64(0)
+	nOp := int64(0)
+	for _, p := range PointDisMap[k][1] {
+		if b.Points[p] == c {
+			nMy += 1
+		} else if b.Points[p] == OpColor(c) {
+			nOp += 1
+		}
+	}
+
+	f ^= 257012801851 + nMy*710517801
+	f ^= 314501851003 + nOp*837104719
+
+	nMy = 0
+	nOp = 0
+	for _, p := range PointDisMap[k][2] {
+		if b.Points[p] == c {
+			nMy += 1
+		} else if b.Points[p] == OpColor(c) {
+			nOp += 1
+		}
+	}
+	f ^= 839457015011 + nMy*834561911
+	f ^= 954876687874 + nOp*231971295
 	return f
 }
 
-func (b *Board) NeighWorms(k int, c, wc Color) []*Worm {
+func (b *Board) NeighWorms(k int, c, wc Color, stopLiberty int) []*Worm {
 	n4 := Neigh4(k)
 	ret := []*Worm{}
 	for _, nk := range n4 {
@@ -173,7 +198,7 @@ func (b *Board) NeighWorms(k int, c, wc Color) []*Worm {
 		if include {
 			continue
 		}
-		worm := b.WormFromPoint(nk, b.Points[nk])
+		worm := b.WormFromPoint(nk, b.Points[nk], stopLiberty)
 		ret = append(ret, worm)
 	}
 	return ret
