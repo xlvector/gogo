@@ -164,6 +164,7 @@ func main() {
 		gt1 := gogo.NewGameTree(gogo.SIZE)
 		gt2 := gogo.NewGameTree(gogo.SIZE)
 		for {
+			gt1.CurrentChild()
 			if ok := board.MCTSMove(gogo.BLACK, gt1, 10); !ok {
 				break
 			}
@@ -174,6 +175,7 @@ func main() {
 				gt2.Add(gogo.NewGameTreeNode(gogo.BLACK, lastX, lastY))
 			}
 
+			gt2.CurrentChild()
 			if ok := board.MCTSMove(gogo.WHITE, gt2, 20); !ok {
 				break
 			}
