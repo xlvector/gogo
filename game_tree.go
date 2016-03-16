@@ -124,7 +124,6 @@ func (p *GameTreeNode) AddChild(v *GameTreeNode) (*GameTreeNode, *GameTreeNode) 
 	}
 
 	for _, u := range p.Children {
-		log.Println("exist child:", PointString(u.x, u.y, u.stone))
 		if u.x == v.x && u.y == v.y && u.stone == v.stone {
 			return p, u
 		}
@@ -208,6 +207,12 @@ func (t *GameTree) HasHandicap() bool {
 		return true
 	}
 	return false
+}
+
+func (t *GameTree) CurrentChild() {
+	for _, child := range t.Current.Children {
+		log.Println(PointString(child.x, child.y, child.stone))
+	}
 }
 
 func (t *GameTree) SGFSize() int {
