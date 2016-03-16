@@ -183,7 +183,7 @@ func main() {
 			{
 				last, _ := board.LastMove()
 				lastX, lastY := gogo.IndexPos(last)
-				gt1.Add(gogo.NewGameTreeNode(gogo.BLACK, lastX, lastY))
+				gt1.Add(gogo.NewGameTreeNode(gogo.WHITE, lastX, lastY))
 			}
 		}
 		log.Println(board.Score())
