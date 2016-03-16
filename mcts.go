@@ -227,12 +227,12 @@ func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board, total int) {
 	oc := OpColor(node.stone)
 	rank := board.CandidateMoves(oc, nil)
 	topn := TopN(rank, 10)
-	n := 0
 	sg := make(chan byte, 100)
 	sum := 0.0
 	for _, child := range topn {
 		sum += child.Second
 	}
+	var wg sync.WaitGroup
 	for _, child := range topn {
 		x, y := IndexPos(child.First)
 		cnode := NewGameTreeNode(oc, x, y)
@@ -240,22 +240,16 @@ func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board, total int) {
 		node.AddChild(cnode)
 		tt := int(float64(total)*(child.Second/sum) + 0.5)
 		for s := 0; s < tt; s++ {
-			go MCTSSimulation(board.Copy(), cnode, wc, sg)
-			n += 1
+			wg.Add(1)
+			go MCTSSimulation(board.Copy(), cnode, wc, &wg)
 		}
 	}
-	for _ = range sg {
-		n -= 1
-		if n == 0 {
-			break
-		}
-	}
-	close(sg)
+	wg.Wait()
 }
 
-func MCTSSimulation(b *Board, next *GameTreeNode, wc Color, sg chan byte) {
+func MCTSSimulation(b *Board, next *GameTreeNode, wc Color, wg *sync.WaitGroup) {
 	defer func() {
-		sg <- 1
+		wg.Done()
 	}()
 	b.Put(PosIndex(next.x, next.y), next.stone)
 	b.SelfBattle(OpColor(next.stone))
