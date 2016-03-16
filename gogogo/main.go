@@ -17,19 +17,20 @@ import (
 
 func GenDLDataset(root, output string) {
 	paths := gogo.TreeDir(root, "sgf")
-	f, _ := os.Create(output)
-	defer f.Close()
-	writer := bufio.NewWriter(f)
+
 	out := make(chan string, 100000)
 	wg0 := &sync.WaitGroup{}
 	wg0.Add(1)
-	go func(wg *sync.WaitGroup) {
+	go func() {
+		f, _ := os.Create(output)
+		defer f.Close()
+		writer := bufio.NewWriter(f)
 		for line := range out {
 			writer.WriteString(line)
 			writer.WriteString("\n")
 		}
-		wg.Done()
-	}(wg0)
+		wg0.Done()
+	}()
 
 	wg1 := &sync.WaitGroup{}
 	for _, path := range paths {
