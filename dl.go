@@ -29,7 +29,7 @@ func GenDLDataset(sgfFile string, out chan string, wg *sync.WaitGroup) {
 		}
 	}
 	wg.Done()
-	log.Println(sgfFile)
+	log.Println(sgfFile, len(out))
 }
 
 func (b *Board) DLFeature(stone Color) []byte {
