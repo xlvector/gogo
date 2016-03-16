@@ -124,8 +124,8 @@ func (p *GameTreeNode) AddChild(v *GameTreeNode) (*GameTreeNode, *GameTreeNode) 
 	}
 
 	for _, u := range p.Children {
+		log.Println("exist child:", PointString(u.x, u.y, u.stone))
 		if u.x == v.x && u.y == v.y && u.stone == v.stone {
-			log.Println("exist child:", u.visit, u.win)
 			return p, u
 		}
 	}
