@@ -3,9 +3,10 @@ package gogo
 import (
 	"io/ioutil"
 	"strconv"
+	"sync"
 )
 
-func GenDLDataset(sgfFile string) []string {
+func GenDLDataset(sgfFile string, out chan string, wg *sync.WaitGroup) {
 	buf, _ := ioutil.ReadFile(sgfFile)
 	gt := NewGameTree(SIZE)
 	gt.ParseSGF(string(buf))
@@ -13,7 +14,6 @@ func GenDLDataset(sgfFile string) []string {
 	path := gt.Path2Root()
 	board := NewBoard()
 
-	ret := make([]string, 0, 300)
 	for i := len(path) - 2; i >= 0; i-- {
 		cur := path[i]
 		sample := board.DLFeature(cur.stone)
@@ -22,12 +22,13 @@ func GenDLDataset(sgfFile string) []string {
 		for _, v := range sample {
 			line += strconv.Itoa(int(v))
 		}
-		ret = append(ret, line)
+		out <- line
 		if ok := board.Put(PosIndex(cur.x, cur.y), cur.stone); !ok {
 			break
 		}
 	}
-	return ret
+	wg.Done()
+
 }
 
 func (b *Board) DLFeature(stone Color) []byte {
