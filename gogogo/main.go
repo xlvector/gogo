@@ -20,7 +20,7 @@ func GenDLDataset(root, output string) {
 	f, _ := os.Create(output)
 	defer f.Close()
 	writer := bufio.NewWriter(f)
-	out := make(chan string)
+	out := make(chan string, 100000)
 	wg0 := &sync.WaitGroup{}
 	wg0.Add(1)
 	go func() {
