@@ -17,7 +17,7 @@ func (b *Board) SelfBattle(c Color) int {
 	rank := make(map[int]float64)
 	p := -1
 	n := 0
-	for {
+	for n < 350 {
 		pass := 0
 		p, rank = b.GenMove(c, rank)
 		if p < 0 {
@@ -254,6 +254,9 @@ func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board) {
 }
 
 func MCTSSimulation(b *Board, next *GameTreeNode, wc Color, sg chan byte) {
+	defer func() {
+		sg <- 1
+	}()
 	b.Put(PosIndex(next.x, next.y), next.stone)
 	b.SelfBattle(OpColor(next.stone))
 	s := b.Score()
@@ -262,7 +265,6 @@ func MCTSSimulation(b *Board, next *GameTreeNode, wc Color, sg chan byte) {
 	} else {
 		MCTSBackProp(next, 0)
 	}
-	sg <- 1
 }
 
 func MCTSBackProp(node *GameTreeNode, win int) {
