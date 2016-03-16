@@ -2,7 +2,6 @@ package gogo
 
 import (
 	"container/list"
-	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -26,8 +25,10 @@ func TreeDir(root, ext string) []string {
 			if info.IsDir() && path != root {
 				q.PushBack(path)
 			} else {
+				if path[0] == "." {
+					continue
+				}
 				if strings.HasSuffix(path, ext) {
-					log.Println(path)
 					ret = append(ret, path)
 				}
 			}

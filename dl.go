@@ -18,8 +18,8 @@ func GenDLDataset(sgfFile string) []string {
 		cur := path[i]
 		sample := board.DLFeature(cur.stone)
 		line := strconv.Itoa(PosIndex(cur.x, cur.y))
+		line += "\t"
 		for _, v := range sample {
-			line += "\t"
 			line += strconv.Itoa(int(v))
 		}
 		ret = append(ret, line)
