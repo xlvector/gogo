@@ -26,7 +26,7 @@ func TreeDir(root, ext string) []string {
 				q.PushBack(path)
 			} else {
 				if path[0] == '.' {
-					continue
+					return nil
 				}
 				if strings.HasSuffix(path, ext) {
 					ret = append(ret, path)
