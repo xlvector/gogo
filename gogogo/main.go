@@ -8,7 +8,6 @@ import (
 	"runtime"
 	"runtime/pprof"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/xlvector/gogo"
@@ -17,29 +16,17 @@ import (
 
 func GenDLDataset(root, output string) {
 	paths := gogo.TreeDir(root, "sgf")
+	f, _ := os.Create(output)
+	defer f.Close()
+	writer := bufio.NewWriter(f)
 
-	out := make(chan string, 100000)
-	wg0 := &sync.WaitGroup{}
-	wg0.Add(1)
-	go func() {
-		f, _ := os.Create(output)
-		defer f.Close()
-		defer wg0.Done()
-		writer := bufio.NewWriter(f)
-		for line := range out {
+	for _, path := range paths {
+		lines := gogo.GenDLDataset(path)
+		for _, line := range lines {
 			writer.WriteString(line)
 			writer.WriteString("\n")
 		}
-	}()
-
-	wg1 := &sync.WaitGroup{}
-	for _, path := range paths {
-		wg1.Add(1)
-		go gogo.GenDLDataset(path, out, wg1)
 	}
-	wg1.Wait()
-	close(out)
-	wg0.Wait()
 }
 
 func GenPatterns(path string, ch chan string) {

@@ -4,11 +4,9 @@ import (
 	"io/ioutil"
 	"log"
 	"strconv"
-	"sync"
 )
 
-func GenDLDataset(sgfFile string, out chan string, wg *sync.WaitGroup) {
-	defer wg.Done()
+func GenDLDataset(sgfFile string) []string {
 	buf, _ := ioutil.ReadFile(sgfFile)
 	gt := NewGameTree(SIZE)
 	gt.ParseSGF(string(buf))
@@ -17,7 +15,7 @@ func GenDLDataset(sgfFile string, out chan string, wg *sync.WaitGroup) {
 	log.Println(len(path))
 	board := NewBoard()
 
-	n := 0
+	ret := []string{}
 	for i := len(path) - 2; i >= 0; i-- {
 		cur := path[i]
 		sample := board.DLFeature(cur.stone)
@@ -26,13 +24,13 @@ func GenDLDataset(sgfFile string, out chan string, wg *sync.WaitGroup) {
 		for _, v := range sample {
 			line += strconv.Itoa(int(v))
 		}
-		out <- line
-		n += 1
+		ret = append(ret, line)
 		if ok := board.Put(PosIndex(cur.x, cur.y), cur.stone); !ok {
 			log.Println(cur.x, cur.y, cur.stone)
 		}
 	}
-	log.Println(sgfFile, len(out), n, len(path))
+	log.Println(sgfFile, len(ret), len(path))
+	return ret
 }
 
 func (b *Board) DLFeature(stone Color) []byte {
