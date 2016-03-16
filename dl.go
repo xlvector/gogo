@@ -28,10 +28,10 @@ func GenDLDataset(sgfFile string, out chan string, wg *sync.WaitGroup) {
 		out <- line
 		n += 1
 		if ok := board.Put(PosIndex(cur.x, cur.y), cur.stone); !ok {
-			break
+			log.Println(cur.x, cur.y, cur.stone)
 		}
 	}
-	log.Println(sgfFile, len(out), n)
+	log.Println(sgfFile, len(out), n, len(path))
 }
 
 func (b *Board) DLFeature(stone Color) []byte {
