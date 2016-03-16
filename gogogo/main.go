@@ -24,12 +24,12 @@ func GenDLDataset(root, output string) {
 	go func() {
 		f, _ := os.Create(output)
 		defer f.Close()
+		defer wg0.Done()
 		writer := bufio.NewWriter(f)
 		for line := range out {
 			writer.WriteString(line)
 			writer.WriteString("\n")
 		}
-		wg0.Done()
 	}()
 
 	wg1 := &sync.WaitGroup{}
