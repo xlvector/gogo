@@ -14,6 +14,20 @@ import (
 	"github.com/xlvector/hector/lr"
 )
 
+func GenDLDataset(root, output string) {
+	paths := gogo.TreeDir(root, "sgf")
+	f, _ := os.Create(output)
+	defer f.Close()
+	writer := bufio.NewWriter(f)
+	for _, path := range paths {
+		samples := gogo.GenDLDataset(path)
+		for _, line := range samples {
+			writer.WriteString(line)
+			writer.WriteString("\n")
+		}
+	}
+}
+
 func GenPatterns(path string, ch chan string) {
 	log.Println(path)
 	board := gogo.NewBoard()
@@ -146,5 +160,7 @@ func main() {
 			log.Println(board.String(nil))
 		}
 		log.Println(board.Score())
+	} else if *mode == "dl-data" {
+		GenDLDataset(*input, *output)
 	}
 }
