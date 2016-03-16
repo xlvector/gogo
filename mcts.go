@@ -167,11 +167,11 @@ func (p *GameTreeNode) UCTValue() float64 {
 	return ret
 }
 
-func (b *Board) MCTSMove(c Color, gt *GameTree) bool {
+func (b *Board) MCTSMove(c Color, gt *GameTree, n int) bool {
 	root := gt.Current
 	for i := 0; i < 1; i++ {
 		node := MCTSSelection(gt)
-		MCTSExpand(node, c, b)
+		MCTSExpand(node, c, b, n)
 		log.Println(i, root.visit)
 	}
 	var best *GameTreeNode
@@ -221,7 +221,7 @@ func NewBoardFromPath(path []*GameTreeNode) *Board {
 	return ret
 }
 
-func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board) {
+func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board, total int) {
 	board := NewBoardFromPath(node.Path2Root())
 	board.Model = oBoard.Model
 	oc := OpColor(node.stone)
@@ -238,7 +238,7 @@ func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board) {
 		cnode := NewGameTreeNode(oc, x, y)
 		cnode.prior = child.Second
 		node.AddChild(cnode)
-		tt := int(2000.0*(child.Second/sum) + 0.5)
+		tt := int(float64(total)*(child.Second/sum) + 0.5)
 		for s := 0; s < tt; s++ {
 			go MCTSSimulation(board.Copy(), cnode, wc, sg)
 			n += 1

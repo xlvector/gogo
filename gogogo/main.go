@@ -121,7 +121,7 @@ func main() {
 			gt.Add(gogo.NewGameTreeNode(c, x, y))
 			log.Println(board.String(nil))
 
-			if ok := board.MCTSMove(gogo.WHITE, gt); !ok {
+			if ok := board.MCTSMove(gogo.WHITE, gt, 2000); !ok {
 				break
 			}
 			log.Println(board.String(nil))
@@ -135,12 +135,12 @@ func main() {
 		log.Println(board.String(nil))
 		gt := gogo.NewGameTree(gogo.SIZE)
 		for {
-			if ok := board.GenBestMove(gogo.BLACK, gt); !ok {
+			if ok := board.MCTSMove(gogo.BLACK, gt, 500); !ok {
 				break
 			}
 			log.Println(board.String(nil))
 
-			if ok := board.MCTSMove(gogo.WHITE, gt); !ok {
+			if ok := board.MCTSMove(gogo.WHITE, gt, 2000); !ok {
 				break
 			}
 			log.Println(board.String(nil))
