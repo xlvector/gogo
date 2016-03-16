@@ -227,7 +227,6 @@ func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board, total int) {
 	oc := OpColor(node.stone)
 	rank := board.CandidateMoves(oc, nil)
 	topn := TopN(rank, 10)
-	sg := make(chan byte, 100)
 	sum := 0.0
 	for _, child := range topn {
 		sum += child.Second
