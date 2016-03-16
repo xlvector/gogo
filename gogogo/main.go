@@ -23,13 +23,13 @@ func GenDLDataset(root, output string) {
 	out := make(chan string, 100000)
 	wg0 := &sync.WaitGroup{}
 	wg0.Add(1)
-	go func() {
+	go func(wg *sync.WaitGroup) {
 		for line := range out {
 			writer.WriteString(line)
 			writer.WriteString("\n")
 		}
-		wg0.Done()
-	}()
+		wg.Done()
+	}(wg0)
 
 	wg1 := &sync.WaitGroup{}
 	for _, path := range paths {
