@@ -102,10 +102,11 @@ func (b *Board) EscapeAtari(k int, c Color) bool {
 	}
 }
 
-func (b *Board) LocalFeature(k int, c Color) int64 {
+func (b *Board) LocalFeature(k int, c Color) []int64 {
 	myNWorms := b.NeighWorms(k, c, c, 3)
 	opNWorms := b.NeighWorms(k, c, OpColor(c), 3)
 	worm := b.WormFromPoint(k, c, 3)
+	ret := make([]int64, 0, 5)
 
 	f := int64(0)
 	minLiberty := 10000
@@ -119,10 +120,13 @@ func (b *Board) LocalFeature(k int, c Color) int64 {
 		if worm.Liberty == 1 {
 			//escape capture
 			f ^= 493570158105
+			ret = append(ret, 493570158105)
 		} else if worm.Liberty == 2 {
 			f ^= 159084081432
+			ret = append(ret, 159084081432)
 		} else if worm.Liberty == 3 {
 			f ^= 897325971018
+			ret = append(ret, 897325971018)
 		} else if worm.Liberty > 3 {
 			f ^= 291850148415
 		}
@@ -130,10 +134,13 @@ func (b *Board) LocalFeature(k int, c Color) int64 {
 		if worm.Liberty == 1 {
 			//escape capture
 			f ^= 932759347016
+			ret = append(ret, 932759347016)
 		} else if worm.Liberty == 2 {
 			f ^= 758724359874
+			ret = append(ret, 758724359874)
 		} else if worm.Liberty == 3 {
 			f ^= 238146923179
+			ret = append(ret, 238146923179)
 		} else if worm.Liberty > 3 {
 			f ^= 945876927621
 		}
@@ -148,8 +155,10 @@ func (b *Board) LocalFeature(k int, c Color) int64 {
 	}
 	if minLiberty == 1 {
 		f ^= 787401927621
+		ret = append(ret, 787401927621)
 	} else if minLiberty == 2 {
 		f ^= 304580158101
+		ret = append(ret, 304580158101)
 	}
 
 	f ^= b.EdgeDisHash(k)
@@ -167,6 +176,14 @@ func (b *Board) LocalFeature(k int, c Color) int64 {
 	f ^= 257012801851 + nMy*710517801
 	f ^= 314501851003 + nOp*837104719
 
+	if nMy > 0 {
+		ret = append(ret, 257012801851+nMy*710517801)
+	}
+
+	if nOp > 0 {
+		ret = append(ret, 314501851003+nOp*837104719)
+	}
+
 	nMy = 0
 	nOp = 0
 	for _, p := range PointDisMap[k][2] {
@@ -178,7 +195,17 @@ func (b *Board) LocalFeature(k int, c Color) int64 {
 	}
 	f ^= 839457015011 + nMy*834561911
 	f ^= 954876687874 + nOp*231971295
-	return f
+
+	if nMy > 0 {
+		ret = append(ret, 839457015011+nMy*834561911)
+	}
+
+	if nOp > 0 {
+		ret = append(ret, 954876687874+nOp*231971295)
+	}
+
+	ret = append(ret, f)
+	return ret
 }
 
 func (b *Board) NeighWorms(k int, c, wc Color, stopLiberty int) []*Worm {

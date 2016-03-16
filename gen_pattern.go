@@ -33,7 +33,7 @@ func (b *Board) PatternFeature(k int, c Color, last, cur []int64) []int64 {
 	for _, v := range cur {
 		ret = append(ret, v*1000+int64(k))
 	}
-	ret = append(ret, b.LocalFeature(k, c))
+	ret = append(ret, b.LocalFeature(k, c)...)
 	return ret
 }
 
