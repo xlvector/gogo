@@ -2,6 +2,7 @@ package gogo
 
 import (
 	"io/ioutil"
+	"log"
 	"strconv"
 	"sync"
 )
@@ -28,7 +29,7 @@ func GenDLDataset(sgfFile string, out chan string, wg *sync.WaitGroup) {
 		}
 	}
 	wg.Done()
-
+	log.Println(sgfFile)
 }
 
 func (b *Board) DLFeature(stone Color) []byte {

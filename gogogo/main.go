@@ -33,7 +33,6 @@ func GenDLDataset(root, output string) {
 
 	wg1 := &sync.WaitGroup{}
 	for _, path := range paths {
-		log.Println(path)
 		wg1.Add(1)
 		go gogo.GenDLDataset(path, out, wg1)
 	}
