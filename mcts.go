@@ -225,9 +225,9 @@ func NewBoardFromPath(path []*GameTreeNode) *Board {
 func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board, nLeaf, nSimulation int) {
 	board := NewBoardFromPath(node.Path2Root())
 	board.Model = oBoard.Model
-	oc := OpColor(node.stone)
-	if node.stone == INVALID_COLOR {
-		oc = BLACK
+	oc := wc
+	if node.stone == BLACK || node.stone == WHITE {
+		oc = OpColor(node.stone)
 	}
 	rank := board.CandidateMoves(oc, nil)
 	topn := TopN(rank, nLeaf)
@@ -236,7 +236,7 @@ func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board, nLeaf, nSimulation 
 		sum += child.Second
 	}
 	var wg sync.WaitGroup
-	log.Println("expand: ", PointString(node.x, node.y, node.stone))
+	log.Println("expand: ", PointString(node.x, node.y, node.stone), oc)
 	for _, child := range topn {
 		x, y := IndexPos(child.First)
 		cnode := NewGameTreeNode(oc, x, y)
