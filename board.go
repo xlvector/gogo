@@ -43,6 +43,9 @@ func init() {
 }
 
 func PointString(x, y int, c Color) string {
+	if PosOutBoard(x, y) {
+		return "invalid"
+	}
 	ret := ColorMark(c)
 	ret += "["
 	ret += string(LX[x])

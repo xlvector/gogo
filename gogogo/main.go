@@ -161,17 +161,28 @@ func main() {
 			board.Model.LoadModel(*model)
 		}
 		log.Println(board.String(nil))
-		gt := gogo.NewGameTree(gogo.SIZE)
+		gt1 := gogo.NewGameTree(gogo.SIZE)
+		gt2 := gogo.NewGameTree(gogo.SIZE)
 		for {
-			if ok := board.MCTSMove(gogo.BLACK, gt, 500); !ok {
+			if ok := board.MCTSMove(gogo.BLACK, gt1, 10); !ok {
 				break
 			}
 			log.Println(board.String(nil))
+			{
+				last, _ := board.LastMove()
+				lastX, lastY := gogo.IndexPos(last)
+				gt2.Add(gogo.NewGameTreeNode(gogo.BLACK, lastX, lastY))
+			}
 
-			if ok := board.MCTSMove(gogo.WHITE, gt, 2000); !ok {
+			if ok := board.MCTSMove(gogo.WHITE, gt2, 20); !ok {
 				break
 			}
 			log.Println(board.String(nil))
+			{
+				last, _ := board.LastMove()
+				lastX, lastY := gogo.IndexPos(last)
+				gt1.Add(gogo.NewGameTreeNode(gogo.BLACK, lastX, lastY))
+			}
 		}
 		log.Println(board.Score())
 	} else if *mode == "dl-data" {

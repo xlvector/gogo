@@ -163,24 +163,25 @@ func (p *GameTreeNode) UCTValue() float64 {
 	if p.Father != nil && p.Father.visit > 0 {
 		np = float64(p.Father.visit)
 	}
-	ret += 2 * p.prior * math.Sqrt(np) / float64(1+p.visit)
+	ret += math.Sqrt(math.Log(np) / float64(1+p.visit))
 	return ret
 }
 
 func (b *Board) MCTSMove(c Color, gt *GameTree, n int) bool {
 	root := gt.Current
-	for i := 0; i < 1; i++ {
+	log.Println(PointString(root.x, root.y, root.stone), "next stone color: ", ColorMark(c))
+	for i := 0; i < n; i++ {
 		node := MCTSSelection(gt)
-		MCTSExpand(node, c, b, n)
+		MCTSExpand(node, c, b, 10, 200)
 		log.Println(i, root.visit)
 	}
 	var best *GameTreeNode
-	robust := 0.0
+	robust := 0
 	for _, child := range root.Children {
-		winrate := float64(child.win) / float64(10+child.visit)
-		log.Println(string(LX[child.x]), child.y+1, ColorMark(child.stone), winrate, child.win, child.visit, child.prior)
-		if robust < winrate {
-			robust = winrate
+		winrate := float64(child.win) / float64(child.visit)
+		log.Println(PointString(child.x, child.y, child.stone), winrate, child.win, child.visit, child.prior)
+		if robust < child.visit {
+			robust = child.visit
 			best = child
 		}
 	}
@@ -221,12 +222,12 @@ func NewBoardFromPath(path []*GameTreeNode) *Board {
 	return ret
 }
 
-func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board, total int) {
+func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board, nLeaf, nSimulation int) {
 	board := NewBoardFromPath(node.Path2Root())
 	board.Model = oBoard.Model
 	oc := wc
 	rank := board.CandidateMoves(oc, nil)
-	topn := TopN(rank, 10)
+	topn := TopN(rank, nLeaf)
 	sum := 0.0
 	for _, child := range topn {
 		sum += child.Second
@@ -236,8 +237,8 @@ func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board, total int) {
 		x, y := IndexPos(child.First)
 		cnode := NewGameTreeNode(oc, x, y)
 		cnode.prior = child.Second
-		node.AddChild(cnode)
-		tt := int(float64(total)*(child.Second/sum) + 0.5)
+		_, cnode = node.AddChild(cnode)
+		tt := int(float64(nSimulation)*(child.Second/sum) + 0.5)
 		for s := 0; s < tt; s++ {
 			wg.Add(1)
 			go MCTSSimulation(board.Copy(), cnode, wc, &wg)

@@ -7,7 +7,10 @@ import (
 )
 
 func GenDLDataset(sgfFile string) []string {
-	buf, _ := ioutil.ReadFile(sgfFile)
+	buf, err := ioutil.ReadFile(sgfFile)
+	if err != nil {
+		log.Println(err)
+	}
 	gt := NewGameTree(SIZE)
 	gt.ParseSGF(string(buf))
 

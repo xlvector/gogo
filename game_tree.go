@@ -3,6 +3,7 @@ package gogo
 import (
 	"container/list"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -117,13 +118,21 @@ func (p *GameTreeNode) AddAttr(k, v string) *GameTreeNode {
 	return p
 }
 
-func (p *GameTreeNode) AddChild(v *GameTreeNode) *GameTreeNode {
+func (p *GameTreeNode) AddChild(v *GameTreeNode) (*GameTreeNode, *GameTreeNode) {
 	if p.Children == nil {
 		p.Children = []*GameTreeNode{}
 	}
+
+	for _, u := range p.Children {
+		if u.x == v.x && u.y == v.y && u.stone == v.stone {
+			log.Println("exist child:", u.visit, u.win)
+			return p, u
+		}
+	}
+
 	v.Father = p
 	p.Children = append(p.Children, v)
-	return p
+	return p, v
 }
 
 func (p *GameTreeNode) Path2Root() []*GameTreeNode {
@@ -219,7 +228,7 @@ func (t *GameTree) Add(v *GameTreeNode) {
 		t.Current = t.Root
 		return
 	}
-	t.Current.AddChild(v)
+	_, v = t.Current.AddChild(v)
 	t.Current = v
 }
 
