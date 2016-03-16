@@ -23,6 +23,9 @@ func GenDLDataset(sgfFile string) []string {
 			line += strconv.Itoa(int(v))
 		}
 		ret = append(ret, line)
+		if ok := board.Put(PosIndex(cur.x, cur.y), cur.stone); !ok {
+			break
+		}
 	}
 	return ret
 }
