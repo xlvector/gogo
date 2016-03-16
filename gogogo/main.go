@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"runtime/pprof"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/xlvector/gogo"
@@ -19,14 +20,26 @@ func GenDLDataset(root, output string) {
 	f, _ := os.Create(output)
 	defer f.Close()
 	writer := bufio.NewWriter(f)
-
-	for _, path := range paths {
-		lines := gogo.GenDLDataset(path)
-		for _, line := range lines {
-			writer.WriteString(line)
-			writer.WriteString("\n")
-		}
+	lock := &sync.Mutex{}
+	var wg sync.WaitGroup
+	for i := 0; i < 32; i++ {
+		wg.Add(1)
+		go func(k int, wg *sync.WaitGroup, paths []string) {
+			for j, path := range paths {
+				if j%32 == k {
+					lines := gogo.GenDLDataset(path)
+					lock.Lock()
+					for _, line := range lines {
+						writer.WriteString(line)
+						writer.WriteString("\n")
+					}
+					lock.Unlock()
+				}
+			}
+			wg.Done()
+		}(i, &wg, paths)
 	}
+	wg.Wait()
 }
 
 func GenPatterns(path string, ch chan string) {
