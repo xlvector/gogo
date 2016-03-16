@@ -233,11 +233,13 @@ func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board, nLeaf, nSimulation 
 		sum += child.Second
 	}
 	var wg sync.WaitGroup
+	log.Println("expand: ", PointString(node.x, node.y, node.stone))
 	for _, child := range topn {
 		x, y := IndexPos(child.First)
 		cnode := NewGameTreeNode(oc, x, y)
 		cnode.prior = child.Second
 		_, cnode = node.AddChild(cnode)
+		log.Println("add child: ", PointString(cnode.x, cnode.y, cnode.stone))
 		tt := int(float64(nSimulation)*(child.Second/sum) + 0.5)
 		for s := 0; s < tt; s++ {
 			wg.Add(1)
