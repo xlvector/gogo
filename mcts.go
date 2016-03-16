@@ -224,7 +224,7 @@ func NewBoardFromPath(path []*GameTreeNode) *Board {
 func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board, total int) {
 	board := NewBoardFromPath(node.Path2Root())
 	board.Model = oBoard.Model
-	oc := OpColor(node.stone)
+	oc := wc
 	rank := board.CandidateMoves(oc, nil)
 	topn := TopN(rank, 10)
 	sum := 0.0
