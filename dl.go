@@ -10,6 +10,7 @@ import (
 func GenDLDataset(sgfFile string, out chan string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	buf, _ := ioutil.ReadFile(sgfFile)
+	log.Println(string(buf))
 	gt := NewGameTree(SIZE)
 	gt.ParseSGF(string(buf))
 
