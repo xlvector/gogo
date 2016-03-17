@@ -172,7 +172,7 @@ func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) bool {
 	log.Println(PointString(root.x, root.y, root.stone), "next stone color: ", ColorMark(c))
 	for i := 0; i < n; i++ {
 		node := MCTSSelection(gt)
-		MCTSExpand(node, c, b, expand, 200)
+		MCTSExpand(node, b, expand, 200)
 		log.Println(i, root.visit)
 	}
 	var best *GameTreeNode
@@ -222,10 +222,10 @@ func NewBoardFromPath(path []*GameTreeNode) *Board {
 	return ret
 }
 
-func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board, nLeaf, nSimulation int) {
+func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf, nSimulation int) {
 	board := NewBoardFromPath(node.Path2Root())
 	board.Model = oBoard.Model
-	oc := wc
+	oc := BLACK
 	if node.stone == BLACK || node.stone == WHITE {
 		oc = OpColor(node.stone)
 	}
@@ -242,27 +242,28 @@ func MCTSExpand(node *GameTreeNode, wc Color, oBoard *Board, nLeaf, nSimulation 
 		//log.Println("add child: ", PointString(cnode.x, cnode.y, cnode.stone))
 		for s := 0; s < nSingle; s++ {
 			wg.Add(1)
-			go MCTSSimulation(board.Copy(), cnode, wc, &wg)
+			go MCTSSimulation(board.Copy(), cnode, &wg)
 		}
 	}
 	wg.Wait()
 }
 
-func MCTSSimulation(b *Board, next *GameTreeNode, wc Color, wg *sync.WaitGroup) {
+func MCTSSimulation(b *Board, next *GameTreeNode, wg *sync.WaitGroup) {
 	defer func() {
 		wg.Done()
 	}()
 	b.Put(PosIndex(next.x, next.y), next.stone)
 	b.SelfBattle(OpColor(next.stone))
 	s := b.Score()
-	if (s > 0 && wc == BLACK) || (s <= 0 && wc == WHITE) {
-		MCTSBackProp(next, 1)
+
+	if s > 0 {
+		MCTSBackProp(next, BLACK)
 	} else {
-		MCTSBackProp(next, 0)
+		MCTSBackProp(next, WHITE)
 	}
 }
 
-func MCTSBackProp(node *GameTreeNode, win int) {
+func MCTSBackProp(node *GameTreeNode, wc Color) {
 	MCTSLock.Lock()
 	defer MCTSLock.Unlock()
 	v := node
@@ -271,7 +272,9 @@ func MCTSBackProp(node *GameTreeNode, win int) {
 			return
 		}
 		v.visit += 1
-		v.win += win
+		if v.stone == wc {
+			v.win += 1
+		}
 		v = v.Father
 	}
 }
