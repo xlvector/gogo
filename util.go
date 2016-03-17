@@ -25,7 +25,7 @@ func TreeDir(root, ext string) []string {
 			if info.IsDir() && path != root {
 				q.PushBack(path)
 			} else {
-				if info.Name() == '.' {
+				if strings.HasPrefix(info.Name(), ".") {
 					return nil
 				}
 				if strings.HasSuffix(path, ext) {
