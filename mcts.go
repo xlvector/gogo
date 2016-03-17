@@ -169,7 +169,7 @@ func (p *GameTreeNode) UCTValue() float64 {
 
 func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) bool {
 	root := gt.Current
-	log.Println(PointString(root.x, root.y, root.stone), "next stone color: ", ColorMark(c))
+	log.Println(PointString(root.x, root.y, root.stone), root.win, root.visit, "next stone color: ", ColorMark(c))
 	for i := 0; i < n; i++ {
 		node := MCTSSelection(gt)
 		MCTSExpand(node, b, expand, expand*3)
