@@ -128,6 +128,7 @@ func main() {
 		total := 0
 		paths := gogo.TreeDir(*input, "sgf")
 		for _, path := range paths {
+			log.Println(path)
 			board := gogo.NewBoard()
 			board.Model = m
 			h, t := board.EvaluateModel(path, false)
