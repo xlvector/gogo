@@ -120,21 +120,11 @@ func (b *Board) CandidateMoves(c Color, rank map[int]float64) map[int]float64 {
 
 func (b *Board) GenMove(c Color, rank map[int]float64) (int, map[int]float64) {
 	rank = b.CandidateMoves(c, rank)
-	cands := TopN(rank, 20)
-	psum := 0.0
-	for _, v := range cands {
-		psum += v.Second
+	cands := TopN(rank, 30)
+	if len(cands) == 0 {
+		return -1, rank
 	}
-
-	pr := rand.Float64() * psum
-	pf := -1
-	for _, v := range cands {
-		pr -= v.Second
-		if pr <= 0.0 {
-			pf = v.First
-			break
-		}
-	}
+	pf := cands[rand.Intn(len(cands))].First
 	b.Put(pf, c)
 	delete(rank, pf)
 	return pf, rank
