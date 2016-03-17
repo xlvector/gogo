@@ -75,6 +75,9 @@ func (b *Board) GenPattern(sgf string, rotate int) []PatternSample {
 	buf, _ := ioutil.ReadFile(sgf)
 	gt := NewGameTree(SIZE)
 	gt.ParseSGF(string(buf))
+	if gt.HasHandicap() {
+		return []PatternSample{}
+	}
 	path := gt.Path2Root()
 	ret := []PatternSample{}
 	lastPat := []int64{}
@@ -110,6 +113,9 @@ func (b *Board) EvaluateModel(sgf string, withLog bool) (int, int) {
 	buf, _ := ioutil.ReadFile(sgf)
 	gt := NewGameTree(SIZE)
 	gt.ParseSGF(string(buf))
+	if gt.HasHandicap() {
+		return 0, 0
+	}
 	path := gt.Path2Root()
 	lastPat := []int64{}
 	hit := 0
