@@ -29,6 +29,9 @@ func (p *GameTreeNode) GetAttr(key string) (string, bool) {
 }
 
 func (p *GameTreeNode) HasAttr(key string) bool {
+	if p.attr == nil {
+		return false
+	}
 	_, ok := p.attr[key]
 	return ok
 }
@@ -203,6 +206,9 @@ func NewGameTree(size int) *GameTree {
 }
 
 func (t *GameTree) HasHandicap() bool {
+	if t.Root == nil {
+		return false
+	}
 	if t.Root.HasAttr("AB") || t.Root.HasAttr("AW") {
 		return true
 	}
