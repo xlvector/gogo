@@ -363,6 +363,47 @@ func (w *Worm) Size() int {
 	return w.Points.Size()
 }
 
+func (b *Board) EmptyWormFromPoint(k int, maxDepth int) (int, int, int) {
+	if b.Points[k] != GRAY {
+		return 0, 0, 0
+	}
+	queue := make([]int, 0, 10)
+	start := 0
+	queue = append(queue, k*100)
+	gray := NewPointMap(10)
+	black := NewPointMap(10)
+	white := NewPointMap(10)
+	for {
+		if start >= len(queue) {
+			break
+		}
+		v := queue[start]
+		start += 1
+		pos, depth := v/100, v%100
+		if depth > maxDepth {
+			continue
+		}
+		if gray.Exist(pos) {
+			continue
+		}
+		gray.Add(pos)
+		n4 := Neigh4(pos)
+		for _, nv := range n4 {
+			if gray.Exist(nv) {
+				continue
+			}
+			if b.Points[nv] == BLACK && depth < maxDepth {
+				black.Add(nv)
+			} else if b.Points[nv] == WHITE && depth < maxDepth {
+				white.Add(nv)
+			} else if b.Points[nv] == GRAY {
+				queue = append(queue, nv*100+depth+1)
+			}
+		}
+	}
+	return gray.Size(), black.Size(), white.Size()
+}
+
 func (b *Board) WormFromPoint(k int, c Color, stopLiberty int) *Worm {
 	// if pass invalid color, means use color in point k of board, otherwise, use specified color c
 	if c == INVALID_COLOR {
@@ -579,6 +620,6 @@ func (b *Board) Territory() map[int]int {
 }
 
 func (b *Board) RefreshInfluenceAndTerritory() {
-	b.InfluenceVal = b.Influence()
+	//b.InfluenceVal = b.Influence()
 	//b.TerritoryVal = b.Territory()
 }
