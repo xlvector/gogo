@@ -122,17 +122,18 @@ func main() {
 		hit, total := board.EvaluateModel(*input, true)
 		log.Println(hit, total, float64(hit)/float64(total))
 	} else if *mode == "eval-folder" {
-		board := gogo.NewBoard()
-		board.Model = &lr.LogisticRegression{}
-		board.Model.LoadModel(*model)
+		m := &lr.LogisticRegression{}
+		m.LoadModel(*model)
 		hit := 0
 		total := 0
 		paths := gogo.TreeDir(*input, "sgf")
 		for _, path := range paths {
+			board := gogo.NewBoard()
+			board.Model = m
 			h, t := board.EvaluateModel(path, false)
 			hit += h
 			total += t
-			log.Println(hit, total, float64(hit)/float64(total))
+			log.Println(h, t, hit, total, float64(hit)/float64(total))
 		}
 	} else if *mode == "simple" {
 		board := gogo.NewBoard()
