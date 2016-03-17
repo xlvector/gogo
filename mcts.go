@@ -173,7 +173,7 @@ func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) bool {
 	for i := 0; i < n; i++ {
 		node := MCTSSelection(gt)
 		MCTSExpand(node, b, expand, expand*3)
-		log.Println(i, root.visit)
+		//log.Println(i, root.visit)
 	}
 	var best *GameTreeNode
 	robust := 0
@@ -232,19 +232,20 @@ func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf, nSimulation int) {
 	rank := board.CandidateMoves(oc, nil)
 	topn := TopN(rank, nLeaf)
 	var wg sync.WaitGroup
-	//log.Println("expand: ", PointString(node.x, node.y, node.stone), oc)
+	log.Println("expand: ", PointString(node.x, node.y, node.stone), oc)
 	nSingle := nSimulation / nLeaf
 	for _, child := range topn {
 		x, y := IndexPos(child.First)
 		cnode := NewGameTreeNode(oc, x, y)
 		cnode.prior = child.Second
 		_, cnode = node.AddChild(cnode)
-		//log.Println("add child: ", PointString(cnode.x, cnode.y, cnode.stone))
+		log.Print(PointString(cnode.x, cnode.y, cnode.stone), ",")
 		for s := 0; s < nSingle; s++ {
 			wg.Add(1)
 			go MCTSSimulation(board.Copy(), cnode, &wg)
 		}
 	}
+	log.Println()
 	wg.Wait()
 }
 
