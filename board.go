@@ -167,13 +167,15 @@ func IndexOutBoard(k int) bool {
 }
 
 type Board struct {
-	Points      []Color
-	KoIndex     int
-	Model       *lr.LogisticRegression
-	PointHash   []int64
-	PatternHash [][]int64
-	Actions     []int
-	LastPattern []int64
+	Points       []Color
+	KoIndex      int
+	Model        *lr.LogisticRegression
+	PointHash    []int64
+	PatternHash  [][]int64
+	Actions      []int
+	LastPattern  []int64
+	InfluenceVal map[int]int
+	TerritoryVal map[int]int
 }
 
 func NewBoard() *Board {
@@ -320,6 +322,8 @@ func (b *Board) Put(k int, c Color) bool {
 	b.Points[k] = c
 	b.Actions = append(b.Actions, FormatIndexAction(k, c))
 	b.UpdateHash(k, GRAY, c)
+	b.InfluenceVal = make(map[int]int)
+	b.TerritoryVal = make(map[int]int)
 	return true
 }
 
@@ -467,4 +471,114 @@ func (b *Board) String(mark map[int]string) string {
 	}
 	ret += "\n"
 	return ret
+}
+
+func (b *Board) Dilation(seeds map[int]int) map[int]int {
+	expand := make(map[int]int)
+	for k, _ := range seeds {
+		n4 := Neigh4(k)
+		for _, pn := range n4 {
+			if b.Points[pn] == GRAY {
+				expand[pn] = 0
+			}
+		}
+	}
+	for i, v := range seeds {
+		expand[i] = v
+	}
+
+	for i, v := range expand {
+		if v == 64 || v == -64 {
+			continue
+		}
+		n4 := Neigh4(i)
+		add := 0
+		minus := 0
+		for _, pn := range n4 {
+			vn, _ := expand[pn]
+			if vn > 0 {
+				add += 1
+			} else if vn < 0 {
+				minus += 1
+			}
+		}
+		if v >= 0 && add > 0 && minus == 0 {
+			seeds[i] = v + add
+		}
+		if v <= 0 && minus > 0 && add == 0 {
+			seeds[i] = v - minus
+		}
+	}
+	return seeds
+}
+
+func (b *Board) Erase(seeds map[int]int) map[int]int {
+	ret := make(map[int]int)
+	for i, v := range seeds {
+		n4 := Neigh4(i)
+		add := 0
+		for _, pn := range n4 {
+			vn, _ := seeds[pn]
+			if vn*v <= 0 {
+				add += 1
+			}
+		}
+		if v > 0 {
+			v = v - add
+			if v < 0 {
+				v = 0
+			}
+		} else if v < 0 {
+			v = v + add
+			if v > 0 {
+				v = 0
+			}
+		}
+		if v != 0 {
+			ret[i] = v
+		}
+	}
+	return ret
+}
+
+func (b *Board) Influence() map[int]int {
+	seeds := make(map[int]int)
+	for k, c := range b.Points {
+		if c == BLACK {
+			seeds[k] = 64
+		} else if c == WHITE {
+			seeds[k] = -64
+		}
+	}
+
+	for i := 0; i < 5; i++ {
+		seeds = b.Dilation(seeds)
+	}
+
+	return seeds
+}
+
+func (b *Board) Territory() map[int]int {
+	seeds := make(map[int]int)
+	for k, c := range b.Points {
+		if c == BLACK {
+			seeds[k] = 64
+		} else if c == WHITE {
+			seeds[k] = -64
+		}
+	}
+
+	for i := 0; i < 5; i++ {
+		seeds = b.Dilation(seeds)
+	}
+
+	for i := 0; i < 21; i++ {
+		seeds = b.Erase(seeds)
+	}
+	return seeds
+}
+
+func (b *Board) RefreshInfluenceAndTerritory() {
+	b.InfluenceVal = b.Influence()
+	b.TerritoryVal = b.Territory()
 }

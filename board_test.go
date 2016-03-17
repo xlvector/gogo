@@ -1,6 +1,7 @@
 package gogo
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -334,4 +335,43 @@ func TestSelfBattle(t *testing.T) {
 	b := NewBoard()
 	b.SelfBattle(BLACK)
 	t.Log(b.String(nil))
+}
+
+func TestInfluence(t *testing.T) {
+	b := NewBoard()
+	b.PutLabel("BJ10")
+	b.PutLabel("WL10")
+	t.Log(b.String(nil))
+
+	influence := b.Influence()
+	mark := make(map[int]string)
+	for k, v := range influence {
+		mark[k] = fmt.Sprintf("%2.f", float64(v))
+	}
+	for k, c := range b.Points {
+		if _, ok := influence[k]; !ok {
+			mark[k] = " " + ColorMark(c)
+		}
+	}
+	t.Log(b.String(mark))
+}
+
+func TestTerritory(t *testing.T) {
+	b := NewBoard()
+	b.PutLabel("BJ10")
+	b.PutLabel("BL10")
+	b.PutLabel("BK9")
+	t.Log(b.String(nil))
+
+	territory := b.Territory()
+	mark := make(map[int]string)
+	for k, v := range territory {
+		mark[k] = fmt.Sprintf("%2.f", float64(v))
+	}
+	for k, c := range b.Points {
+		if _, ok := territory[k]; !ok {
+			mark[k] = " " + ColorMark(c)
+		}
+	}
+	t.Log(b.String(mark))
 }

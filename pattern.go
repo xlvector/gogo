@@ -204,6 +204,14 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 		ret = append(ret, 954876687874+nOp*231971295)
 	}
 
+	if val, ok := b.InfluenceVal[k]; ok {
+		ret = append(ret, 760918543717+int64(val)*7139)
+	}
+
+	if val, ok := b.TerritoryVal[k]; ok {
+		ret = append(ret, 845234579915+int64(val)*1053)
+	}
+
 	ret = append(ret, f)
 	return ret
 }

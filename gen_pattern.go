@@ -101,6 +101,7 @@ func (b *Board) GenPattern(sgf string, rotate int) []PatternSample {
 		if !ok {
 			break
 		}
+		b.RefreshInfluenceAndTerritory()
 	}
 	return ret
 }
