@@ -155,6 +155,7 @@ func (b *Board) EvaluateModel(sgf string, withLog bool) (int, int) {
 		if !ok {
 			break
 		}
+		b.RefreshInfluenceAndTerritory()
 	}
 	return hit, total
 }
