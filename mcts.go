@@ -232,20 +232,20 @@ func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf, nSimulation int) {
 	rank := board.CandidateMoves(oc, nil)
 	topn := TopN(rank, nLeaf)
 	var wg sync.WaitGroup
-	log.Println("expand: ", PointString(node.x, node.y, node.stone), oc)
+	line := PointString(node.x, node.y, node.stone) + ":"
 	nSingle := nSimulation / nLeaf
 	for _, child := range topn {
 		x, y := IndexPos(child.First)
 		cnode := NewGameTreeNode(oc, x, y)
 		cnode.prior = child.Second
 		_, cnode = node.AddChild(cnode)
-		log.Print(PointString(cnode.x, cnode.y, cnode.stone), ",")
+		line += PointString(cnode.x, cnode.y, cnode.stone) + ","
 		for s := 0; s < nSingle; s++ {
 			wg.Add(1)
 			go MCTSSimulation(board.Copy(), cnode, &wg)
 		}
 	}
-	log.Println()
+	log.Println(line)
 	wg.Wait()
 }
 
