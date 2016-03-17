@@ -180,8 +180,8 @@ func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) bool {
 	for _, child := range root.Children {
 		winrate := float64(child.win) / float64(child.visit)
 		log.Println(PointString(child.x, child.y, child.stone), winrate, child.win, child.visit, child.prior)
-		if robust < child.visit {
-			robust = child.visit
+		if robust < child.win {
+			robust = child.win
 			best = child
 		}
 	}
