@@ -9,6 +9,7 @@ import (
 	"runtime/pprof"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/xlvector/gogo"
 	"github.com/xlvector/hector/lr"
@@ -50,7 +51,7 @@ func GenPatterns(path string, ch chan string) {
 	}
 }
 
-func GenPatternsThread(paths []string, total, split int, ch chan string, wg *sync.WaitGroup) {
+func GenPatternsThread(paths []string, total, split int, ch chan string) {
 	log.Println("begin split:", split)
 	for i, path := range paths {
 		if i%total != split {
@@ -58,7 +59,6 @@ func GenPatternsThread(paths []string, total, split int, ch chan string, wg *syn
 		}
 		GenPatterns(path, ch)
 	}
-	wg.Done()
 }
 
 func EvalModel(sgf string, model *lr.LogisticRegression) {
@@ -88,13 +88,25 @@ func main() {
 	if *mode == "gen-pattern" {
 		paths := gogo.TreeDir(*input, "sgf")
 		patCh := make(chan string, 1000)
-		wg := &sync.WaitGroup{}
 		for i := 0; i < 32; i++ {
-			wg.Add(1)
-			go GenPatternsThread(paths, 32, i, patCh, wg)
+			go GenPatternsThread(paths, 32, i, patCh)
 		}
 
-		wg.Wait()
+		go func() {
+			tc := time.NewTicker(time.Second)
+			n := 0
+			for _ = range tc.C {
+				if len(patCh) == 0 {
+					n += 1
+					log.Println("==>", n)
+				} else {
+					n = 0
+				}
+				if n > 60 {
+					close(patCh)
+				}
+			}
+		}()
 
 		f, _ := os.Create(*output)
 		defer f.Close()
