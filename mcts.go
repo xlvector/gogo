@@ -162,7 +162,7 @@ func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) bool {
 	log.Println(PointString(root.x, root.y, root.stone), root.win, root.visit, "next stone color: ", ColorMark(c))
 	for i := 0; i < n; i++ {
 		node := MCTSSelection(gt)
-		MCTSExpand(node, b, expand, expand*10)
+		MCTSExpand(node, b, expand, expand*5)
 	}
 	var best *GameTreeNode
 	robust := 0
