@@ -186,9 +186,11 @@ func MCTSSelection(gt *GameTree) *GameTreeNode {
 	depth := 0
 	for {
 		if ret.Children == nil || len(ret.Children) == 0 {
+			log.Println(depth, PointString(ret.x, ret.y, ret.stone))
 			return ret
 		}
 		if len(ret.CandMoves) > 0 {
+			log.Println(depth, PointString(ret.x, ret.y, ret.stone))
 			return ret
 		}
 		depth += 1
@@ -203,7 +205,7 @@ func MCTSSelection(gt *GameTree) *GameTreeNode {
 		}
 		ret = best
 	}
-	log.Println(depth, PointString(ret.x, ret.y, ret.stone))
+
 	return ret
 }
 
