@@ -62,7 +62,7 @@ func (b *Board) MakeWorms() []*Worm {
 
 func (b *Board) Score() float64 {
 	worms := b.MakeWorms()
-	ret := 0.0
+	ret := -7.5
 	for _, w := range worms {
 		if w.Color == BLACK {
 			ret += float64(w.Size())
