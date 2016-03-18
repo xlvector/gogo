@@ -332,9 +332,17 @@ func TestHash(t *testing.T) {
 }
 
 func TestSelfBattle(t *testing.T) {
-	b := NewBoard()
-	b.SelfBattle(BLACK)
-	t.Log(b.String(nil))
+	win := 0
+	for i := 0; i < 100; i++ {
+		b := NewBoard()
+		b.SelfBattle(BLACK)
+		s := b.Score()
+		if s > 0 {
+			win += 1
+		}
+		t.Log(win, s)
+		t.Log(b.String(nil))
+	}
 }
 
 func TestInfluence(t *testing.T) {
