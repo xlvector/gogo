@@ -158,12 +158,14 @@ func (p *GameTreeNode) UCTValue() float64 {
 }
 
 func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) bool {
+	wg := &sync.WaitGroup{}
 	root := gt.Current
 	log.Println(PointString(root.x, root.y, root.stone), root.win, root.visit, "next stone color: ", ColorMark(c))
 	for i := 0; i < n; i++ {
 		node := MCTSSelection(gt)
-		MCTSExpand(node, b, expand, expand*5)
+		MCTSExpand(node, b, expand, wg)
 	}
+	wg.Wait()
 	var best *GameTreeNode
 	robust := 0
 	for _, child := range root.Children {
@@ -181,10 +183,15 @@ func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) bool {
 func MCTSSelection(gt *GameTree) *GameTreeNode {
 	root := gt.Current
 	ret := root
+	depth := 0
 	for {
 		if ret.Children == nil || len(ret.Children) == 0 {
 			return ret
 		}
+		if len(ret.CandMoves) > 0 {
+			return ret
+		}
+		depth += 1
 		maxUCT := 0.0
 		var best *GameTreeNode
 		for _, child := range ret.Children {
@@ -196,6 +203,7 @@ func MCTSSelection(gt *GameTree) *GameTreeNode {
 		}
 		ret = best
 	}
+	log.Println(PointString(ret.x, ret.y, ret.stone))
 	return ret
 }
 
@@ -211,31 +219,33 @@ func NewBoardFromPath(path []*GameTreeNode) *Board {
 	return ret
 }
 
-func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf, nSimulation int) {
+func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf int, wg *sync.WaitGroup) {
 	board := NewBoardFromPath(node.Path2Root())
 	board.Model = oBoard.Model
 	oc := BLACK
 	if node.stone == BLACK || node.stone == WHITE {
 		oc = OpColor(node.stone)
 	}
-	rank := board.CandidateMoves(oc, nil)
-	topn := TopN(rank, nLeaf)
-	var wg sync.WaitGroup
-	line := PointString(node.x, node.y, node.stone) + ":"
-	nSingle := nSimulation / nLeaf
-	for _, child := range topn {
-		x, y := IndexPos(child.First)
-		cnode := NewGameTreeNode(oc, x, y)
-		cnode.prior = child.Second
-		_, cnode = node.AddChild(cnode)
-		line += PointString(cnode.x, cnode.y, cnode.stone) + ","
-		for s := 0; s < nSingle; s++ {
-			wg.Add(1)
-			go MCTSSimulation(board.Copy(), cnode, &wg)
+
+	if len(node.CandMoves) == 0 {
+		rank := board.CandidateMoves(oc, nil)
+		topn := TopN(rank, nLeaf)
+		//line := PointString(node.x, node.y, node.stone) + ":"
+		for _, child := range topn {
+			x, y := IndexPos(child.First)
+			cnode := NewGameTreeNode(oc, x, y)
+			//line += PointString(x, y, oc) + ","
+			cnode.prior = child.Second
+			node.CandMoves = append(node.CandMoves, cnode)
 		}
+		//log.Println(line)
 	}
-	log.Println(line)
-	wg.Wait()
+
+	cnode := node.CandMoves[0]
+	node.CandMoves = node.CandMoves[1:]
+	_, cnode = node.AddChild(cnode)
+	wg.Add(1)
+	go MCTSSimulation(board.Copy(), cnode, wg)
 }
 
 func MCTSSimulation(b *Board, next *GameTreeNode, wg *sync.WaitGroup) {
