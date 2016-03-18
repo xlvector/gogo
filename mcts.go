@@ -14,16 +14,18 @@ var MCTSLock = &sync.Mutex{}
 
 func (b *Board) SelfBattle(c Color) int {
 	rand.Seed(time.Now().UnixNano())
-	rank := make(map[int]float64)
+	//rank := make(map[int]float64)
 	p := -1
 	n := 0
 	for n < 350 {
 		pass := 0
-		p, rank = b.GenMove(c, rank)
+		//p, rank = b.GenMove(c, rank)
+		p = b.GenSelfBattleMove(c)
 		if p < 0 {
 			pass += 1
 		}
-		p, rank = b.GenMove(OpColor(c), rank)
+		//p, rank = b.GenMove(OpColor(c), rank)
+		p = b.GenSelfBattleMove(c)
 		if p < 0 {
 			pass += 1
 		}
@@ -116,6 +118,32 @@ func (b *Board) CandidateMoves(c Color, rank map[int]float64) map[int]float64 {
 		}
 	}
 	return rank
+}
+
+func (b *Board) GenSelfBattleMove(c Color) int {
+	last, _ := b.LastMove()
+
+	if last > 0 && rand.Float64() < 0.5 {
+		for d := 1; d < 3; d++ {
+			for _, p := range PointDisMap[last][d] {
+				if rand.Float64() < 0.8 {
+					if ok, _ := b.CanPut(p, c); ok {
+						b.Put(p, c)
+						return p
+					}
+				}
+			}
+		}
+	}
+
+	for i := 0; i < NPOINT*10; i++ {
+		p := rand.Intn(NPOINT)
+		if ok, _ := b.CanPut(p, c); ok {
+			b.Put(p, c)
+			return p
+		}
+	}
+	return -1
 }
 
 func (b *Board) GenMove(c Color, rank map[int]float64) (int, map[int]float64) {
