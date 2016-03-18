@@ -203,7 +203,7 @@ func MCTSSelection(gt *GameTree) *GameTreeNode {
 		}
 		ret = best
 	}
-	log.Println(PointString(ret.x, ret.y, ret.stone))
+	log.Println(depth, PointString(ret.x, ret.y, ret.stone))
 	return ret
 }
 
