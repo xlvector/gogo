@@ -161,6 +161,11 @@ func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) bool {
 	wg := &sync.WaitGroup{}
 	root := gt.Current
 	log.Println(PointString(root.x, root.y, root.stone), root.win, root.visit, "next stone color: ", ColorMark(c))
+	if len(root.Children) == 0 {
+		for _, child := range root.Children {
+			log.Println(PointString(child.x, child.y, child.stone), child.win, child.visit)
+		}
+	}
 	for i := 0; i < n; i++ {
 		node := MCTSSelection(gt)
 		MCTSExpand(node, b, expand, wg)
