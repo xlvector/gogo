@@ -370,7 +370,7 @@ func (b *Board) EmptyWormFromPoint(k int, maxDepth int) []int64 {
 	queue := make([]int, 0, 10)
 	start := 0
 	queue = append(queue, k*100)
-	ret := make([]int64, maxDepth)
+	ret := make([]int64, maxDepth+1)
 	gray := NewPointMap(10)
 	for {
 		if start >= len(queue) {
