@@ -384,6 +384,40 @@ func TestTerritory(t *testing.T) {
 	t.Log(b.String(mark))
 }
 
+func TestLocalFeature(t *testing.T) {
+	b := NewBoard()
+	/*
+			A B C D E F G H J K L M N O P Q R S T
+		19  . . . . . . . . . . . . . . . . . . .
+		18  . . . . . . . . . . . . . . . . . . .
+		17  . . . . . . . . . . . . . . . . . . .
+		16  . . . . . . . . . . . . . . . . . . .
+		15  . . . . . . . . . . . . . . . . . . .
+		14  . . . . . . . . . . . . . . . . . . .
+		13  . . . . . . . . . . . . . . . . . . .
+		12  . . . . . . . . . . . . . . . . . . .
+		11  . . . . . . . . . . . . . . . . . . .
+		10  . . . . . . . . . . . . . . . . . . .
+		 9  . . . . . . . . . . . . . . . . . . .
+		 8  . . . . . . . . . . . . . . . . . . .
+		 7  . . . . . . . . . . . . . . . . . . .
+		 6  . . . . . . . . . . . . . . . . . . .
+		 5  . . . X . . . . . . . . . . . . . . .
+		 4  . . X O X . . . . . . . . . . . . . .
+		 3  . . . . . . . . . . . . . . . . . . .
+		 2  . . . . . . . . . . . . . . . . . . .
+		 1  . . . . . . . . . . . . . . . . . . .
+		    A B C D E F G H J K L M N O P Q R S T
+	*/
+	b.PutLabel("BC4")
+	b.PutLabel("BE4")
+	b.PutLabel("BD5")
+	b.PutLabel("WD4")
+	k := PosIndex(3, 2)
+	f := b.LocalFeature(k, WHITE)
+	t.Log(f)
+}
+
 func TestEmptyWormFromPoint(t *testing.T) {
 	b := NewBoard()
 	/*
@@ -419,27 +453,5 @@ func TestEmptyWormFromPoint(t *testing.T) {
 	b.PutLabel("WC4")
 	b.PutLabel("WD5")
 
-	ng, nb, nw := b.EmptyWormFromPoint(PosIndex(2, 0), 1)
-	t.Log(ng, nb, nw)
-	if ng != 4 || nb != 0 || nw != 0 {
-		t.Error(ng, nb, nw)
-	}
-
-	ng, nb, nw = b.EmptyWormFromPoint(PosIndex(2, 0), 2)
-	t.Log(ng, nb, nw)
-	if ng != 7 || nb != 2 || nw != 0 {
-		t.Error(ng, nb, nw)
-	}
-
-	ng, nb, nw = b.EmptyWormFromPoint(PosIndex(2, 0), 3)
-	t.Log(ng, nb, nw)
-	if ng != 12 || nb != 2 || nw != 0 {
-		t.Error(ng, nb, nw)
-	}
-
-	ng, nb, nw = b.EmptyWormFromPoint(PosIndex(2, 0), 4)
-	t.Log(ng, nb, nw)
-	if ng != 16 || nb != 4 || nw != 0 {
-		t.Error(ng, nb, nw)
-	}
+	b.EmptyWormFromPoint(PosIndex(2, 0), 1)
 }

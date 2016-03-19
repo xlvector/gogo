@@ -116,18 +116,17 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 		}
 	}
 
-	pl := b.PointLiberty(k)
 	if minLiberty == 1 {
 		if worm.Liberty == 1 {
 			//escape capture
-			f ^= 493570158105 + int64(pl)
-			ret = append(ret, 493570158105+int64(pl))
+			f ^= 493570158105
+			ret = append(ret, 493570158105)
 		} else if worm.Liberty == 2 {
-			f ^= 159084081432 + int64(pl)
-			ret = append(ret, 159084081432+int64(pl))
+			f ^= 159084081432
+			ret = append(ret, 159084081432)
 		} else if worm.Liberty == 3 {
-			f ^= 897325971018 + int64(pl)
-			ret = append(ret, 897325971018+int64(pl))
+			f ^= 897325971018
+			ret = append(ret, 897325971018)
 		} else if worm.Liberty > 3 {
 			f ^= 291850148415
 			ret = append(ret, 291850148415)
@@ -151,17 +150,19 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 
 	//op
 	minLiberty = 10000
+	minLibertySize := 0
 	for _, w := range opNWorms {
 		if minLiberty > w.Liberty {
 			minLiberty = w.Liberty
+			minLibertySize = w.Size()
 		}
 	}
 	if minLiberty == 1 {
-		f ^= 787401927621
-		ret = append(ret, 787401927621)
+		f ^= 787401927621 + int64(minLibertySize)
+		ret = append(ret, 787401927621+int64(minLibertySize))
 	} else if minLiberty == 2 {
-		f ^= 304580158101
-		ret = append(ret, 304580158101)
+		f ^= 304580158101 + int64(minLibertySize)
+		ret = append(ret, 304580158101+int64(minLibertySize))
 	}
 
 	f ^= b.EdgeDisHash(k)
@@ -221,7 +222,7 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 	for _, h := range wormHash {
 		ret = append(ret, h^78860975057501)
 	}
-	ret = append(ret, b.Pattern3x3(k))
+	ret = append(ret, b.PatternDxd(k, c, 1))
 	ret = append(ret, f)
 	return ret
 }
@@ -246,26 +247,36 @@ func (b *Board) RotateNeigh(x, y, dx, dy, r int) (int, int) {
 	}
 }
 
-func (b *Board) Pattern3x3(p int) int64 {
+func (b *Board) PatternDxd(p int, c Color, d int) int64 {
 	x, y := IndexPos(p)
 	ret := int64(0)
 	for r := 0; r < 8; r++ {
 		f := int64(0)
-		for dy := -1; dy <= 1; dy++ {
-			for dx := -1; dx <= 1; dx++ {
+		for dy := -1 * d; dy <= d; dy++ {
+			for dx := -1 * d; dx <= d; dx++ {
+				f *= 20
 				x1, y1 := b.RotateNeigh(x, y, dx, dy, r)
-				c := INVALID_COLOR
+				c1 := INVALID_COLOR
 				if !PosOutBoard(x1, y1) {
-					c = b.Points[PosIndex(x1, y1)]
+					c1 = b.Points[PosIndex(x1, y1)]
 				}
-				f ^= b.ColorHash(c)
+				pl := b.PointLiberty(PosIndex(x1, y1))
+				if c1 == c {
+					f += int64(pl * 4)
+				} else if c1 == OpColor(c) {
+					f += int64(pl*4 + 1)
+				} else if c1 == GRAY {
+					f += int64(pl*4 + 2)
+				} else {
+					f += int64(pl*4 + 3)
+				}
 			}
 		}
 		if ret < f {
 			ret = f
 		}
 	}
-	ret ^= 9215701258101
+	ret += 90000000000000
 	return ret
 }
 
