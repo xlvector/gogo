@@ -116,17 +116,18 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 		}
 	}
 
+	pl := b.PointLiberty(k)
 	if minLiberty == 1 {
 		if worm.Liberty == 1 {
 			//escape capture
-			f ^= 493570158105
-			ret = append(ret, 493570158105)
+			f ^= 493570158105 + int64(pl)
+			ret = append(ret, 493570158105+int64(pl))
 		} else if worm.Liberty == 2 {
-			f ^= 159084081432
-			ret = append(ret, 159084081432)
+			f ^= 159084081432 + int64(pl)
+			ret = append(ret, 159084081432+int64(pl))
 		} else if worm.Liberty == 3 {
-			f ^= 897325971018
-			ret = append(ret, 897325971018)
+			f ^= 897325971018 + int64(pl)
+			ret = append(ret, 897325971018+int64(pl))
 		} else if worm.Liberty > 3 {
 			f ^= 291850148415
 			ret = append(ret, 291850148415)
