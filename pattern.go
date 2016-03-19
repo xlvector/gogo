@@ -122,31 +122,31 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 		if worm.Liberty == 1 {
 			//escape capture
 			f ^= 493570158105
-			ret = append(ret, 493570158105+int64(minLibertyWormSize*357))
+			ret = append(ret, 493570158105)
 		} else if worm.Liberty == 2 {
 			f ^= 159084081432
-			ret = append(ret, 159084081432+int64(minLibertyWormSize*357))
+			ret = append(ret, 159084081432)
 		} else if worm.Liberty == 3 {
 			f ^= 897325971018
-			ret = append(ret, 897325971018+int64(minLibertyWormSize*357))
+			ret = append(ret, 897325971018)
 		} else if worm.Liberty > 3 {
 			f ^= 291850148415
-			ret = append(ret, 291850148415+int64(minLibertyWormSize*357))
+			ret = append(ret, 291850148415)
 		}
 	} else if minLiberty == 2 {
 		if worm.Liberty == 1 {
 			//escape capture
 			f ^= 932759347016
-			ret = append(ret, 932759347016+int64(minLibertyWormSize*357))
+			ret = append(ret, 932759347016)
 		} else if worm.Liberty == 2 {
 			f ^= 758724359874
-			ret = append(ret, 758724359874+int64(minLibertyWormSize*357))
+			ret = append(ret, 758724359874)
 		} else if worm.Liberty == 3 {
 			f ^= 238146923179
-			ret = append(ret, 238146923179+int64(minLibertyWormSize*357))
+			ret = append(ret, 238146923179)
 		} else if worm.Liberty > 3 {
 			f ^= 945876927621
-			ret = append(ret, 945876927621+int64(minLibertyWormSize*357))
+			ret = append(ret, 945876927621)
 		}
 	}
 
@@ -161,10 +161,10 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 	}
 	if minLiberty == 1 {
 		f ^= 787401927621
-		ret = append(ret, 787401927621+int64(minLibertyWormSize*171))
+		ret = append(ret, 787401927621)
 	} else if minLiberty == 2 {
 		f ^= 304580158101
-		ret = append(ret, 304580158101+int64(minLibertyWormSize*171))
+		ret = append(ret, 304580158101)
 	}
 
 	f ^= b.EdgeDisHash(k)
