@@ -418,6 +418,45 @@ func TestLocalFeature(t *testing.T) {
 	t.Log(f)
 }
 
+func TestPattern3x3(t *testing.T) {
+	b := NewBoard()
+	/*
+			A B C D E F G H J K L M N O P Q R S T
+		19  . . . . . . . . . . . . . . . . . . .
+		18  . . . . . . . . . . . . . . . . . . .
+		17  . . . . . . . . . . . . . . . . . . .
+		16  . . . . . . . . . . . . . . . . . . .
+		15  . . . . . . . . . . . . . . . . . . .
+		14  . . . . . . . . . . . . . . . . . . .
+		13  . . . . . . . . . . . . . . . . . . .
+		12  . . . . . . . . . . . . . . . . . . .
+		11  . . . . . . . . . . . . . . . . . . .
+		10  . . . . . . . . . . . . . . . . . . .
+		 9  . . . . . . . . . . . . . . . . . . .
+		 8  . . . . . . . . . . . . . . . . . . .
+		 7  . . . . . . . . . . . . . . . . . . .
+		 6  . . . X O . . . . . . . . . . . . . .
+		 5  . . X O X O . . . . . . . . . . . . .
+		 4  . X O . . . . . . . . . . . . . . . .
+		 3  . X . . . . . . . . . . . . . . . . .
+		 2  . . . . . . . . . . . . . . . . . . .
+		 1  . . . . . . . . . . . . . . . . . . .
+		    A B C D E F G H J K L M N O P Q R S T
+	*/
+	b.PutLabel("BB3")
+	b.PutLabel("BB4")
+	b.PutLabel("BC5")
+	b.PutLabel("WC4")
+	b.PutLabel("WD5")
+	b.PutLabel("BD6")
+	b.PutLabel("BE5")
+	b.PutLabel("WE6")
+	b.PutLabel("WF5")
+	t.Log(b.String(nil))
+	t.Log(b.PatternDxd(PosIndex(3, 3), BLACK, 1))
+	t.Log(b.PatternDxd(PosIndex(4, 3), BLACK, 1))
+}
+
 func TestEmptyWormFromPoint(t *testing.T) {
 	b := NewBoard()
 	/*
