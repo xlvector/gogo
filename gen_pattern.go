@@ -146,8 +146,8 @@ func (b *Board) EvaluateModel(sgf string, withLog bool) (int, int) {
 			log.Println(PointString(cur.x, cur.y, cur.stone), PointString(x1, y1, cur.stone), rank[0].Second)
 			if i%10 == 0 {
 				mark := make(map[int]string)
-				for k := 0; k < 5 && k < len(rank); k++ {
-					mark[rank[k].First] = strconv.Itoa(k + 1)
+				for k := 0; k < 26 && k < len(rank); k++ {
+					mark[rank[k].First] = string(97 + k)
 				}
 				log.Println(b.String(mark))
 			}
