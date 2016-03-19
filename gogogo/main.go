@@ -164,7 +164,7 @@ func main() {
 			gt.Add(gogo.NewGameTreeNode(c, x, y))
 			log.Println(board.String(nil))
 
-			if ok := board.MCTSMove(gogo.WHITE, gt, 16, 100000); !ok {
+			if ok := board.MCTSMove(gogo.WHITE, gt, 16, 10000); !ok {
 				break
 			}
 			log.Println(board.String(nil))
