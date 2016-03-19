@@ -1,6 +1,7 @@
 package gogo
 
 import (
+	"fmt"
 	"log"
 	"math"
 	"math/rand"
@@ -196,9 +197,13 @@ func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) bool {
 		}
 	}
 	for i := 0; i < n; i++ {
+		if i%1000 == 0 {
+			fmt.Print(".")
+		}
 		node := MCTSSelection(gt)
 		MCTSExpand(node, b, expand, wg)
 	}
+	fmt.Println()
 	wg.Wait()
 	var best *GameTreeNode
 	robust := 0
