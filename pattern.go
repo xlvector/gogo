@@ -228,6 +228,15 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 			ret = append(ret, 790105634981+int64((nW<<14)+(nB<<7)+nG))
 		}
 	}
+
+	{
+		nG, nB, nW := b.EmptyWormFromPoint(k, 4)
+		if c == BLACK {
+			ret = append(ret, 947135773475+int64((nB<<14)+(nW<<7)+nG))
+		} else if c == WHITE {
+			ret = append(ret, 683459175919+int64((nW<<14)+(nB<<7)+nG))
+		}
+	}
 	ret = append(ret, b.Pattern3x3(k))
 	ret = append(ret, f)
 	return ret
