@@ -159,7 +159,7 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 	}
 	if minLiberty == 1 {
 		f ^= 787401927621 + int64(minLibertySize)
-		ret = append(ret, 787401927621+int64(minLibertySize)*11+int64(len(opNWorms)))
+		ret = append(ret, 787401927621+int64(minLibertySize))
 	} else if minLiberty == 2 {
 		f ^= 304580158101 + int64(minLibertySize)
 		ret = append(ret, 304580158101+int64(minLibertySize))
