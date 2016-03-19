@@ -110,11 +110,9 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 
 	f := int64(0)
 	minLiberty := 10000
-	minLibertyWormSize := 0
 	for _, w := range myNWorms {
 		if minLiberty > w.Liberty {
 			minLiberty = w.Liberty
-			minLibertyWormSize = w.Size()
 		}
 	}
 
@@ -152,11 +150,9 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 
 	//op
 	minLiberty = 10000
-	minLibertyWormSize = 0
 	for _, w := range opNWorms {
 		if minLiberty > w.Liberty {
 			minLiberty = w.Liberty
-			minLibertyWormSize = w.Size()
 		}
 	}
 	if minLiberty == 1 {
@@ -220,22 +216,9 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 		}
 	*/
 
-	{
-		nG, nB, nW := b.EmptyWormFromPoint(k, 3)
-		if c == BLACK {
-			ret = append(ret, 790105634981+int64((nB<<14)+(nW<<7)+nG))
-		} else if c == WHITE {
-			ret = append(ret, 790105634981+int64((nW<<14)+(nB<<7)+nG))
-		}
-	}
-
-	{
-		nG, nB, nW := b.EmptyWormFromPoint(k, 4)
-		if c == BLACK {
-			ret = append(ret, 947135773475+int64((nB<<14)+(nW<<7)+nG))
-		} else if c == WHITE {
-			ret = append(ret, 683459175919+int64((nW<<14)+(nB<<7)+nG))
-		}
+	wormHash := b.EmptyWormFromPoint(k, 5)
+	for _, h := range wormHash {
+		ret = append(ret, h^78860975057501)
 	}
 	ret = append(ret, b.Pattern3x3(k))
 	ret = append(ret, f)

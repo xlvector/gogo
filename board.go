@@ -363,16 +363,15 @@ func (w *Worm) Size() int {
 	return w.Points.Size()
 }
 
-func (b *Board) EmptyWormFromPoint(k int, maxDepth int) (int, int, int) {
+func (b *Board) EmptyWormFromPoint(k int, maxDepth int) []int64 {
 	if b.Points[k] != GRAY {
-		return 0, 0, 0
+		return []int64{}
 	}
 	queue := make([]int, 0, 10)
 	start := 0
 	queue = append(queue, k*100)
+	ret := make([]int64, maxDepth)
 	gray := NewPointMap(10)
-	black := NewPointMap(10)
-	white := NewPointMap(10)
 	for {
 		if start >= len(queue) {
 			break
@@ -387,21 +386,25 @@ func (b *Board) EmptyWormFromPoint(k int, maxDepth int) (int, int, int) {
 			continue
 		}
 		gray.Add(pos)
+		ret[depth] ^= b.PointHash[pos]
 		n4 := Neigh4(pos)
 		for _, nv := range n4 {
 			if gray.Exist(nv) {
 				continue
 			}
 			if b.Points[nv] == BLACK && depth < maxDepth {
-				black.Add(nv)
+				ret[depth] ^= b.PointHash[nv]
 			} else if b.Points[nv] == WHITE && depth < maxDepth {
-				white.Add(nv)
+				ret[depth] ^= b.PointHash[nv]
 			} else if b.Points[nv] == GRAY {
 				queue = append(queue, nv*100+depth+1)
 			}
 		}
 	}
-	return gray.Size(), black.Size(), white.Size()
+	for i := 1; i < maxDepth; i++ {
+		ret[i] ^= ret[i-1]
+	}
+	return ret
 }
 
 func (b *Board) WormFromPoint(k int, c Color, stopLiberty int) *Worm {
