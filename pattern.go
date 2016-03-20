@@ -167,7 +167,7 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 	fl := int64(0)
 	for _, l := range liberties {
 		fl *= 5
-		fl += l + 1
+		fl += int64(l + 1)
 	}
 	fl += 809438508012
 	ret = append(ret, fl)
