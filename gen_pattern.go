@@ -45,7 +45,7 @@ func (b *Board) RandomSelectValidPoint(n, p int, c Color) map[int]byte {
 			if rand.Float64() > 0.3 {
 				continue
 			}
-			if len(ret > n) {
+			if len(ret) > n {
 				return ret
 			}
 			if ok, _ := b.CanPut(q, c); ok {
