@@ -37,23 +37,8 @@ func (b *Board) PatternFeature(k int, c Color, last, cur []int64) []int64 {
 	return ret
 }
 
-func (b *Board) RandomSelectValidPoint(n, p int, c Color) map[int]byte {
+func (b *Board) RandomSelectValidPoint(n int, c Color) map[int]byte {
 	ret := make(map[int]byte)
-
-	for d := 1; d < 5; d++ {
-		for _, q := range PointDisMap[p][d] {
-			if rand.Float64() > 0.3 {
-				continue
-			}
-			if len(ret) > n {
-				return ret
-			}
-			if ok, _ := b.CanPut(q, c); ok {
-				ret[q] = 1
-			}
-
-		}
-	}
 
 	for i := 0; i < NPOINT*2 && len(ret) < n; i++ {
 		k := rand.Intn(NPOINT)
@@ -107,7 +92,7 @@ func (b *Board) GenPattern(sgf string, rotate int) []PatternSample {
 		curPat := b.FinalPatternHash(curK, cur.stone)
 		ret = append(ret, PatternSample{b.PatternFeature(curK, cur.stone, lastPat, curPat), 1})
 
-		vps := b.RandomSelectValidPoint(2, PosIndex(cur.x, cur.y), cur.stone)
+		vps := b.RandomSelectValidPoint(10, cur.stone)
 		for p, _ := range vps {
 			if p == curK {
 				continue
