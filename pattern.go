@@ -1,5 +1,9 @@
 package gogo
 
+import (
+	"sort"
+)
+
 func ExtendPosIndex(x, y int) int {
 	return (y+SIZE)*(SIZE*3) + x + SIZE
 }
@@ -150,13 +154,23 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 
 	//op
 	minLiberty = 10000
+	liberties := []int{}
 	minLibertySize := 0
 	for _, w := range opNWorms {
 		if minLiberty > w.Liberty {
 			minLiberty = w.Liberty
 			minLibertySize = w.Size()
 		}
+		liberties = append(liberties, w.Liberty)
 	}
+	sort.Int(liberties)
+	fl := int64(0)
+	for _, l := range liberties {
+		fl *= 5
+		fl += l + 1
+	}
+	fl += 809438508012
+	ret = append(ret, fl)
 	if minLiberty == 1 {
 		f ^= 787401927621 + int64(minLibertySize)
 		ret = append(ret, 787401927621+int64(minLibertySize))
