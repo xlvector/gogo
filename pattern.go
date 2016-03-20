@@ -163,7 +163,7 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 		}
 		liberties = append(liberties, w.Liberty)
 	}
-	sort.Int(liberties)
+	sort.IntSlice(liberties)
 	fl := int64(0)
 	for _, l := range liberties {
 		fl *= 5
