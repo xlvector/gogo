@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/xlvector/hector/core"
+	"github.com/xlvector/hector/lr"
 )
 
 type PatternSample struct {
@@ -72,7 +73,7 @@ func (b *Board) Rotate(x, y, r int) (int, int) {
 	}
 }
 
-func (b *Board) GenPattern(sgf string, rotate int, patternOnly bool) []PatternSample {
+func (b *Board) GenPattern(sgf string, rotate int, m *lr.LogisticRegression) []PatternSample {
 	buf, _ := ioutil.ReadFile(sgf)
 	gt := NewGameTree(SIZE)
 	gt.ParseSGF(string(buf))
@@ -90,11 +91,7 @@ func (b *Board) GenPattern(sgf string, rotate int, patternOnly bool) []PatternSa
 		cur.x, cur.y = b.Rotate(cur.x, cur.y, rotate)
 		curK := PosIndex(cur.x, cur.y)
 		curPat := b.FinalPatternHash(curK, cur.stone)
-		if patternOnly {
-			ret = append(ret, PatternSample{curPat, 1})
-		} else {
-			ret = append(ret, PatternSample{b.PatternFeature(curK, cur.stone, lastPat, curPat), 1})
-		}
+		ret = append(ret, PatternSample{b.PatternFeature(curK, cur.stone, lastPat, curPat), 1})
 
 		vps := b.RandomSelectValidPoint(20, cur.stone)
 		for p, _ := range vps {
@@ -102,11 +99,18 @@ func (b *Board) GenPattern(sgf string, rotate int, patternOnly bool) []PatternSa
 				continue
 			}
 			pat := b.FinalPatternHash(p, cur.stone)
-			if patternOnly {
-				ret = append(ret, PatternSample{pat, 0})
-			} else {
-				ret = append(ret, PatternSample{b.PatternFeature(p, cur.stone, lastPat, pat), 0})
+			spat := b.PatternFeature(p, cur.stone, lastPat, pat)
+			if m != nil {
+				sample := core.NewSample()
+				for _, f := range spat {
+					sample.AddFeature(core.Feature{f, 1.0})
+				}
+				pr := m.Predict(sample)
+				if pr < 0.1 {
+					continue
+				}
 			}
+			ret = append(ret, PatternSample{spat, 0})
 		}
 		lastPat = curPat
 		ok := b.Put(PosIndex(cur.x, cur.y), cur.stone)
