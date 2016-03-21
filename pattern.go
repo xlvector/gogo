@@ -30,7 +30,13 @@ func (b *Board) VertexHash(x, y int, c Color) int64 {
 
 func (b *Board) EdgeDisHash(k int) int64 {
 	d := IndexEdgeDis(k)
-	if d <= 3 {
+	if d == 0 {
+		return 34325608508451
+	} else if d == 1 {
+		return 73492759157915
+	} else if d == 2 {
+		return 89832645519571
+	} else if d == 3 {
 		return 71481275917501
 	} else if d == 4 {
 		return 91347170185103
