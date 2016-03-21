@@ -37,12 +37,28 @@ func GenDLDataset(sgfFile string) []string {
 }
 
 func (b *Board) DLFeature(stone Color) []byte {
-	ret := make([]byte, NPOINT*2)
+	ret := make([]byte, NPOINT*7)
 	for k, c := range b.Points {
+		lb := b.PointLiberty(k)
 		if c == stone {
-			ret[k] = 1
+			if lb == 1 {
+				ret[k] = 1
+			} else if lb == 2 {
+				ret[k+NPOINT] = 1
+			} else {
+				ret[k+2*NPOINT] = 1
+			}
 		} else if c == OpColor(stone) {
-			ret[k+NPOINT] = 1
+			if lb == 1 {
+				ret[k+3*NPOINT] = 1
+			} else if lb == 2 {
+				ret[k+4*NPOINT] = 1
+			} else {
+				ret[k+5*NPOINT] = 1
+			}
+		}
+		if k == b.KoIndex {
+			ret[k+6*NPOINT] = 1
 		}
 	}
 	return ret
