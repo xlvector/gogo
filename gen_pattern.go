@@ -72,7 +72,7 @@ func (b *Board) Rotate(x, y, r int) (int, int) {
 	}
 }
 
-func (b *Board) GenPattern(sgf string, rotate int) []PatternSample {
+func (b *Board) GenPattern(sgf string, rotate int, patternOnly bool) []PatternSample {
 	buf, _ := ioutil.ReadFile(sgf)
 	gt := NewGameTree(SIZE)
 	gt.ParseSGF(string(buf))
@@ -90,7 +90,11 @@ func (b *Board) GenPattern(sgf string, rotate int) []PatternSample {
 		cur.x, cur.y = b.Rotate(cur.x, cur.y, rotate)
 		curK := PosIndex(cur.x, cur.y)
 		curPat := b.FinalPatternHash(curK, cur.stone)
-		ret = append(ret, PatternSample{b.PatternFeature(curK, cur.stone, lastPat, curPat), 1})
+		if patternOnly {
+			ret = append(ret, PatternSample{curPat, 1})
+		} else {
+			ret = append(ret, PatternSample{b.PatternFeature(curK, cur.stone, lastPat, curPat), 1})
+		}
 
 		vps := b.RandomSelectValidPoint(20, cur.stone)
 		for p, _ := range vps {
@@ -98,7 +102,11 @@ func (b *Board) GenPattern(sgf string, rotate int) []PatternSample {
 				continue
 			}
 			pat := b.FinalPatternHash(p, cur.stone)
-			ret = append(ret, PatternSample{b.PatternFeature(p, cur.stone, lastPat, pat), 0})
+			if patternOnly {
+				ret = append(ret, PatternSample{pat, 0})
+			} else {
+				ret = append(ret, PatternSample{b.PatternFeature(p, cur.stone, lastPat, pat), 0})
+			}
 		}
 		lastPat = curPat
 		ok := b.Put(PosIndex(cur.x, cur.y), cur.stone)

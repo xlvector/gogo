@@ -42,22 +42,22 @@ func GenDLDataset(root, output string) {
 	wg.Wait()
 }
 
-func GenPatterns(path string, ch chan string) {
+func GenPatterns(path string, ch chan string, patternOnly bool) {
 	log.Println(path)
 	board := gogo.NewBoard()
-	pats := board.GenPattern(path, 0)
+	pats := board.GenPattern(path, 0, patternOnly)
 	for _, pat := range pats {
 		ch <- pat.String()
 	}
 }
 
-func GenPatternsThread(paths []string, total, split int, ch chan string) {
+func GenPatternsThread(paths []string, total, split int, ch chan string, patternOnly bool) {
 	log.Println("begin split:", split)
 	for i, path := range paths {
 		if i%total != split {
 			continue
 		}
-		GenPatterns(path, ch)
+		GenPatterns(path, ch, patternOnly)
 	}
 }
 
@@ -72,6 +72,7 @@ func main() {
 	input := flag.String("input", "", "input")
 	output := flag.String("output", "", "output")
 	model := flag.String("model", "", "model path")
+	patternOnly := flag.String("pattern", "", "pattern")
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
 	flag.Parse()
 
@@ -89,7 +90,7 @@ func main() {
 		paths := gogo.TreeDir(*input, "sgf")
 		patCh := make(chan string, 1000)
 		for i := 0; i < 32; i++ {
-			go GenPatternsThread(paths, 32, i, patCh)
+			go GenPatternsThread(paths, 32, i, patCh, (*patternOnly == "true"))
 		}
 
 		go func() {
