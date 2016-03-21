@@ -151,6 +151,12 @@ func (b *Board) EvaluateModel(sgf string, withLog bool) (int, int) {
 				sample.AddFeature(core.Feature{f, 1.0})
 			}
 			pr := b.Model.Predict(sample)
+			if b.Model2 != nil && pr > 0.1 {
+				pr := b.Model2.Predict(sample)
+				if pr < 0.1 {
+					pr = 0.1
+				}
+			}
 			rank = append(rank, IntFloatPair{p, pr})
 		}
 		sort.Sort(sort.Reverse(rank))

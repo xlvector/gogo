@@ -72,6 +72,7 @@ func main() {
 	input := flag.String("input", "", "input")
 	output := flag.String("output", "", "output")
 	model := flag.String("model", "", "model path")
+	model2 := flag.String("model2", "", "model2 path")
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
 	flag.Parse()
 
@@ -124,6 +125,10 @@ func main() {
 		board := gogo.NewBoard()
 		board.Model = &lr.LogisticRegression{}
 		board.Model.LoadModel(*model)
+		if len(*model2) > 0 {
+			board.Model2 = &lr.LogisticRegression{}
+			board.Model2.LoadModel(*model2)
+		}
 		hit, total := board.EvaluateModel(*input, true)
 		log.Println(hit, total, float64(hit)/float64(total))
 	} else if *mode == "eval-folder" {
