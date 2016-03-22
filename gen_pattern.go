@@ -39,11 +39,10 @@ func NewPairwiseSample(a, b *PatternSample) *PairwiseSample {
 }
 
 func (p *PairwiseSample) String() string {
-	label := 1
 	if p.Label < 0 {
-		label = 0
+		p.Label = 0
 	}
-	ret := strconv.Itoa(label)
+	ret := strconv.Itoa(p.Label)
 	for k, v := range p.Features {
 		ret += "\t"
 		ret += strconv.FormatInt(k, 10)

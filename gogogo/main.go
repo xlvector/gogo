@@ -47,6 +47,9 @@ func GenPatterns(path string, ch chan string) {
 	board := gogo.NewBoard()
 	pats := board.GenPattern(path, 0)
 	for _, pat := range pats {
+		if pat == nil {
+			continue
+		}
 		ch <- pat.String()
 	}
 }
