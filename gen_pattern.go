@@ -15,43 +15,6 @@ type PatternSample struct {
 	Label   int
 }
 
-type PairwiseSample struct {
-	Features map[int64]int
-	Label    int
-}
-
-func NewPairwiseSample(a, b *PatternSample) *PairwiseSample {
-	ret := &PairwiseSample{
-		Features: make(map[int64]int),
-		Label:    a.Label - b.Label,
-	}
-	for _, p := range a.Pattern {
-		ret.Features[p] = 1
-	}
-	for _, p := range b.Pattern {
-		if _, ok := ret.Features[p]; ok {
-			delete(ret.Features, p)
-		} else {
-			ret.Features[p] = -1
-		}
-	}
-	return ret
-}
-
-func (p *PairwiseSample) String() string {
-	if p.Label < 0 {
-		p.Label = 0
-	}
-	ret := strconv.Itoa(p.Label)
-	for k, v := range p.Features {
-		ret += "\t"
-		ret += strconv.FormatInt(k, 10)
-		ret += ":"
-		ret += strconv.Itoa(v)
-	}
-	return ret
-}
-
 func (p *PatternSample) String() string {
 	ret := strconv.Itoa(p.Label)
 	for _, k := range p.Pattern {
@@ -109,42 +72,40 @@ func (b *Board) Rotate(x, y, r int) (int, int) {
 	}
 }
 
-func (b *Board) GenPattern(sgf string, rotate int) []*PairwiseSample {
+func (b *Board) GenPattern(sgf string) []PatternSample {
 	buf, _ := ioutil.ReadFile(sgf)
 	gt := NewGameTree(SIZE)
 	gt.ParseSGF(string(buf))
 	if gt.HasHandicap() {
-		return []*PairwiseSample{}
+		return []PatternSample{}
 	}
 	path := gt.Path2Root()
-	ret := make([]*PairwiseSample, 0, 6)
+	ret := []PatternSample{}
 	lastPat := []int64{}
 	for i := len(path) - 2; i >= 0; i-- {
 		cur := path[i]
 		if PosOutBoard(cur.x, cur.y) {
 			continue
 		}
-		cur.x, cur.y = b.Rotate(cur.x, cur.y, rotate)
 		curK := PosIndex(cur.x, cur.y)
 		curPat := b.FinalPatternHash(curK, cur.stone)
-		curPf := &PatternSample{b.PatternFeature(curK, cur.stone, lastPat, curPat), 1}
+		ret = append(ret, PatternSample{b.PatternFeature(curK, cur.stone, lastPat, curPat), 1})
 
-		vps := b.RandomSelectValidPoint(5, cur.stone)
+		vps := b.RandomSelectValidPoint(2, cur.stone)
 		for p, _ := range vps {
 			if p == curK {
 				continue
 			}
 			pat := b.FinalPatternHash(p, cur.stone)
-			spat := &PatternSample{b.PatternFeature(p, cur.stone, lastPat, pat), 0}
-			ret = append(ret, NewPairwiseSample(curPf, spat))
-			ret = append(ret, NewPairwiseSample(spat, curPf))
+			spat := b.PatternFeature(p, cur.stone, lastPat, pat)
+			ret = append(ret, PatternSample{spat, 0})
 		}
 		lastPat = curPat
 		ok := b.Put(PosIndex(cur.x, cur.y), cur.stone)
 		if !ok {
 			break
 		}
-		//b.RefreshInfluenceAndTerritory()
+		b.RefreshInfluenceAndTerritory()
 	}
 	return ret
 }

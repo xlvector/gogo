@@ -18,6 +18,7 @@ const (
 	WHITE         Color = 2
 	INVALID_COLOR Color = 3
 	PATTERN_SIZE        = 12
+	ROTATE              = 8
 	LX                  = "ABCDEFGHJKLMNOPQRSTUVWXYZ"
 )
 
@@ -170,8 +171,9 @@ type Board struct {
 	Points       []Color
 	KoIndex      int
 	Model        *lr.LogisticRegression
-	PointHash    []int64
-	PatternHash  [][]int64
+	Model2       *lr.LogisticRegression
+	PointHash    [][]int64
+	PatternHash  [][][]int64
 	Actions      []int
 	LastPattern  []int64
 	InfluenceVal map[int]int
@@ -194,6 +196,7 @@ func (b *Board) Clear() {
 	}
 	b.KoIndex = -1
 	b.Model = nil
+	b.Model2 = nil
 	b.InitHash()
 }
 
@@ -201,30 +204,36 @@ func (b *Board) Copy() *Board {
 	ret := &Board{
 		Points:      make([]Color, NPOINT),
 		KoIndex:     b.KoIndex,
-		PointHash:   make([]int64, len(b.PointHash)),
-		PatternHash: make([][]int64, len(b.PatternHash)),
+		PointHash:   make([][]int64, ROTATE),
+		PatternHash: make([][][]int64, ROTATE),
 		Actions:     make([]int, len(b.Actions)),
 		LastPattern: make([]int64, len(b.LastPattern)),
 		Model:       b.Model,
+		Model2:      b.Model2,
 	}
 	for i, v := range b.Points {
 		ret.Points[i] = v
 	}
-	for i, v := range b.PointHash {
-		ret.PointHash[i] = v
-	}
+
 	for i, v := range b.Actions {
 		ret.Actions[i] = v
 	}
 	for i, v := range b.LastPattern {
 		ret.LastPattern[i] = v
 	}
-	for i, a := range b.PatternHash {
-		tmp := make([]int64, len(a))
-		for j, v := range a {
-			tmp[j] = v
+	for r := 0; r < ROTATE; r++ {
+		ret.PointHash[r] = make([]int64, NPOINT)
+		for i, v := range b.PointHash[r] {
+			ret.PointHash[r][i] = v
 		}
-		ret.PatternHash[i] = tmp
+		ret.PatternHash[r] = make([][]int64, NPOINT)
+		for i, a := range b.PatternHash[r] {
+			tmp := make([]int64, len(a))
+			for j, v := range a {
+				tmp[j] = v
+			}
+			ret.PatternHash[r][i] = tmp
+		}
 	}
 	return ret
 }
@@ -363,6 +372,16 @@ func (w *Worm) Size() int {
 	return w.Points.Size()
 }
 
+func (b *Board) MinPointHash(pos int) int64 {
+	ret := b.PointHash[0][pos]
+	for r := 1; r < ROTATE; r++ {
+		if ret < b.PointHash[r][pos] {
+			ret = b.PointHash[r][pos]
+		}
+	}
+	return ret
+}
+
 func (b *Board) EmptyWormFromPoint(k int, maxDepth int) []int64 {
 	if b.Points[k] != GRAY {
 		return []int64{}
@@ -386,16 +405,16 @@ func (b *Board) EmptyWormFromPoint(k int, maxDepth int) []int64 {
 			continue
 		}
 		gray.Add(pos)
-		ret[depth] ^= b.PointHash[pos]
+		ret[depth] ^= b.MinPointHash(pos)
 		n4 := Neigh4(pos)
 		for _, nv := range n4 {
 			if gray.Exist(nv) {
 				continue
 			}
 			if b.Points[nv] == BLACK && depth < maxDepth {
-				ret[depth] ^= b.PointHash[nv]
+				ret[depth] ^= b.MinPointHash(nv)
 			} else if b.Points[nv] == WHITE && depth < maxDepth {
-				ret[depth] ^= b.PointHash[nv]
+				ret[depth] ^= b.MinPointHash(nv)
 			} else if b.Points[nv] == GRAY {
 				queue = append(queue, nv*100+depth+1)
 			}
