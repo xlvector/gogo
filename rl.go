@@ -20,20 +20,22 @@ func BatchRLBattle(b *Board) {
 	for k := 0; k < 10; k++ {
 		wg := &sync.WaitGroup{}
 		win := 0
-		for i := 0; i < 200; i++ {
+		for i := 0; i < 100; i++ {
 			wg.Add(1)
 			go func() {
 				s, rank := b.Copy().RLBattle(BLACK)
 				if s > 0 {
 					win += 1
 				}
-				lock.Lock()
-				defer lock.Unlock()
-				for k, v := range rank {
-					v1, _ := b.Model.Model[k]
-					v1 += 0.001 * float64(v)
-					b.Model.Model[k] = v1
-				}
+				/*
+					lock.Lock()
+					defer lock.Unlock()
+					for k, v := range rank {
+						v1, _ := b.Model.Model[k]
+						v1 += 0.001 * float64(v)
+						b.Model.Model[k] = v1
+					}
+				*/
 				wg.Done()
 			}()
 		}
