@@ -40,12 +40,13 @@ func (b *Board) RLBattle(c Color) map[int64]int {
 		p, fs = b.GenRLBattleMove(c)
 		if p < 0 {
 			pass += 1
-		}
-		for _, v := range fs {
-			if v1, ok := colorFs[c][v]; ok {
-				colorFs[c][v] = v1 + 1
-			} else {
-				colorFs[c][v] = 1
+		} else {
+			for _, v := range fs {
+				if v1, ok := colorFs[c][v]; ok {
+					colorFs[c][v] = v1 + 1
+				} else {
+					colorFs[c][v] = 1
+				}
 			}
 		}
 
@@ -53,17 +54,19 @@ func (b *Board) RLBattle(c Color) map[int64]int {
 		p, fs = b.GenRLBattleMove(oc)
 		if p < 0 {
 			pass += 1
+		} else {
+			for _, v := range fs {
+				if v1, ok := colorFs[oc][v]; ok {
+					colorFs[oc][v] = v1 + 1
+				} else {
+					colorFs[oc][v] = 1
+				}
+			}
 		}
 		if pass >= 2 {
 			break
 		}
-		for _, v := range fs {
-			if v1, ok := colorFs[oc][v]; ok {
-				colorFs[oc][v] = v1 + 1
-			} else {
-				colorFs[oc][v] = 1
-			}
-		}
+
 		n += 1
 	}
 	s := b.Score()
@@ -110,6 +113,9 @@ func (b *Board) GenRLBattleMove(c Color) (int, []int64) {
 		}
 	}
 	topn := TopN(rank, 10)
+	if len(topn) == 0 {
+		return -1, nil
+	}
 	k := rand.Intn(len(topn))
 	b.Put(topn[k].First, c)
 	return topn[k].First, fs[topn[k].First]
