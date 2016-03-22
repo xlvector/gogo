@@ -7,26 +7,42 @@ import (
 	"time"
 
 	"github.com/xlvector/hector/core"
+	"github.com/xlvector/hector/lr"
 )
 
 func BatchRLBattle(b *Board) {
 	lock := &sync.Mutex{}
-	for i := 0; i < 200; i++ {
-		go func() {
-			rank := b.Copy().RLBattle(BLACK)
-			lock.Lock()
-			defer lock.Unlock()
-			for k, v := range rank {
-				v1, _ := b.Model.Model[k]
-				v1 += 0.001 * float64(v)
-				b.Model.Model[k] = v1
-			}
-		}()
+	b.Model2 = &lr.LogisticRegression{}
+	b.Model2.Model = make(map[int64]float64)
+	for k, v := range b.Model.Model {
+		b.Model2.Model[k] = v
 	}
-	b.Model.SaveModel("expert.model.rl")
+	for k := 0; k < 10; k++ {
+		wg := &sync.WaitGroup{}
+		win := 0
+		for i := 0; i < 200; i++ {
+			wg.Add(1)
+			go func() {
+				s, rank := b.Copy().RLBattle(BLACK)
+				if s > 0 {
+					win += 1
+				}
+				lock.Lock()
+				defer lock.Unlock()
+				for k, v := range rank {
+					v1, _ := b.Model.Model[k]
+					v1 += 0.001 * float64(v)
+					b.Model.Model[k] = v1
+				}
+				wg.Done()
+			}()
+		}
+		wg.Wait()
+		log.Println(win)
+	}
 }
 
-func (b *Board) RLBattle(c Color) map[int64]int {
+func (b *Board) RLBattle(c Color) (float64, map[int64]int) {
 	rand.Seed(time.Now().UnixNano())
 	var fs []int64
 	p := -1
@@ -89,8 +105,7 @@ func (b *Board) RLBattle(c Color) map[int64]int {
 			ret[k] = v1 - v
 		}
 	}
-	log.Println(s)
-	return ret
+	return s, ret
 }
 
 func (b *Board) GenRLBattleMove(c Color) (int, []int64) {
@@ -107,7 +122,11 @@ func (b *Board) GenRLBattleMove(c Color) (int, []int64) {
 				for _, v := range smp {
 					sample.AddFeature(core.Feature{v, 1.0})
 				}
-				pr = b.Model.Predict(sample)
+				if c == BLACK {
+					pr = b.Model.Predict(sample)
+				} else {
+					pr = b.Model2.Predict(sample)
+				}
 			}
 			rank[k] = pr
 		}
