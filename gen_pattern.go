@@ -117,7 +117,7 @@ func (b *Board) GenPattern(sgf string, rotate int) []*PairwiseSample {
 		return []*PairwiseSample{}
 	}
 	path := gt.Path2Root()
-	ret := make([]*PairwiseSample, 12)
+	ret := make([]*PairwiseSample, 0, 6)
 	lastPat := []int64{}
 	for i := len(path) - 2; i >= 0; i-- {
 		cur := path[i]
@@ -129,7 +129,7 @@ func (b *Board) GenPattern(sgf string, rotate int) []*PairwiseSample {
 		curPat := b.FinalPatternHash(curK, cur.stone)
 		curPf := &PatternSample{b.PatternFeature(curK, cur.stone, lastPat, curPat), 1}
 
-		vps := b.RandomSelectValidPoint(5, cur.stone)
+		vps := b.RandomSelectValidPoint(2, cur.stone)
 		for p, _ := range vps {
 			if p == curK {
 				continue
