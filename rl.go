@@ -11,7 +11,7 @@ import (
 
 func BatchRLBattle(b *Board) {
 	lock := &sync.Mutex{}
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 200; i++ {
 		go func() {
 			rank := b.Copy().RLBattle(BLACK)
 			lock.Lock()
