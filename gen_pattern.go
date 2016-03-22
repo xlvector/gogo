@@ -91,7 +91,7 @@ func (b *Board) GenPattern(sgf string) []PatternSample {
 		curPat := b.FinalPatternHash(curK, cur.stone)
 		ret = append(ret, PatternSample{b.PatternFeature(curK, cur.stone, lastPat, curPat), 1})
 
-		vps := b.RandomSelectValidPoint(2, cur.stone)
+		vps := b.RandomSelectValidPoint(10, cur.stone)
 		for p, _ := range vps {
 			if p == curK {
 				continue
