@@ -207,5 +207,12 @@ func main() {
 		log.Println(board.Score())
 	} else if *mode == "dl-data" {
 		GenDLDataset(*input, *output)
+	} else if *mode == "rl" {
+		board := gogo.NewBoard()
+		if len(*model) > 0 {
+			board.Model = &lr.LogisticRegression{}
+			board.Model.LoadModel(*model)
+		}
+		gogo.BatchRLBattle(board)
 	}
 }
