@@ -129,7 +129,7 @@ func (b *Board) GenPattern(sgf string, rotate int) []*PairwiseSample {
 		curPat := b.FinalPatternHash(curK, cur.stone)
 		curPf := &PatternSample{b.PatternFeature(curK, cur.stone, lastPat, curPat), 1}
 
-		vps := b.RandomSelectValidPoint(2, cur.stone)
+		vps := b.RandomSelectValidPoint(5, cur.stone)
 		for p, _ := range vps {
 			if p == curK {
 				continue
@@ -144,7 +144,7 @@ func (b *Board) GenPattern(sgf string, rotate int) []*PairwiseSample {
 		if !ok {
 			break
 		}
-		b.RefreshInfluenceAndTerritory()
+		//b.RefreshInfluenceAndTerritory()
 	}
 	return ret
 }
