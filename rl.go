@@ -111,5 +111,6 @@ func (b *Board) GenRLBattleMove(c Color) (int, []int64) {
 	}
 	topn := TopN(rank, 10)
 	k := rand.Intn(len(topn))
+	b.Put(topn[k].First, c)
 	return topn[k].First, fs[topn[k].First]
 }
