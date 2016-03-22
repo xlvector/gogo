@@ -42,22 +42,22 @@ func GenDLDataset(root, output string) {
 	wg.Wait()
 }
 
-func GenPatterns(path string, ch chan string, m *lr.LogisticRegression) {
+func GenPatterns(path string, ch chan string) {
 	log.Println(path)
 	board := gogo.NewBoard()
-	pats := board.GenPattern(path, 0, m)
+	pats := board.GenPattern(path, 0)
 	for _, pat := range pats {
 		ch <- pat.String()
 	}
 }
 
-func GenPatternsThread(paths []string, total, split int, ch chan string, m *lr.LogisticRegression) {
+func GenPatternsThread(paths []string, total, split int, ch chan string) {
 	log.Println("begin split:", split)
 	for i, path := range paths {
 		if i%total != split {
 			continue
 		}
-		GenPatterns(path, ch, m)
+		GenPatterns(path, ch)
 	}
 }
 
@@ -72,7 +72,6 @@ func main() {
 	input := flag.String("input", "", "input")
 	output := flag.String("output", "", "output")
 	model := flag.String("model", "", "model path")
-	model2 := flag.String("model2", "", "model2 path")
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
 	flag.Parse()
 
@@ -87,15 +86,10 @@ func main() {
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	if *mode == "gen-pattern" {
-		var m *lr.LogisticRegression
-		if len(*model) > 0 {
-			m = &lr.LogisticRegression{}
-			m.LoadModel(*model)
-		}
 		paths := gogo.TreeDir(*input, "sgf")
 		patCh := make(chan string, 1000)
 		for i := 0; i < 32; i++ {
-			go GenPatternsThread(paths, 32, i, patCh, m)
+			go GenPatternsThread(paths, 32, i, patCh)
 		}
 
 		go func() {
@@ -125,10 +119,6 @@ func main() {
 		board := gogo.NewBoard()
 		board.Model = &lr.LogisticRegression{}
 		board.Model.LoadModel(*model)
-		if len(*model2) > 0 {
-			board.Model2 = &lr.LogisticRegression{}
-			board.Model2.LoadModel(*model2)
-		}
 		hit, total := board.EvaluateModel(*input, true)
 		log.Println(hit, total, float64(hit)/float64(total))
 	} else if *mode == "eval-folder" {

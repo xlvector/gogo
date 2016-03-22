@@ -170,7 +170,6 @@ type Board struct {
 	Points       []Color
 	KoIndex      int
 	Model        *lr.LogisticRegression
-	Model2       *lr.LogisticRegression
 	PointHash    []int64
 	PatternHash  [][]int64
 	Actions      []int
@@ -207,7 +206,6 @@ func (b *Board) Copy() *Board {
 		Actions:     make([]int, len(b.Actions)),
 		LastPattern: make([]int64, len(b.LastPattern)),
 		Model:       b.Model,
-		Model2:      b.Model2,
 	}
 	for i, v := range b.Points {
 		ret.Points[i] = v
