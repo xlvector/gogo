@@ -16,7 +16,7 @@ func BatchRLBattle(b *Board) {
 	for k, v := range b.Model.Model {
 		b.Model2.Model[k] = v
 	}
-	for k := 0; k < 10; k++ {
+	for k := 0; k < 100; k++ {
 		wg := &sync.WaitGroup{}
 		win := 0
 		ch := make(chan map[int64]int, 100)
@@ -36,7 +36,7 @@ func BatchRLBattle(b *Board) {
 		for rank := range ch {
 			for k, v := range rank {
 				v1, _ := b.Model.Model[k]
-				v1 += 0.0002 * float64(v)
+				v1 += 0.0001 * float64(v)
 				b.Model.Model[k] = v1
 			}
 		}
