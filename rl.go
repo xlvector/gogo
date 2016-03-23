@@ -36,7 +36,7 @@ func BatchRLBattle(b *Board) {
 		for rank := range ch {
 			for k, v := range rank {
 				v1, _ := b.Model.Model[k]
-				v1 += 0.001 * float64(v)
+				v1 += 0.0002 * float64(v)
 				b.Model.Model[k] = v1
 			}
 		}
