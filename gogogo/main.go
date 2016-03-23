@@ -43,13 +43,11 @@ func GenDLDataset(root, output string) {
 }
 
 func GenPatterns(path string, ch chan string) {
-	for r := 0; r < 8; r++ {
-		log.Println(path)
-		board := gogo.NewBoard()
-		pats := board.GenPattern(path, r)
-		for _, pat := range pats {
-			ch <- pat.String()
-		}
+	log.Println(path)
+	board := gogo.NewBoard()
+	pats := board.GenPattern(path, 0)
+	for _, pat := range pats {
+		ch <- pat.String()
 	}
 }
 
