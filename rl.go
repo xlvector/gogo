@@ -11,7 +11,7 @@ import (
 )
 
 func BatchRLBattle(b *Board) {
-	lock := &sync.Mutex{}
+	//lock := &sync.Mutex{}
 	b.Model2 = &lr.LogisticRegression{}
 	b.Model2.Model = make(map[int64]float64)
 	for k, v := range b.Model.Model {
@@ -23,7 +23,7 @@ func BatchRLBattle(b *Board) {
 		for i := 0; i < 100; i++ {
 			wg.Add(1)
 			go func() {
-				s, rank := b.Copy().RLBattle(BLACK)
+				s, _ := b.Copy().RLBattle(BLACK)
 				if s > 0 {
 					win += 1
 				}
