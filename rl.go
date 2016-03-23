@@ -26,8 +26,8 @@ func BatchRLBattle(b *Board) {
 				s, rank := b.Copy().RLBattle(BLACK)
 				if s > 0 {
 					win += 1
+					ch <- rank
 				}
-				ch <- rank
 				wg.Done()
 			}()
 		}
@@ -36,7 +36,7 @@ func BatchRLBattle(b *Board) {
 		for rank := range ch {
 			for k, v := range rank {
 				v1, _ := b.Model.Model[k]
-				v1 -= 0.0001 * float64(v)
+				v1 += 0.0001 * float64(v)
 				b.Model.Model[k] = v1
 			}
 		}
@@ -52,7 +52,7 @@ func (b *Board) RLBattle(c Color) (float64, map[int64]int) {
 	colorFs := make(map[Color]map[int64]int)
 	colorFs[BLACK] = make(map[int64]int)
 	colorFs[WHITE] = make(map[int64]int)
-	ret := make(map[int64]int)
+	//ret := make(map[int64]int)
 	for n < 350 {
 		pass := 0
 		p, fs = b.GenRLBattleMove(c)
@@ -88,26 +88,29 @@ func (b *Board) RLBattle(c Color) (float64, map[int64]int) {
 		n += 1
 	}
 	s := b.Score()
-	if s > 0 {
-		for k, v := range colorFs[BLACK] {
-			v1, _ := ret[k]
-			ret[k] = v1 + v
+	/*
+		if s > 0 {
+			for k, v := range colorFs[BLACK] {
+				v1, _ := ret[k]
+				ret[k] = v1 + v
+			}
+
+			for k, v := range colorFs[WHITE] {
+				v1, _ := ret[k]
+				ret[k] = v1 - v
+			}
+		} else {
+			for k, v := range colorFs[WHITE] {
+				v1, _ := ret[k]
+				ret[k] = v1 + v
+			}
+			for k, v := range colorFs[BLACK] {
+				v1, _ := ret[k]
+				ret[k] = v1 - v
+			}
 		}
-		for k, v := range colorFs[WHITE] {
-			v1, _ := ret[k]
-			ret[k] = v1 - v
-		}
-	} else {
-		for k, v := range colorFs[WHITE] {
-			v1, _ := ret[k]
-			ret[k] = v1 + v
-		}
-		for k, v := range colorFs[BLACK] {
-			v1, _ := ret[k]
-			ret[k] = v1 - v
-		}
-	}
-	return s, ret
+	*/
+	return s, colorFs[BLACK]
 }
 
 func (b *Board) GenRLBattleMove(c Color) (int, []int64) {
