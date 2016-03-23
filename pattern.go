@@ -24,9 +24,8 @@ func (b *Board) ColorHash(c Color) int64 {
 	return 78017175060911
 }
 
-func (b *Board) VertexHash(x, y, r int, c Color) int64 {
-	x1, y1 := b.Rotate(x, y, r)
-	return (int64(ExtendPosIndex(x1, y1)+17)*13481917391 + 18223) ^ b.ColorHash(c)
+func (b *Board) VertexHash(x, y int, c Color) int64 {
+	return (int64(ExtendPosIndex(x, y)+17)*13481917391 + 18223) ^ b.ColorHash(c)
 }
 
 func (b *Board) EdgeDisHash(k int) int64 {
@@ -325,50 +324,42 @@ func (b *Board) NeighWorms(k int, c, wc Color, stopLiberty int) []*Worm {
 }
 
 func (b *Board) InitHash() {
-	b.PointHash = make([][]int64, ROTATE)
-	b.PatternHash = make([][][]int64, ROTATE)
-	for r := 0; r < ROTATE; r++ {
-		b.PointHash[r] = make([]int64, NPOINT)
-		b.PatternHash[r] = make([][]int64, NPOINT)
+	b.PointHash = make([]int64, NPOINT)
+	b.PatternHash = make([][]int64, NPOINT)
+	for i := 0; i < NPOINT; i++ {
+		x, y := IndexPos(i)
+		b.PointHash[i] = b.VertexHash(x, y, b.Points[i])
+	}
+	for i := 0; i < NPOINT; i++ {
+		b.PatternHash[i] = make([]int64, PATTERN_SIZE)
+		x, y := IndexPos(i)
 
-		for i := 0; i < NPOINT; i++ {
-			x, y := IndexPos(i)
-			b.PointHash[r][i] = b.VertexHash(x, y, r, b.Points[i])
-		}
-		for i := 0; i < NPOINT; i++ {
-			b.PatternHash[r][i] = make([]int64, PATTERN_SIZE)
-			x, y := IndexPos(i)
-
-			for dy := -1*PATTERN_SIZE + 1; dy < PATTERN_SIZE; dy++ {
-				for dx := -1*PATTERN_SIZE + 1; dx < PATTERN_SIZE; dx++ {
-					x1, y1 := x+dx, y+dy
-					d := Abs(dx) + Abs(dy)
-					if d >= PATTERN_SIZE {
-						continue
-					}
-					c := INVALID_COLOR
-					if !PosOutBoard(x1, y1) {
-						c = b.Points[PosIndex(x1, y1)]
-					}
-					b.PatternHash[r][i][d] ^= b.VertexHash(x1, y1, r, c)
+		for dy := -1*PATTERN_SIZE + 1; dy < PATTERN_SIZE; dy++ {
+			for dx := -1*PATTERN_SIZE + 1; dx < PATTERN_SIZE; dx++ {
+				x1, y1 := x+dx, y+dy
+				d := Abs(dx) + Abs(dy)
+				if d >= PATTERN_SIZE {
+					continue
 				}
+				c := INVALID_COLOR
+				if !PosOutBoard(x1, y1) {
+					c = b.Points[PosIndex(x1, y1)]
+				}
+				b.PatternHash[i][d] ^= b.VertexHash(x1, y1, c)
 			}
 		}
 	}
-
 }
 
 func (b *Board) UpdateHash(k int, oc, nc Color) {
-	for r := 0; r < ROTATE; r++ {
-		x, y := IndexPos(k)
-		b.PointHash[r][k] ^= b.VertexHash(x, y, r, oc)
-		b.PointHash[r][k] ^= b.VertexHash(x, y, r, nc)
+	x, y := IndexPos(k)
+	b.PointHash[k] ^= b.VertexHash(x, y, oc)
+	b.PointHash[k] ^= b.VertexHash(x, y, nc)
 
-		for d := 0; d < PATTERN_SIZE; d++ {
-			for _, j := range PointDisMap[k][d] {
-				b.PatternHash[r][j][d] ^= b.VertexHash(x, y, r, oc)
-				b.PatternHash[r][j][d] ^= b.VertexHash(x, y, r, nc)
-			}
+	for d := 0; d < PATTERN_SIZE; d++ {
+		for _, j := range PointDisMap[k][d] {
+			b.PatternHash[j][d] ^= b.VertexHash(x, y, oc)
+			b.PatternHash[j][d] ^= b.VertexHash(x, y, nc)
 		}
 	}
 }
@@ -384,18 +375,11 @@ func (b *Board) FeatureHash(k int, c Color) int64 {
 //calc before put
 func (b *Board) FinalPatternHash(k int, c Color) []int64 {
 	ret := make([]int64, PATTERN_SIZE)
+	h := int64(0)
 	fh := b.FeatureHash(k, c)
-	for r := 0; r < ROTATE; r++ {
-		h := int64(0)
-		for d := 0; d < PATTERN_SIZE; d++ {
-			h ^= b.PatternHash[r][k][d]
-			if ret[d] < h {
-				ret[d] = h
-			}
-		}
-	}
 	for d := 0; d < PATTERN_SIZE; d++ {
-		ret[d] ^= fh
+		h ^= b.PatternHash[k][d]
+		ret[d] = h ^ fh
 	}
 	return ret
 }
