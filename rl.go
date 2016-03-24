@@ -143,7 +143,7 @@ func (b *Board) GenRLBattleMove(c Color) (int, []int64) {
 			rank[k] = pr
 		}
 	}
-	topn := TopN(rank, 2)
+	topn := TopN(rank, 16)
 	if len(topn) == 0 {
 		return -1, nil
 	}
