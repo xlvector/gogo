@@ -22,9 +22,7 @@ func CopyModel(model *lr.LogisticRegression) *lr.LogisticRegression {
 
 func BatchRLBattle(b *Board) {
 	b.Model2 = CopyModel(b.Model)
-	prev := CopyModel(b.Model)
-	prevWin := 0
-	for k := 0; k < 1000; k++ {
+	for k := 0; k < 10000; k++ {
 		wg := &sync.WaitGroup{}
 		win := 0
 		ch := make(chan map[int64]int, 200)
@@ -41,30 +39,24 @@ func BatchRLBattle(b *Board) {
 		}
 		wg.Wait()
 		close(ch)
-		if win > prevWin {
-			prev = CopyModel(b.Model)
-			prevWin = win
-			dis := make(map[int64]int)
-			for rank := range ch {
-				for k, v := range rank {
-					v1, _ := dis[k]
-					v1 += v
-					dis[k] = v1
-				}
+		dis := make(map[int64]int)
+		for rank := range ch {
+			for k, v := range rank {
+				v1, _ := dis[k]
+				v1 += v
+				dis[k] = v1
 			}
-			for k, v := range dis {
-				v1, _ := b.Model.Model[k]
-				coeff := math.Abs(float64(v)) / (5.0 + math.Abs(float64(v)))
-				if v < 0 {
-					coeff *= -1.0
-				}
-				b.Model.Model[k] = v1 + 0.003*coeff*math.Abs(v1)
+		}
+		for k, v := range dis {
+			v1, _ := b.Model.Model[k]
+			coeff := math.Abs(float64(v)) / (5.0 + math.Abs(float64(v)))
+			if v < 0 {
+				coeff *= -1.0
 			}
-		} else {
-			b.Model = prev
+			b.Model.Model[k] = v1 + 0.01*coeff*math.Abs(v1)
 		}
 
-		log.Println(win, prevWin)
+		log.Println(win)
 	}
 }
 
