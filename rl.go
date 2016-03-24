@@ -42,9 +42,11 @@ func BatchRLBattle(b *Board) {
 			}
 		}
 		for k, v := range dis {
+			if v < 2 && v > -2 {
+				continue
+			}
 			v1, _ := b.Model.Model[k]
-			log.Println(k, v, v1)
-			b.Model.Model[k] = v1 + 0.01*float64(v)
+			b.Model.Model[k] = v1 + 0.001*float64(v)
 		}
 		log.Println(win)
 	}
