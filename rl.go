@@ -11,12 +11,19 @@ import (
 	"github.com/xlvector/hector/lr"
 )
 
-func BatchRLBattle(b *Board) {
-	b.Model2 = &lr.LogisticRegression{}
-	b.Model2.Model = make(map[int64]float64)
-	for k, v := range b.Model.Model {
-		b.Model2.Model[k] = v
+func CopyModel(model *lr.LogisticRegression) *lr.LogisticRegression {
+	ret := &lr.LogisticRegression{}
+	ret.Model = make(map[int64]float64)
+	for k, v := range model.Model {
+		ret.Model[k] = v
 	}
+	return ret
+}
+
+func BatchRLBattle(b *Board) {
+	b.Model2 = CopyModel(b.Model)
+	prev = CopyModel(b.Model)
+	prevWin = 0
 	for k := 0; k < 1000; k++ {
 		wg := &sync.WaitGroup{}
 		win := 0
@@ -34,24 +41,30 @@ func BatchRLBattle(b *Board) {
 		}
 		wg.Wait()
 		close(ch)
-		dis := make(map[int64]int)
-		for rank := range ch {
-			for k, v := range rank {
-				v1, _ := dis[k]
-				v1 += v
-				dis[k] = v1
+		if win > prevWin {
+			prev = CopyModel(b.Model)
+			prevWin = win
+			dis := make(map[int64]int)
+			for rank := range ch {
+				for k, v := range rank {
+					v1, _ := dis[k]
+					v1 += v
+					dis[k] = v1
+				}
 			}
-		}
-		for k, v := range dis {
-			v1, _ := b.Model.Model[k]
-			coeff := math.Abs(float64(v)) / (5.0 + math.Abs(float64(v)))
-			if v < 0 {
-				coeff *= -1.0
+			for k, v := range dis {
+				v1, _ := b.Model.Model[k]
+				coeff := math.Abs(float64(v)) / (5.0 + math.Abs(float64(v)))
+				if v < 0 {
+					coeff *= -1.0
+				}
+				b.Model.Model[k] = v1 + 0.003*coeff*math.Abs(v1)
 			}
-			b.Model.Model[k] = v1 + 0.003*coeff*math.Abs(v1)
+		} else {
+			b.Model = prev
 		}
 
-		log.Println(win)
+		log.Println(win, prevWin)
 	}
 }
 
