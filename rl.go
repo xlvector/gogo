@@ -155,7 +155,7 @@ func (b *Board) GenRLBattleMove(c Color) (int, []int64) {
 	if len(topn) == 0 {
 		return -1, nil
 	}
-	sum := 0
+	sum := 0.0
 	for _, v := range topn {
 		sum += v.Second
 	}
