@@ -45,6 +45,11 @@ func BatchRLBattle(b *Board) {
 			if v < 2 && v > -2 {
 				continue
 			}
+			if v > 0 {
+				v = 1
+			} else {
+				v = -1
+			}
 			v1, _ := b.Model.Model[k]
 			b.Model.Model[k] = v1 + 0.0001*float64(v)
 		}
