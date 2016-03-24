@@ -42,11 +42,8 @@ func BatchRLBattle(b *Board) {
 			}
 		}
 		for k, v := range dis {
-			if v < 2 && v > -2 {
-				continue
-			}
 			v1, _ := b.Model.Model[k]
-			b.Model.Model[k] = v1 + 0.00001*float64(v)
+			b.Model.Model[k] = v1 + 0.0001*float64(v)
 		}
 		log.Println(win)
 	}
@@ -102,16 +99,19 @@ func (b *Board) RLBattle(c Color) (float64, map[int64]int) {
 			v1, _ := ret[k]
 			ret[k] = v1 + v
 		}
-
-		for k, v := range colorFs[WHITE] {
-			v1, _ := ret[k]
-			ret[k] = v1 - v
-		}
+		/*
+			for k, v := range colorFs[WHITE] {
+				v1, _ := ret[k]
+				ret[k] = v1 - v
+			}
+		*/
 	} else {
-		for k, v := range colorFs[WHITE] {
-			v1, _ := ret[k]
-			ret[k] = v1 + v
-		}
+		/*
+			for k, v := range colorFs[WHITE] {
+				v1, _ := ret[k]
+				ret[k] = v1 + v
+			}
+		*/
 		for k, v := range colorFs[BLACK] {
 			v1, _ := ret[k]
 			ret[k] = v1 - v
