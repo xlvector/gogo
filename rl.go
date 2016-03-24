@@ -2,6 +2,7 @@ package gogo
 
 import (
 	"log"
+	"math"
 	"math/rand"
 	"sync"
 	"time"
@@ -43,12 +44,11 @@ func BatchRLBattle(b *Board) {
 		}
 		for k, v := range dis {
 			v1, _ := b.Model.Model[k]
-			v2 := v1 + 0.0001*float64(v)
-			if v2*v1 < 0 {
-				delete(b.Model.Model, k)
-			} else {
-				b.Model.Model[k] = v2
+			coeff := math.Abs(float64(v)) / (1.0 + math.Abs(float64(v)))
+			if v < 0 {
+				coeff *= -1.0
 			}
+			b.Model.Model[k] = v1 * (1 + 0.01*coeff)
 		}
 		log.Println(win)
 	}
