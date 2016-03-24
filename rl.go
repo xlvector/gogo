@@ -22,6 +22,7 @@ func CopyModel(model *lr.LogisticRegression) *lr.LogisticRegression {
 
 func BatchRLBattle(b *Board) {
 	b.Model2 = CopyModel(b.Model)
+	alpha := 0.2
 	for k := 0; k < 10000; k++ {
 		wg := &sync.WaitGroup{}
 		win := 0
@@ -53,10 +54,11 @@ func BatchRLBattle(b *Board) {
 			if v < 0 {
 				coeff *= -1.0
 			}
-			b.Model.Model[k] = v1 + 0.3*coeff*math.Abs(v1)
+			b.Model.Model[k] = v1 + alpha*coeff*math.Abs(v1)
 		}
 
 		log.Println(win)
+		alpha *= 0.99
 	}
 }
 
