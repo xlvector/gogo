@@ -46,7 +46,7 @@ func BatchRLBattle(b *Board) {
 				continue
 			}
 			v1, _ := b.Model.Model[k]
-			b.Model.Model[k] = v1 + 0.001*float64(v)
+			b.Model.Model[k] = v1 + 0.01*float64(v)
 		}
 		log.Println(win)
 	}
