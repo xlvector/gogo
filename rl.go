@@ -22,8 +22,8 @@ func CopyModel(model *lr.LogisticRegression) *lr.LogisticRegression {
 
 func BatchRLBattle(b *Board) {
 	b.Model2 = CopyModel(b.Model)
-	prev = CopyModel(b.Model)
-	prevWin = 0
+	prev := CopyModel(b.Model)
+	prevWin := 0
 	for k := 0; k < 1000; k++ {
 		wg := &sync.WaitGroup{}
 		win := 0
