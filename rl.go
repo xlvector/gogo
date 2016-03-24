@@ -16,11 +16,11 @@ func BatchRLBattle(b *Board) {
 	for k, v := range b.Model.Model {
 		b.Model2.Model[k] = v
 	}
-	for k := 0; k < 100; k++ {
+	for k := 0; k < 1000; k++ {
 		wg := &sync.WaitGroup{}
 		win := 0
 		ch := make(chan map[int64]int, 200)
-		for i := 0; i < 200; i++ {
+		for i := 0; i < 100; i++ {
 			wg.Add(1)
 			go func() {
 				s, rank := b.Copy().RLBattle(BLACK)
