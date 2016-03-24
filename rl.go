@@ -155,7 +155,17 @@ func (b *Board) GenRLBattleMove(c Color) (int, []int64) {
 	if len(topn) == 0 {
 		return -1, nil
 	}
-	k := rand.Intn(len(topn))
-	b.Put(topn[k].First, c)
-	return topn[k].First, fs[topn[k].First]
+	sum := 0
+	for _, v := range topn {
+		sum += v.Second
+	}
+	pr := sum * rand.Float64()
+	for _, v := range topn {
+		pr -= v.Second
+		if pr <= 0 {
+			b.Put(v.First, c)
+			return v.First, fs[v.First]
+		}
+	}
+	return -1, nil
 }
