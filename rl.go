@@ -33,13 +33,20 @@ func BatchRLBattle(b *Board) {
 		}
 		wg.Wait()
 		close(ch)
+		dis := make(map[int64]int)
 		for rank := range ch {
 			for k, v := range rank {
-				log.Println(k, v)
-				v1, _ := b.Model.Model[k]
-				v1 += 0.0001 * float64(v)
-				b.Model.Model[k] = v1
+				v1, _ := dis[k]
+				v1 += v
+				dis[k] = v1
 			}
+		}
+		for k, v := range dis {
+			if v < 2 || v > -2 {
+				continue
+			}
+			v1, _ := b.Model.Model[k]
+			b.Model.Model[k] = v1 + 0.001*float64(v)
 		}
 		log.Println(win)
 	}
