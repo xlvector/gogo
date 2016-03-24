@@ -53,7 +53,7 @@ func BatchRLBattle(b *Board) {
 			if v < 0 {
 				coeff *= -1.0
 			}
-			b.Model.Model[k] = v1 + 0.1*coeff*math.Abs(v1)
+			b.Model.Model[k] = v1 + 0.3*coeff*math.Abs(v1)
 		}
 
 		log.Println(win)
