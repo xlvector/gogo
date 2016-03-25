@@ -374,6 +374,8 @@ func (b *Board) EmptyWormFromPoint(k int, maxDepth int) []int64 {
 	start := 0
 	queue = append(queue, k*100)
 	ret := make([]int64, maxDepth+1)
+	black := NewPointMap(10)
+	white := NewPointMap(10)
 	gray := NewPointMap(10)
 	for {
 		if start >= len(queue) {
@@ -397,8 +399,10 @@ func (b *Board) EmptyWormFromPoint(k int, maxDepth int) []int64 {
 			}
 			if b.Points[nv] == BLACK && depth < maxDepth {
 				ret[depth] ^= b.PointHash[nv]
+				black.Add(nv)
 			} else if b.Points[nv] == WHITE && depth < maxDepth {
 				ret[depth] ^= b.PointHash[nv]
+				white.Add(nv)
 			} else if b.Points[nv] == GRAY {
 				queue = append(queue, nv*100+depth+1)
 			}
@@ -407,6 +411,8 @@ func (b *Board) EmptyWormFromPoint(k int, maxDepth int) []int64 {
 	for i := 1; i < maxDepth; i++ {
 		ret[i] ^= ret[i-1]
 	}
+
+	ret = append(ret, 9345710457107515+int64(black.Size()*171)+int64(white.Size()*17)+int64(gray.Size()))
 	return ret
 }
 
@@ -626,6 +632,6 @@ func (b *Board) Territory() map[int]int {
 }
 
 func (b *Board) RefreshInfluenceAndTerritory() {
-	b.InfluenceVal = b.Influence()
+	//b.InfluenceVal = b.Influence()
 	//b.TerritoryVal = b.Territory()
 }
