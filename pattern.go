@@ -118,7 +118,6 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 	worm := b.WormFromPoint(k, c, 3)
 	ret := make([]int64, 0, 5)
 
-	f := int64(0)
 	minLiberty := 10000
 	for _, w := range myNWorms {
 		if minLiberty > w.Liberty {
@@ -128,32 +127,22 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 
 	if minLiberty == 1 {
 		if worm.Liberty == 1 {
-			//escape capture
-			f ^= 493570158105
 			ret = append(ret, 493570158105)
 		} else if worm.Liberty == 2 {
-			f ^= 159084081432
 			ret = append(ret, 159084081432)
 		} else if worm.Liberty == 3 {
-			f ^= 897325971018
 			ret = append(ret, 897325971018)
 		} else if worm.Liberty > 3 {
-			f ^= 291850148415
 			ret = append(ret, 291850148415)
 		}
 	} else if minLiberty == 2 {
 		if worm.Liberty == 1 {
-			//escape capture
-			f ^= 932759347016
 			ret = append(ret, 932759347016)
 		} else if worm.Liberty == 2 {
-			f ^= 758724359874
 			ret = append(ret, 758724359874)
 		} else if worm.Liberty == 3 {
-			f ^= 238146923179
 			ret = append(ret, 238146923179)
 		} else if worm.Liberty > 3 {
-			f ^= 945876927621
 			ret = append(ret, 945876927621)
 		}
 	}
@@ -178,14 +167,12 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 	fl += 809438508012
 	ret = append(ret, fl)
 	if minLiberty == 1 {
-		f ^= 787401927621 + int64(minLibertySize)
 		ret = append(ret, 787401927621+int64(minLibertySize))
 	} else if minLiberty == 2 {
-		f ^= 304580158101 + int64(minLibertySize)
 		ret = append(ret, 304580158101+int64(minLibertySize))
 	}
 
-	f ^= b.EdgeDisHash(k)
+	ret = append(ret, b.EdgeDisHash(k))
 
 	nMy := int64(0)
 	nOp := int64(0)
@@ -197,16 +184,8 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 		}
 	}
 
-	f ^= 257012801851 + nMy*710517801
-	f ^= 314501851003 + nOp*837104719
-
-	if nMy > 0 {
-		ret = append(ret, 257012801851+nMy*710517801)
-	}
-
-	if nOp > 0 {
-		ret = append(ret, 314501851003+nOp*837104719)
-	}
+	ret = append(ret, 257012801851+nMy*710517801)
+	ret = append(ret, 314501851003+nOp*837104719)
 
 	nMy = 0
 	nOp = 0
@@ -217,33 +196,29 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 			nOp += 1
 		}
 	}
-	f ^= 839457015011 + nMy*834561911
-	f ^= 954876687874 + nOp*231971295
-
-	if nMy > 0 {
-		ret = append(ret, 839457015011+nMy*834561911)
-	}
-
-	if nOp > 0 {
-		ret = append(ret, 954876687874+nOp*231971295)
-	}
-
-	/*
-		if val, ok := b.InfluenceVal[k]; ok {
-			ret = append(ret, 760918543717+int64(val)*7139)
-		}
-
-		if val, ok := b.TerritoryVal[k]; ok {
-			ret = append(ret, 845234579915+int64(val)*1053)
-		}
-	*/
+	ret = append(ret, 839457015011+nMy*834561911)
+	ret = append(ret, 954876687874+nOp*231971295)
 
 	wormHash := b.EmptyWormFromPoint(k, 5)
 	for _, h := range wormHash {
 		ret = append(ret, h^78860975057501)
 	}
 	ret = append(ret, b.PatternDxd(k, c, 1))
-	ret = append(ret, f)
+
+	fret := make([]int64, 0, 2*len(ret))
+
+	for _, f := range ret {
+		fret = append(fret, f)
+	}
+
+	for _, f1 := range ret {
+		for _, f2 := range ret {
+			if f1 < f2 {
+				fret = append(fret, f1^f2)
+			}
+		}
+	}
+
 	return ret
 }
 
