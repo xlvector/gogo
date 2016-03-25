@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"log"
+	"math/rand"
 	"os"
 	"runtime"
 	"runtime/pprof"
@@ -42,10 +43,10 @@ func GenDLDataset(root, output string) {
 	wg.Wait()
 }
 
-func GenPatterns(path string, ch chan string) {
+func GenPatterns(path string, ch chan string, r int) {
 	log.Println(path)
 	board := gogo.NewBoard()
-	pats := board.GenPattern(path, 0)
+	pats := board.GenPattern(path, r)
 	for _, pat := range pats {
 		ch <- pat.String()
 	}
@@ -57,7 +58,10 @@ func GenPatternsThread(paths []string, total, split int, ch chan string) {
 		if i%total != split {
 			continue
 		}
-		GenPatterns(path, ch)
+		a := rand.Intn(8)
+		b := (a + 1) % 8
+		GenPatterns(path, ch, a)
+		GenPatterns(path, ch, b)
 	}
 }
 
