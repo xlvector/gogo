@@ -346,19 +346,51 @@ func TestSelfBattle(t *testing.T) {
 }
 
 func TestInfluence(t *testing.T) {
+	/*
+			A B C D E F G H J K L M N O P Q R S T
+		19  . . . . . . . . . . . . . . . . . . .
+		18  . . . . . . . . . . . . . . . . . . .
+		17  . . . . . . . . . . . . . . . . . . .
+		16  . . . . . . . . . . . . . . . . . . .
+		15  . . . . . . . . . . . . . . . . . . .
+		14  . . . . . . . . . . . . . . . . . . .
+		13  . . . . . . . . . . . . . . . . . . .
+		12  . . . . . . . . . . . . . . . . . . .
+		11  . . . . . . . . . . . . . . . . . . .
+		10  . . . . . . . . . . . . . . . . . . .
+		 9  . . . . . . . . . . . . . . . . . . .
+		 8  . . . . . . . . . . . . . . . . . . .
+		 7  . . . . . . . . . . . . . . . X . . .
+		 6  . . . . . . . . . . . . . . . . . . .
+		 5  . . . . . . . . . . . . . . . . . X .
+		 4  . . . . . . . . . . . . . . O . X . .
+		 3  . . . . . . . . . . . . . . . O O X .
+		 2  . . . . . . . . . . . . . . . . . . .
+		 1  . . . . . . . . . . . . . . . . . . .
+		    A B C D E F G H J K L M N O P Q R S T
+	*/
 	b := NewBoard()
-	b.PutLabel("BJ10")
-	b.PutLabel("WL10")
+	b.PutLabel("BS3")
+	b.PutLabel("BS5")
+	b.PutLabel("BR4")
+	b.PutLabel("BQ7")
+	b.PutLabel("WR3")
+	b.PutLabel("WQ3")
+	b.PutLabel("WP4")
 	t.Log(b.String(nil))
 
 	influence := b.Influence()
 	mark := make(map[int]string)
 	for k, v := range influence {
-		mark[k] = fmt.Sprintf("%2.f", float64(v))
+		tmp := fmt.Sprintf("%2.f", float64(v))
+		if len(tmp) < 3 {
+			tmp = " " + tmp
+		}
+		mark[k] = tmp
 	}
 	for k, c := range b.Points {
 		if _, ok := influence[k]; !ok {
-			mark[k] = " " + ColorMark(c)
+			mark[k] = "  " + ColorMark(c)
 		}
 	}
 	t.Log(b.String(mark))

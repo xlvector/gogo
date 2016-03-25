@@ -205,6 +205,14 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 	}
 	ret = append(ret, b.PatternDxd(k, c, 1))
 
+	ret = append(ret, 970803460911+751*int64(len(b.Actions)/10))
+
+	influ := b.InfluenceVal[k]
+	if c == WHITE {
+		influ *= -1
+	}
+	ret = append(ret, 491570147501+11*int64(influ))
+
 	fret := make([]int64, 0, 3*len(ret))
 	for _, f1 := range ret {
 		fret = append(fret, f1)

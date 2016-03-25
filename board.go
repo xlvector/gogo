@@ -626,6 +626,6 @@ func (b *Board) Territory() map[int]int {
 }
 
 func (b *Board) RefreshInfluenceAndTerritory() {
-	//b.InfluenceVal = b.Influence()
+	b.InfluenceVal = b.Influence()
 	//b.TerritoryVal = b.Territory()
 }
