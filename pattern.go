@@ -205,16 +205,17 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 	}
 	ret = append(ret, b.PatternDxd(k, c, 1))
 
-	fret := make([]int64, 0, 2*len(ret))
-
-	for _, f := range ret {
-		fret = append(fret, f)
-	}
-
+	fret := make([]int64, 0, 3*len(ret))
 	for _, f1 := range ret {
+		fret = append(fret, f1)
 		for _, f2 := range ret {
 			if f1 < f2 {
 				fret = append(fret, f1^f2)
+				for _, f3 := range ret {
+					if f2 < f3 {
+						fret = append(fret, f1^f2^f3)
+					}
+				}
 			}
 		}
 	}
