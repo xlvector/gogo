@@ -161,10 +161,21 @@ func (b *Board) GenMove(c Color, rank map[int]float64) (int, map[int]float64) {
 	if len(cands) == 0 {
 		return -1, rank
 	}
-	pf := cands[rand.Intn(len(cands))].First
-	b.Put(pf, c)
-	delete(rank, pf)
-	return pf, rank
+	psum := 0.0
+	for _, cand := range cands {
+		psum += cand.Second
+	}
+	pr := rand.Float64() * psum
+	for _, cand := range cands {
+		pr -= cand.Second
+		if pr <= 0.0 {
+			pf := cand.First
+			b.Put(pf, c)
+			delete(rank, pf)
+			return pf, rank
+		}
+	}
+	return -1, rank
 }
 
 func (b *Board) GenBestMove(c Color, gt *GameTree) (bool, int) {
@@ -229,7 +240,7 @@ func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) (bool, int) {
 	robust := 0
 	for _, child := range root.Children {
 		winrate := float64(child.win) / float64(child.visit)
-		log.Println(PointString(child.x, child.y, child.stone), child.RaveValue(), winrate, child.win, child.visit, child.prior)
+		log.Println(PointString(child.x, child.y, child.stone), winrate, child.win, child.visit, child.prior)
 		if robust < child.visit {
 			robust = child.visit
 			best = child
@@ -251,12 +262,12 @@ func MCTSSelection(gt *GameTree) *GameTreeNode {
 			return ret
 		}
 		depth += 1
-		maxRave := 0.0
+		maxVal := 0.0
 		var best *GameTreeNode
 		for _, child := range ret.Children {
-			rave := child.RaveValue()
-			if maxRave < rave {
-				maxRave = rave
+			val := child.UCTValue()
+			if maxVal < val {
+				maxVal = val
 				best = child
 			}
 		}
