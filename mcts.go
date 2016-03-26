@@ -207,7 +207,7 @@ func (p *GameTreeNode) UCTValue() float64 {
 	return ret
 }
 
-func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) bool {
+func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) (bool, int) {
 	wg := &sync.WaitGroup{}
 	root := gt.Current
 	log.Println(PointString(root.x, root.y, root.stone), root.win, root.visit, "next stone color: ", ColorMark(c))
@@ -236,7 +236,7 @@ func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) bool {
 		}
 	}
 	gt.Current = best
-	return b.Put(PosIndex(best.x, best.y), c)
+	return b.Put(PosIndex(best.x, best.y), c), PosIndex(best.x, best.y)
 }
 
 func MCTSSelection(gt *GameTree) *GameTreeNode {

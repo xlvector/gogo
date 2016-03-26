@@ -222,9 +222,12 @@ func (t *GameTree) HasHandicap() bool {
 
 func (t *GameTree) CurrentChild() {
 	log.Println("current node: ", PointString(t.Current.x, t.Current.y, t.Current.stone), t.Current.visit, t.Current.win)
+	line := ""
 	for _, child := range t.Current.Children {
-		log.Println(PointString(child.x, child.y, child.stone))
+		line += PointString(child.x, child.y, child.stone)
+		line += ","
 	}
+	log.Println(line)
 }
 
 func (t *GameTree) SGFSize() int {

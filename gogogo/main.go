@@ -165,10 +165,42 @@ func main() {
 			gt.Add(gogo.NewGameTreeNode(c, x, y))
 			log.Println(board.String(nil))
 
-			if ok := board.MCTSMove(gogo.WHITE, gt, 5, 10000); !ok {
+			if ok, _ := board.MCTSMove(gogo.WHITE, gt, 5, 10000); !ok {
 				break
 			}
 			log.Println(board.String(nil))
+		}
+	} else if *mode == "gnugo" {
+		gnugo := gogo.NewGTPProgram("gnugo", "--mode", "gtp", "--level", "10")
+		board := gogo.NewBoard()
+		if len(*model) > 0 {
+			board.Model = &lr.LogisticRegression{}
+			board.Model.LoadModel(*model)
+		}
+		log.Println(board.String(nil))
+		gt := gogo.NewGameTree(gogo.SIZE)
+
+		for {
+			gt.CurrentChild()
+			ok, pos := board.MCTSMove(gogo.BLACK, gt, 10, *sim)
+			if !ok {
+				break
+			}
+			log.Println(board.String(nil))
+			x, y := gogo.IndexPos(pos)
+			gnugo.Put(x, y, gogo.BLACK)
+
+			plabel := gnugo.GenMove(gogo.WHITE)
+			ok = board.PutLabel("W" + plabel)
+			if !ok {
+				break
+			}
+			log.Println(board.String(nil))
+			{
+				last, _ := board.LastMove()
+				lastX, lastY := gogo.IndexPos(last)
+				gt.Add(gogo.NewGameTreeNode(gogo.WHITE, lastX, lastY))
+			}
 		}
 	} else if *mode == "self" {
 		board := gogo.NewBoard()
@@ -181,7 +213,7 @@ func main() {
 		gt2 := gogo.NewGameTree(gogo.SIZE)
 		for {
 			gt1.CurrentChild()
-			if ok := board.MCTSMove(gogo.BLACK, gt1, 10, *sim); !ok {
+			if ok, _ := board.MCTSMove(gogo.BLACK, gt1, 10, *sim); !ok {
 				break
 			}
 			log.Println(board.String(nil))
@@ -192,7 +224,7 @@ func main() {
 			}
 
 			gt2.CurrentChild()
-			if ok := board.MCTSMove(gogo.WHITE, gt2, 20, *sim); !ok {
+			if ok, _ := board.MCTSMove(gogo.WHITE, gt2, 20, *sim); !ok {
 				break
 			}
 			log.Println(board.String(nil))

@@ -2,6 +2,7 @@ package gogo
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -301,6 +302,7 @@ func (b *Board) PutLabel(buf string) bool {
 	x := strings.Index(LX, buf[1:2])
 	y, _ := strconv.Atoi(buf[2:])
 	y -= 1
+	log.Println(buf, x, y, c)
 	return b.Put(PosIndex(x, y), c)
 }
 
