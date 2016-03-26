@@ -167,18 +167,18 @@ func (b *Board) GenMove(c Color, rank map[int]float64) (int, map[int]float64) {
 	return pf, rank
 }
 
-func (b *Board) GenBestMove(c Color, gt *GameTree) bool {
+func (b *Board) GenBestMove(c Color, gt *GameTree) (bool, int) {
 	rank := b.CandidateMoves(c, nil)
 	cands := TopN(rank, 1)
 	if len(cands) == 0 {
-		return false
+		return false, -1
 	}
 	if ok := b.Put(cands[0].First, c); ok {
 		x, y := IndexPos(cands[0].First)
 		gt.Add(NewGameTreeNode(c, x, y))
-		return true
+		return true, cands[0].First
 	}
-	return false
+	return false, -1
 }
 
 func (p *GameTreeNode) RaveValue() float64 {
