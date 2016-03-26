@@ -74,6 +74,7 @@ func main() {
 	model := flag.String("model", "", "model path")
 	sim := flag.Int("sim", 1000, "sim count")
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
+	level := flag.String("level", "0", "level")
 	flag.Parse()
 
 	if *cpuprofile != "" {
@@ -171,7 +172,7 @@ func main() {
 			log.Println(board.String(nil))
 		}
 	} else if *mode == "gnugo" {
-		gnugo := gogo.NewGTPProgram("gnugo", "--mode", "gtp", "--level", "10")
+		gnugo := gogo.NewGTPProgram("gnugo", "--mode", "gtp", "--level", *level)
 		board := gogo.NewBoard()
 		if len(*model) > 0 {
 			board.Model = &lr.LogisticRegression{}
