@@ -21,7 +21,8 @@ func (b *Board) SelfBattle(c Color) map[int]Color {
 	n := 0
 	for n < 350 {
 		pass := 0
-		p, rank = b.GenMove(c, rank)
+		//p, rank = b.GenSelfBattleMove(c, rank)
+		p = b.GenSelfBattleMove(c)
 		if p < 0 {
 			pass += 1
 		} else {
@@ -29,7 +30,8 @@ func (b *Board) SelfBattle(c Color) map[int]Color {
 				amaf[p] = c
 			}
 		}
-		p, rank = b.GenMove(OpColor(c), rank)
+		//p, rank = b.GenSelfBattleMove(OpColor(c), rank)
+		p = b.GenSelfBattleMove(OpColor(c))
 		if p < 0 {
 			pass += 1
 		} else {
