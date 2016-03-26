@@ -183,7 +183,7 @@ func main() {
 
 		for {
 			gt.CurrentChild()
-			ok, pos := board.MCTSMove(gogo.BLACK, gt, 32, *sim)
+			ok, pos := board.MCTSMove(gogo.BLACK, gt, 16, *sim)
 			if !ok {
 				break
 			}
