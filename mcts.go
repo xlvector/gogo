@@ -286,7 +286,7 @@ func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf int, wg *sync.WaitGroup
 		oc = OpColor(node.stone)
 	}
 
-	if len(node.CandMoves) == 0 {
+	if len(node.Children) == 0 {
 		rank := board.CandidateMoves(oc, nil)
 		topn := TopN(rank, nLeaf)
 		//line := PointString(node.x, node.y, node.stone) + ":"
