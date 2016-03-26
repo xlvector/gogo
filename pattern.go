@@ -112,6 +112,48 @@ func (b *Board) EscapeAtari(k int, c Color) bool {
 	}
 }
 
+func (b *Board) Urgency(k int, c Color) float64 {
+	if b.PointLiberty(k) > 3 {
+		return 1.0
+	}
+	myNWorms := b.NeighWorms(k, c, c, 3)
+	opNWorms := b.NeighWorms(k, c, OpColor(c), 3)
+	worm := b.WormFromPoint(k, c, 3)
+	minLiberty := 10000
+	for _, w := range myNWorms {
+		if minLiberty > w.Liberty {
+			minLiberty = w.Liberty
+		}
+	}
+
+	if minLiberty == 1 {
+		if worm.Liberty == 2 {
+			return 10.0
+		} else if worm.Liberty >= 3 {
+			return 100.0
+		}
+	} else if minLiberty == 2 {
+		if worm.Liberty >= 3 {
+			return 20.0
+		}
+	}
+
+	minLiberty = 10000
+	for _, w := range opNWorms {
+		if minLiberty > w.Liberty {
+			minLiberty = w.Liberty
+		}
+	}
+
+	if minLiberty == 1 {
+		return 50.0
+	} else if minLiberty == 2 {
+		return 20.0
+	}
+
+	return 1.0
+}
+
 func (b *Board) LocalFeature(k int, c Color) []int64 {
 	myNWorms := b.NeighWorms(k, c, c, 3)
 	opNWorms := b.NeighWorms(k, c, OpColor(c), 3)

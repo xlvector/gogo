@@ -131,27 +131,35 @@ func (b *Board) CandidateMoves(c Color, rank map[int]float64) map[int]float64 {
 }
 
 func (b *Board) GenSelfBattleMove(c Color) int {
-
 	last, _ := b.LastMove()
-
-	if last > 0 && rand.Float64() < 0.7 {
+	rank := make(map[int]float64)
+	if last > 0 {
 		for d := 1; d < 5; d++ {
 			for _, p := range PointDisMap[last][d] {
-				if rand.Float64() < 0.3 {
-					if ok, _ := b.CanPut(p, c); ok {
-						b.Put(p, c)
-						return p
-					}
+				if ok, _ := b.CanPut(p, c); ok {
+					rank[p] = b.Urgency(p, c)
 				}
 			}
 		}
 	}
 
-	for i := 0; i < NPOINT*2; i++ {
+	for i := 0; i < NPOINT*2 && len(rank) < 10; i++ {
 		p := rand.Intn(NPOINT)
 		if ok, _ := b.CanPut(p, c); ok {
-			b.Put(p, c)
-			return p
+			rank[p] = b.Urgency(p, c)
+		}
+	}
+
+	psum := 0.0
+	for _, v := range rank {
+		psum += v
+	}
+	pr := rand.Float64() * psum
+	for k, v := range rank {
+		pr -= v
+		if pr <= 0.0 {
+			b.Put(k, c)
+			return k
 		}
 	}
 	return -1
