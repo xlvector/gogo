@@ -72,6 +72,7 @@ func main() {
 	input := flag.String("input", "", "input")
 	output := flag.String("output", "", "output")
 	model := flag.String("model", "", "model path")
+	sim := flag.Int("sim", 1000, "sim count")
 	cpuprofile := flag.String("cpuprofile", "", "write cpu profile to file")
 	flag.Parse()
 
@@ -180,7 +181,7 @@ func main() {
 		gt2 := gogo.NewGameTree(gogo.SIZE)
 		for {
 			gt1.CurrentChild()
-			if ok := board.MCTSMove(gogo.BLACK, gt1, 10, 1000); !ok {
+			if ok := board.MCTSMove(gogo.BLACK, gt1, 10, *sim); !ok {
 				break
 			}
 			log.Println(board.String(nil))
@@ -191,7 +192,7 @@ func main() {
 			}
 
 			gt2.CurrentChild()
-			if ok := board.MCTSMove(gogo.WHITE, gt2, 20, 1000); !ok {
+			if ok := board.MCTSMove(gogo.WHITE, gt2, 20, *sim); !ok {
 				break
 			}
 			log.Println(board.String(nil))

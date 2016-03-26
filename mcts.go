@@ -13,29 +13,35 @@ import (
 
 var MCTSLock = &sync.Mutex{}
 
-func (b *Board) SelfBattle(c Color) int {
+func (b *Board) SelfBattle(c Color) map[int]Color {
 	rand.Seed(time.Now().UnixNano())
-	//rank := make(map[int]float64)
+	amaf := make(map[int]Color)
 	p := -1
 	n := 0
 	for n < 350 {
 		pass := 0
-		//p, rank = b.GenMove(c, rank)
 		p = b.GenSelfBattleMove(c)
 		if p < 0 {
 			pass += 1
+		} else {
+			if _, ok := amaf[p]; !ok {
+				amaf[p] = c
+			}
 		}
-		//p, rank = b.GenMove(OpColor(c), rank)
 		p = b.GenSelfBattleMove(OpColor(c))
 		if p < 0 {
 			pass += 1
+		} else {
+			if _, ok := amaf[p]; !ok {
+				amaf[p] = OpColor(c)
+			}
 		}
 		if pass >= 2 {
 			break
 		}
 		n += 1
 	}
-	return n
+	return amaf
 }
 
 func (b *Board) MakeWorms() []*Worm {
@@ -174,6 +180,19 @@ func (b *Board) GenBestMove(c Color, gt *GameTree) bool {
 	return false
 }
 
+func (p *GameTreeNode) RaveValue() float64 {
+	if p.visit == 0 {
+		return p.prior
+	}
+	e := p.prior*0.1 + 0.9*float64(p.win)/float64(p.visit)
+	if p.aVisit == 0 {
+		return e
+	}
+	re := float64(p.aWin) / float64(p.aVisit)
+	beta := float64(p.aVisit) / (float64(p.aVisit+p.visit) + float64(p.aVisit*p.visit)/3000.0)
+	return beta*re + (1.0-beta)*e
+}
+
 func (p *GameTreeNode) UCTValue() float64 {
 	if p.visit == 0 {
 		return rand.Float64()
@@ -209,9 +228,9 @@ func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) bool {
 	robust := 0
 	for _, child := range root.Children {
 		winrate := float64(child.win) / float64(child.visit)
-		log.Println(PointString(child.x, child.y, child.stone), winrate, child.win, child.visit, child.prior)
-		if robust < child.win {
-			robust = child.win
+		log.Println(PointString(child.x, child.y, child.stone), child.RaveValue(), winrate, child.win, child.visit, child.prior)
+		if robust < child.visit {
+			robust = child.visit
 			best = child
 		}
 	}
@@ -231,12 +250,12 @@ func MCTSSelection(gt *GameTree) *GameTreeNode {
 			return ret
 		}
 		depth += 1
-		maxUCT := 0.0
+		maxRave := 0.0
 		var best *GameTreeNode
 		for _, child := range ret.Children {
-			uct := child.UCTValue()
-			if maxUCT < uct {
-				maxUCT = uct
+			rave := child.RaveValue()
+			if maxRave < rave {
+				maxRave = rave
 				best = child
 			}
 		}
@@ -292,17 +311,17 @@ func MCTSSimulation(b *Board, next *GameTreeNode, wg *sync.WaitGroup) {
 		wg.Done()
 	}()
 	b.Put(PosIndex(next.x, next.y), next.stone)
-	b.SelfBattle(OpColor(next.stone))
+	amaf := b.SelfBattle(OpColor(next.stone))
 	s := b.Score()
 
 	if s > 0 {
-		MCTSBackProp(next, BLACK)
+		MCTSBackProp(next, BLACK, amaf)
 	} else {
-		MCTSBackProp(next, WHITE)
+		MCTSBackProp(next, WHITE, amaf)
 	}
 }
 
-func MCTSBackProp(node *GameTreeNode, wc Color) {
+func MCTSBackProp(node *GameTreeNode, wc Color, amaf map[int]Color) {
 	MCTSLock.Lock()
 	defer MCTSLock.Unlock()
 	v := node
@@ -314,6 +333,19 @@ func MCTSBackProp(node *GameTreeNode, wc Color) {
 		if v.stone == wc {
 			v.win += 1
 		}
+
+		if len(v.Children) != 0 {
+			for _, child := range v.Children {
+				pc := PosIndex(child.x, child.y)
+				if cp, ok := amaf[pc]; ok && cp == child.stone {
+					if cp == wc {
+						child.aWin += 1
+					}
+					child.aVisit += 1
+				}
+			}
+		}
+
 		v = v.Father
 	}
 }
