@@ -134,10 +134,10 @@ func (b *Board) GenSelfBattleMove(c Color) int {
 
 	last, _ := b.LastMove()
 
-	if last > 0 && rand.Float64() < 0.5 {
-		for d := 1; d < 3; d++ {
+	if last > 0 && rand.Float64() < 0.7 {
+		for d := 1; d < 5; d++ {
 			for _, p := range PointDisMap[last][d] {
-				if rand.Float64() < 0.8 {
+				if rand.Float64() < 0.3 {
 					if ok, _ := b.CanPut(p, c); ok {
 						b.Put(p, c)
 						return p
@@ -147,7 +147,7 @@ func (b *Board) GenSelfBattleMove(c Color) int {
 		}
 	}
 
-	for i := 0; i < NPOINT*10; i++ {
+	for i := 0; i < NPOINT*2; i++ {
 		p := rand.Intn(NPOINT)
 		if ok, _ := b.CanPut(p, c); ok {
 			b.Put(p, c)
