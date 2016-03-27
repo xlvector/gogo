@@ -211,30 +211,32 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 	}
 	fl += 809438508012
 	ret = append(ret, fl)
-	if minLibertyWorm.Liberty == 1 {
-		ret = append(ret, 787401927621+int64(minLibertySize))
-	} else if minLibertyWorm.Liberty == 2 {
-		if worm.Liberty == 1 {
-			ret = append(ret, 304580158101)
-		} else if worm.Liberty == 2 {
-			ret = append(ret, 843759137519)
-			ret = append(ret, 843759137519+int64(minLibertySize))
-		} else if worm.Liberty >= 3 {
-			ret = append(ret, 934571349579)
-			ret = append(ret, 934571349579+int64(minLibertySize))
-		}
-	}
-
-	if minLibertyWorm.Liberty == 2 && worm.Liberty > 1 {
-		opMyWorms := b.WormNeighWorms(minLibertyWorm, c, 2)
-		ml := 10000
-		for _, w := range opMyWorms {
-			if ml > w.Liberty {
-				ml = w.Liberty
+	if minLibertyWorm != nil {
+		if minLibertyWorm.Liberty == 1 {
+			ret = append(ret, 787401927621+int64(minLibertySize))
+		} else if minLibertyWorm.Liberty == 2 {
+			if worm.Liberty == 1 {
+				ret = append(ret, 304580158101)
+			} else if worm.Liberty == 2 {
+				ret = append(ret, 843759137519)
+				ret = append(ret, 843759137519+int64(minLibertySize))
+			} else if worm.Liberty >= 3 {
+				ret = append(ret, 934571349579)
+				ret = append(ret, 934571349579+int64(minLibertySize))
 			}
 		}
-		if ml == 2 {
-			ret = append(ret, 148759154791191)
+
+		if minLibertyWorm.Liberty == 2 && worm.Liberty > 1 {
+			opMyWorms := b.WormNeighWorms(minLibertyWorm, c, 2)
+			ml := 10000
+			for _, w := range opMyWorms {
+				if ml > w.Liberty {
+					ml = w.Liberty
+				}
+			}
+			if ml == 2 {
+				ret = append(ret, 148759154791191)
+			}
 		}
 	}
 
