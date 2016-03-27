@@ -224,7 +224,7 @@ func (p *GameTreeNode) UCTValue() float64 {
 	if p.Father != nil && p.Father.visit > 0 {
 		np = float64(p.Father.visit)
 	}
-	ret += math.Sqrt(math.Log(np) / float64(1+p.visit))
+	ret += 5 * p.prior * math.Sqrt(np) / float64(1+p.visit)
 	return ret
 }
 
