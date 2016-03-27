@@ -265,6 +265,7 @@ func MCTSSelection(gt *GameTree) *GameTreeNode {
 	ret := root
 	depth := 0
 	for {
+		ret.visit += 1
 		if ret.Children == nil || len(ret.Children) == 0 {
 			return ret
 		}
@@ -309,9 +310,6 @@ func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf int, wc Color, wg *sync
 
 	if len(node.Children) == 0 {
 		rank := board.CandidateMoves(oc, nil)
-		if node.stone == wc {
-			nLeaf *= 2
-		}
 		topn := TopN(rank, nLeaf)
 		//line := PointString(node.x, node.y, node.stone) + ":"
 		for _, child := range topn {
@@ -327,6 +325,7 @@ func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf int, wc Color, wg *sync
 	cnode := node.CandMoves[0]
 	node.CandMoves = node.CandMoves[1:]
 	_, cnode = node.AddChild(cnode)
+	cnode.visit += 1
 	wg.Add(1)
 	go MCTSSimulation(board.Copy(), cnode, wg)
 }
@@ -354,7 +353,6 @@ func MCTSBackProp(node *GameTreeNode, wc Color, amaf map[int]Color) {
 		if v == nil {
 			return
 		}
-		v.visit += 1
 		if v.stone == wc {
 			v.win += 1
 		}
