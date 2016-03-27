@@ -322,7 +322,7 @@ func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf int, wc Color, wg *sync
 		//log.Println(line)
 	}
 
-	if node.Children[len(node.Children)-1].visit < 10 {
+	if len(node.Children) > 0 && node.Children[len(node.Children)-1].visit < 10 {
 		cnode := node.Children[len(node.Children)-1]
 		cnode.visit += 3
 		wg.Add(1)
