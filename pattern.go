@@ -190,13 +190,16 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 	}
 
 	//op
-	minLiberty = 10000
+	var minLibertyWorm *Worm
 	liberties := []int{}
 	minLibertySize := 0
 	for _, w := range opNWorms {
-		if minLiberty > w.Liberty {
-			minLiberty = w.Liberty
-			minLibertySize = w.Size()
+		if minLibertyWorm == nil {
+			minLibertyWorm = w
+		} else {
+			if minLibertyWorm.Liberty > w.Liberty {
+				minLibertyWorm = w
+			}
 		}
 		liberties = append(liberties, w.Liberty)
 	}
@@ -208,10 +211,31 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 	}
 	fl += 809438508012
 	ret = append(ret, fl)
-	if minLiberty == 1 {
+	if minLibertyWorm.Liberty == 1 {
 		ret = append(ret, 787401927621+int64(minLibertySize))
-	} else if minLiberty == 2 {
-		ret = append(ret, 304580158101+int64(minLibertySize))
+	} else if minLibertyWorm.Liberty == 2 {
+		if worm.Liberty == 1 {
+			ret = append(ret, 304580158101)
+		} else if worm.Liberty == 2 {
+			ret = append(ret, 843759137519)
+			ret = append(ret, 843759137519+int64(minLibertySize))
+		} else if worm.Liberty >= 3 {
+			ret = append(ret, 934571349579)
+			ret = append(ret, 934571349579+int64(minLibertySize))
+		}
+	}
+
+	if minLibertyWorm.Liberty == 2 && worm.Liberty > 1 {
+		opMyWorms := b.WormNeighWorms(minLibertyWorm, c, 2)
+		ml := 10000
+		for _, w := range opMyWorms {
+			if ml > w.Liberty {
+				ml = w.Liberty
+			}
+		}
+		if ml == 2 {
+			ret = append(ret, 148759154791191)
+		}
 	}
 
 	ret = append(ret, b.EdgeDisHash(k))

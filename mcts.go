@@ -242,7 +242,7 @@ func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) (bool, int) {
 			fmt.Print(".")
 		}
 		node := MCTSSelection(gt)
-		MCTSExpand(node, b, expand, wg)
+		MCTSExpand(node, b, expand, c, wg)
 	}
 	fmt.Println()
 	wg.Wait()
@@ -299,7 +299,7 @@ func NewBoardFromPath(path []*GameTreeNode) *Board {
 	return ret
 }
 
-func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf int, wg *sync.WaitGroup) {
+func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf int, wc Color, wg *sync.WaitGroup) {
 	board := NewBoardFromPath(node.Path2Root())
 	board.Model = oBoard.Model
 	oc := BLACK
@@ -309,6 +309,9 @@ func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf int, wg *sync.WaitGroup
 
 	if len(node.Children) == 0 {
 		rank := board.CandidateMoves(oc, nil)
+		if node.stone == wc {
+			nLeaf *= 2
+		}
 		topn := TopN(rank, nLeaf)
 		//line := PointString(node.x, node.y, node.stone) + ":"
 		for _, child := range topn {

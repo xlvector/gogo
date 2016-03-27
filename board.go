@@ -428,6 +428,34 @@ func (b *Board) EmptyWormFromPoint(k int, maxDepth int) []int64 {
 	return ret
 }
 
+func (b *Board) WormNeighWorms(w *Worm, c Color, stopLiberty int) []*Worm {
+	neigh := make(map[int]byte)
+	for _, k := range w.Points.Points {
+		n4 := Neigh4(k)
+		for _, nv := range n4 {
+			if b.Points[nv] == c {
+				neigh[nv] = 1
+			}
+		}
+	}
+
+	ret := []*Worm{}
+	for k, _ := range neigh {
+		ok := true
+		for _, w2 := range ret {
+			if w2.IncludePoint(k) {
+				ok = false
+				break
+			}
+		}
+		if ok {
+			wn := b.WormFromPoint(k, c, stopLiberty)
+			ret = append(ret, wn)
+		}
+	}
+	return ret
+}
+
 func (b *Board) WormFromPoint(k int, c Color, stopLiberty int) *Worm {
 	// if pass invalid color, means use color in point k of board, otherwise, use specified color c
 	if c == INVALID_COLOR {
