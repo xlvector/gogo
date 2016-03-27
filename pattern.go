@@ -148,7 +148,14 @@ func (b *Board) Urgency(k int, c Color) float64 {
 	if minLiberty == 1 {
 		return 50.0
 	} else if minLiberty == 2 {
+		if worm.Liberty == 1 {
+			return 0.1
+		}
 		return 20.0
+	}
+
+	if worm.Liberty == 1 {
+		return 0.1
 	}
 
 	return 1.0
