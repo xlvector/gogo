@@ -2,7 +2,9 @@ package gogo
 
 import (
 	"fmt"
+	"math/rand"
 	"testing"
+	"time"
 )
 
 func TestRules(t *testing.T) {
@@ -362,13 +364,14 @@ func TestSingleSelfBattle(t *testing.T) {
 	b.PutLabel("BD15")
 
 	n := 0
+	rand.Seed(time.Now().UnixNano())
 	for n < 350 {
 		pass := 0
 		p := b.GenSelfBattleMove(WHITE)
 		if p < 0 {
 			pass += 1
 		}
-		if n < 20 {
+		if n < 3 {
 			t.Log(b.String(nil))
 		}
 
@@ -376,7 +379,7 @@ func TestSingleSelfBattle(t *testing.T) {
 		if p < 0 {
 			pass += 1
 		}
-		if n < 10 {
+		if n < 3 {
 			t.Log(b.String(nil))
 		}
 		if pass >= 2 {

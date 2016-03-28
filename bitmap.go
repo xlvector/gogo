@@ -1,5 +1,7 @@
 package gogo
 
+import "math/rand"
+
 type BoardBitmap struct {
 	n []uint64
 }
@@ -31,6 +33,13 @@ func NewPointMap(capacity int) *PointMap {
 		bitmap: NewBoardBitmap(),
 		Points: make([]int, 0, capacity),
 	}
+}
+
+func (p *PointMap) Random() int {
+	if len(p.Points) == 0 {
+		return -1
+	}
+	return p.Points[rand.Intn(len(p.Points))]
 }
 
 func (p *PointMap) Add(k int) {

@@ -177,30 +177,63 @@ func (b *Board) GenSelfBattleMove(c Color) int {
 		}
 	}
 
-	cand := make([]int, 0, 10)
-	for _, a := range b.Actions {
+	pms := make([]*PointMap, 4)
+	for i := 0; i < len(pms); i++ {
+		pms[i] = NewPointMap(3)
+	}
+
+	visited := NewPointMap(len(b.Actions) + 1)
+	for j := len(b.Actions) - 1; j >= 0; j-- {
+		a := b.Actions[j]
 		k, ac := ParseIndexAction(a)
-		if ac != OpColor(c) {
+		if visited.Exist(k) {
 			continue
 		}
 		worm := b.WormFromPoint(k, b.Points[k], 2)
-		if worm.Liberty == 1 {
-			p := worm.LibertyPoints.First()
-			if ok, _ := b.CanPut(p, c); ok {
-				b.Put(p, c)
-				return p
+		for _, p := range worm.Points.Points {
+			visited.Add(p)
+		}
+		if ac == OpColor(c) {
+			if worm.Liberty == 1 {
+				pms[1].Add(worm.LibertyPoints.First())
+			} else if worm.Liberty == 2 {
+				for _, p := range worm.LibertyPoints.Points {
+					pms[2].Add(p)
+				}
+			} else if worm.Liberty > 2 {
+				for _, p := range worm.LibertyPoints.Points {
+					pms[3].Add(p)
+				}
 			}
-		} else {
-			cand = append(cand, worm.LibertyPoints.Points...)
+
+		} else if ac == c {
+			if worm.Liberty == 1 {
+				ps := b.SaveAtari(worm)
+				for _, p := range ps {
+					pms[0].Add(p)
+				}
+			} else if worm.Liberty == 2 {
+				for _, p := range worm.LibertyPoints.Points {
+					if b.PointLiberty(p) > 2 {
+						pms[3].Add(p)
+					}
+				}
+			} else if worm.Liberty > 2 {
+				for _, p := range worm.LibertyPoints.Points {
+					pms[3].Add(p)
+				}
+			}
 		}
 	}
 
-	if len(cand) > 0 {
-		for i := 0; i < 3; i++ {
-			k := cand[rand.Intn(len(cand))]
-			if ok, _ := b.CanPut(k, c); ok {
-				b.Put(k, c)
-				return k
+	for _, pm := range pms {
+		if pm.Size() > 0 {
+			for i := 0; i < 3; i++ {
+				k := pm.Random()
+				if ok, _ := b.CanPut(k, c); ok {
+					b.Put(k, c)
+					return k
+				}
 			}
 		}
 	}
