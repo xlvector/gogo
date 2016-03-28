@@ -331,6 +331,33 @@ func TestHash(t *testing.T) {
 
 }
 
+func TestSingleSelfBattle(t *testing.T) {
+	b := NewBoard()
+	n := 0
+	for n < 350 {
+		pass := 0
+		p := b.GenSelfBattleMove(BLACK)
+		if p < 0 {
+			pass += 1
+		}
+		if n < 20 {
+			t.Log(b.String(nil))
+		}
+
+		p = b.GenSelfBattleMove(WHITE)
+		if p < 0 {
+			pass += 1
+		}
+		if n < 20 {
+			t.Log(b.String(nil))
+		}
+		if pass >= 2 {
+			break
+		}
+		n += 1
+	}
+}
+
 func TestSelfBattle(t *testing.T) {
 	win := 0
 	for i := 0; i < 100; i++ {
@@ -487,6 +514,50 @@ func TestPattern3x3(t *testing.T) {
 	t.Log(b.String(nil))
 	t.Log(b.PatternDxd(PosIndex(3, 3), BLACK, 1))
 	t.Log(b.PatternDxd(PosIndex(4, 3), BLACK, 1))
+}
+
+func TestSaveAtari(t *testing.T) {
+	b := NewBoard()
+	/*
+			A B C D E F G H J K L M N O P Q R S T
+		19  . . . . . . . . . . . . . . . . . . .
+		18  . . . . . . . . . . . . . . . . . . .
+		17  . . . . . . . . . . . . . . . . . . .
+		16  . . . . . . . . . . . . . . . . . . .
+		15  . . . . . . . . . . . . . . . . . . .
+		14  . . . . . . . . . . . . . . . . . . .
+		13  . . . . . . . . . . . . . . . . . . .
+		12  . . . . . . . . . . . . . . . . . . .
+		11  . . . . . . . . . . . . . . . . . . .
+		10  . . . . . . . . . . . . . . . . . . .
+		 9  . . . . . . . . . . . . . . . . . . .
+		 8  . . . . . . . . . . . . . . . . . . .
+		 7  . . . . . . . . . . . . . . . . . . .
+		 6  . . . X O . . . . . . . . . . . . . .
+		 5  . . X O X O . . . . . . . . . . . . .
+		 4  . X O . . . . . . . . . . . . . . . .
+		 3  . X . . . . . . . . . . . . . . . . .
+		 2  . . . . . . . . . . . . . . . . . . .
+		 1  . . . . . . . . . . . . . . . . . . .
+		    A B C D E F G H J K L M N O P Q R S T
+	*/
+	b.PutLabel("BB3")
+	b.PutLabel("BB4")
+	b.PutLabel("BC5")
+	b.PutLabel("WC4")
+	b.PutLabel("WD5")
+	b.PutLabel("BD6")
+	b.PutLabel("BE5")
+	b.PutLabel("WE6")
+	b.PutLabel("WF5")
+	worm := b.WormFromPoint(PosIndex(4, 4), BLACK, 3)
+	t.Log(worm.Liberty)
+	ret := b.SaveAtari(worm)
+	for _, k := range ret {
+		if k != PosIndex(3, 3) && k != PosIndex(4, 3) {
+			t.Error(k)
+		}
+	}
 }
 
 func TestEmptyWormFromPoint(t *testing.T) {

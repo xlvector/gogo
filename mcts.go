@@ -16,13 +16,13 @@ var MCTSLock = &sync.Mutex{}
 func (b *Board) SelfBattle(c Color) map[int]Color {
 	rand.Seed(time.Now().UnixNano())
 	amaf := make(map[int]Color)
-	rank := make(map[int]float64)
+	//rank := make(map[int]float64)
 	p := -1
 	n := 0
 	for n < 350 {
 		pass := 0
-		p, rank = b.GenMove(c, rank)
-		//p = b.GenSelfBattleMove(c)
+		//p, rank = b.GenMove(c, rank)
+		p = b.GenSelfBattleMove(c)
 		if p < 0 {
 			pass += 1
 		} else {
@@ -30,8 +30,8 @@ func (b *Board) SelfBattle(c Color) map[int]Color {
 				amaf[p] = c
 			}
 		}
-		p, rank = b.GenMove(OpColor(c), rank)
-		//p = b.GenSelfBattleMove(OpColor(c))
+		//p, rank = b.GenMove(OpColor(c), rank)
+		p = b.GenSelfBattleMove(OpColor(c))
 		if p < 0 {
 			pass += 1
 		} else {
@@ -130,34 +130,71 @@ func (b *Board) CandidateMoves(c Color, rank map[int]float64) map[int]float64 {
 	return rank
 }
 
+func (b *Board) SaveAtari(w *Worm) []int {
+	ret := make([]int, 0, 2)
+	if w.Liberty != 1 {
+		return ret
+	}
+	for _, p := range w.LibertyPoints.Points {
+		if b.PointLiberty(p) > 1 {
+			ret = append(ret, p)
+		} else {
+			w2 := b.WormFromPoint(p, w.Color, 3)
+			if w2.Liberty > 1 {
+				ret = append(ret, p)
+			}
+		}
+	}
+	n4 := b.WormNeighWorms(w, OpColor(w.Color), 3)
+	for _, w2 := range n4 {
+		if w2.Liberty == 1 {
+			ret = append(ret, w2.LibertyPoints.First())
+		}
+	}
+	ret2 := make([]int, 0, len(ret))
+	for _, k := range ret {
+		if ok, _ := b.CanPut(k, w.Color); ok {
+			ret2 = append(ret2, k)
+		}
+	}
+	return ret2
+}
+
 func (b *Board) GenSelfBattleMove(c Color) int {
 	last, _ := b.LastMove()
-	rank := make(map[int]float64)
-	if last > 0 {
-		for d := 1; d < 5; d++ {
-			for _, p := range PointDisMap[last][d] {
-				if ok, _ := b.CanPut(p, c); ok {
-					rank[p] = b.Urgency(p, c)
-				}
+	if last >= 0 {
+		ret := make([]int, 0, 2)
+		worms := b.NeighWorms(last, OpColor(c), c, 2)
+		for _, w := range worms {
+			if w.Liberty == 1 {
+				ret = append(ret, b.SaveAtari(w)...)
+			}
+		}
+		if len(ret) > 0 {
+			p := ret[rand.Intn(len(ret))]
+			b.Put(p, c)
+			return p
+		}
+	}
+
+	for _, a := range b.Actions {
+		k, ac := ParseIndexAction(a)
+		if ac != OpColor(c) {
+			continue
+		}
+		worm := b.WormFromPoint(k, b.Points[k], 2)
+		if worm.Liberty == 1 {
+			p := worm.LibertyPoints.First()
+			if ok, _ := b.CanPut(p, c); ok {
+				b.Put(p, c)
+				return p
 			}
 		}
 	}
 
-	for i := 0; i < NPOINT*2 && len(rank) < 10; i++ {
-		p := rand.Intn(NPOINT)
-		if ok, _ := b.CanPut(p, c); ok {
-			rank[p] = b.Urgency(p, c)
-		}
-	}
-
-	psum := 0.0
-	for _, v := range rank {
-		psum += v
-	}
-	pr := rand.Float64() * psum
-	for k, v := range rank {
-		pr -= v
-		if pr <= 0.0 {
+	for i := 0; i < NPOINT*2; i++ {
+		k := rand.Intn(NPOINT)
+		if ok, _ := b.CanPut(k, c); ok {
 			b.Put(k, c)
 			return k
 		}

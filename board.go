@@ -341,18 +341,20 @@ func (b *Board) LastMove() (int, Color) {
 }
 
 type Worm struct {
-	Points      *PointMap
-	Liberty     int
-	Color       Color
-	BorderColor Color
+	Points        *PointMap
+	LibertyPoints *PointMap
+	Liberty       int
+	Color         Color
+	BorderColor   Color
 }
 
 func NewWorm(c Color) *Worm {
 	return &Worm{
-		Points:      NewPointMap(10),
-		Liberty:     0,
-		Color:       c,
-		BorderColor: INVALID_COLOR,
+		Points:        NewPointMap(10),
+		Liberty:       0,
+		Color:         c,
+		BorderColor:   INVALID_COLOR,
+		LibertyPoints: NewPointMap(5),
 	}
 }
 
@@ -465,12 +467,11 @@ func (b *Board) WormFromPoint(k int, c Color, stopLiberty int) *Worm {
 	queue := make([]int, 0, 10)
 	start := 0
 	queue = append(queue, k)
-	lb := make(map[int]byte)
 	for {
 		if start >= len(queue) {
 			break
 		}
-		if stopLiberty > 0 && len(lb) > stopLiberty {
+		if stopLiberty > 0 && worm.LibertyPoints.Size() > stopLiberty {
 			break
 		}
 		v := queue[start]
@@ -488,7 +489,7 @@ func (b *Board) WormFromPoint(k int, c Color, stopLiberty int) *Worm {
 				queue = append(queue, nv)
 			} else {
 				if b.Points[nv] == GRAY {
-					lb[nv] = 1
+					worm.LibertyPoints.Add(nv)
 				}
 				if worm.BorderColor == INVALID_COLOR {
 					worm.BorderColor = b.Points[nv]
@@ -500,7 +501,7 @@ func (b *Board) WormFromPoint(k int, c Color, stopLiberty int) *Worm {
 			}
 		}
 	}
-	worm.Liberty = len(lb)
+	worm.Liberty = worm.LibertyPoints.Size()
 	return worm
 }
 
