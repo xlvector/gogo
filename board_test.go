@@ -387,6 +387,7 @@ func TestSingleSelfBattle(t *testing.T) {
 		}
 		n += 1
 	}
+	t.Log(b.Score())
 }
 
 func TestSelfBattle(t *testing.T) {
