@@ -308,6 +308,10 @@ func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf int, wc Color, wg *sync
 		oc = OpColor(node.stone)
 	}
 
+	if node.stone == wc {
+		nLeaf *= 3
+	}
+
 	if len(node.Children) == 0 {
 		rank := board.CandidateMoves(oc, nil)
 		topn := TopN(rank, nLeaf)
@@ -321,20 +325,12 @@ func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf int, wc Color, wg *sync
 		}
 		//log.Println(line)
 	}
-
-	if len(node.Children) > 0 && node.Children[len(node.Children)-1].visit < 10 {
-		cnode := node.Children[len(node.Children)-1]
-		cnode.visit += 3
-		wg.Add(1)
-		go MCTSSimulation(board.Copy(), cnode, wg)
-	} else {
-		cnode := node.CandMoves[0]
-		node.CandMoves = node.CandMoves[1:]
-		_, cnode = node.AddChild(cnode)
-		cnode.visit += 3
-		wg.Add(1)
-		go MCTSSimulation(board.Copy(), cnode, wg)
-	}
+	cnode := node.CandMoves[0]
+	node.CandMoves = node.CandMoves[1:]
+	_, cnode = node.AddChild(cnode)
+	cnode.visit += 3
+	wg.Add(1)
+	go MCTSSimulation(board.Copy(), cnode, wg)
 }
 
 func MCTSSimulation(b *Board, next *GameTreeNode, wg *sync.WaitGroup) {
