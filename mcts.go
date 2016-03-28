@@ -177,6 +177,7 @@ func (b *Board) GenSelfBattleMove(c Color) int {
 		}
 	}
 
+	cand := make([]int, 0, 10)
 	for _, a := range b.Actions {
 		k, ac := ParseIndexAction(a)
 		if ac != OpColor(c) {
@@ -188,6 +189,18 @@ func (b *Board) GenSelfBattleMove(c Color) int {
 			if ok, _ := b.CanPut(p, c); ok {
 				b.Put(p, c)
 				return p
+			}
+		} else {
+			cand = append(cand, worm.LibertyPoints.Points...)
+		}
+	}
+
+	if len(cand) > 0 {
+		for i := 0; i < 3; i++ {
+			k := cand[rand.Intn(len(cand))]
+			if ok, _ := b.CanPut(k, c); ok {
+				b.Put(k, c)
+				return k
 			}
 		}
 	}

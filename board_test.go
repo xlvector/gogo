@@ -332,11 +332,39 @@ func TestHash(t *testing.T) {
 }
 
 func TestSingleSelfBattle(t *testing.T) {
+	/*
+			A B C D E F G H J K L M N O P Q R S T
+		19  . . . . . . . . . . . . . . . . . . .
+		18  . . . . . . . . . . . . . . . . . . .
+		17  . . . . . . . . . . . . . . . . . . .
+		16  . . O . X . . . . . . . . . . . . . .
+		15  . . . X O . . . . . . . . . . . . . .
+		14  . . . . . . . . . . . . . . . . . . .
+		13  . . . . . . . . . . . . . . . . . . .
+		12  . . . . . . . . . . . . . . . . . . .
+		11  . . . . . . . . . . . . . . . . . . .
+		10  . . . . . . . . . . . . . . . . . . .
+		 9  . . . . . . . . . . . . . . . . . . .
+		 8  . . . . . . . . . . . . . . . . . . .
+		 7  . . . . . . . . . . . . . . . . . . .
+		 6  . . . . . . . . . . . . . . . . . . .
+		 5  . . . . . . . . . . . . . . . . . . .
+		 4  . . . . . . . . . . . . . . . . . . .
+		 3  . . . . . . . . . . . . . . . . . . .
+		 2  . . . . . . . . . . . . . . . . . . .
+		 1  . . . . . . . . . . . . . . . . . . .
+		    A B C D E F G H J K L M N O P Q R S T
+	*/
 	b := NewBoard()
+	b.PutLabel("WC16")
+	b.PutLabel("BE16")
+	b.PutLabel("WE15")
+	b.PutLabel("BD15")
+
 	n := 0
 	for n < 350 {
 		pass := 0
-		p := b.GenSelfBattleMove(BLACK)
+		p := b.GenSelfBattleMove(WHITE)
 		if p < 0 {
 			pass += 1
 		}
@@ -344,11 +372,11 @@ func TestSingleSelfBattle(t *testing.T) {
 			t.Log(b.String(nil))
 		}
 
-		p = b.GenSelfBattleMove(WHITE)
+		p = b.GenSelfBattleMove(BLACK)
 		if p < 0 {
 			pass += 1
 		}
-		if n < 20 {
+		if n < 10 {
 			t.Log(b.String(nil))
 		}
 		if pass >= 2 {
