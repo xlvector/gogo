@@ -365,13 +365,14 @@ func TestSingleSelfBattle(t *testing.T) {
 
 	n := 0
 	rand.Seed(time.Now().UnixNano())
+	f := 10
 	for n < 350 {
 		pass := 0
 		p := b.GenSelfBattleMove(WHITE)
 		if p < 0 {
 			pass += 1
 		}
-		if n < 3 {
+		if n < f {
 			t.Log(b.String(nil))
 		}
 
@@ -379,7 +380,7 @@ func TestSingleSelfBattle(t *testing.T) {
 		if p < 0 {
 			pass += 1
 		}
-		if n < 3 {
+		if n < f {
 			t.Log(b.String(nil))
 		}
 		if pass >= 2 {

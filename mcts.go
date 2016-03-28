@@ -177,7 +177,7 @@ func (b *Board) GenSelfBattleMove(c Color) int {
 		}
 	}
 
-	pms := make([]*PointMap, 4)
+	pms := make([]*PointMap, 5)
 	for i := 0; i < len(pms); i++ {
 		pms[i] = NewPointMap(3)
 	}
@@ -220,7 +220,7 @@ func (b *Board) GenSelfBattleMove(c Color) int {
 				}
 			} else if worm.Liberty > 2 {
 				for _, p := range worm.LibertyPoints.Points {
-					pms[3].Add(p)
+					pms[4].Add(p)
 				}
 			}
 		}
@@ -389,10 +389,6 @@ func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf int, wc Color, wg *sync
 	oc := BLACK
 	if node.stone == BLACK || node.stone == WHITE {
 		oc = OpColor(node.stone)
-	}
-
-	if node.stone == wc {
-		nLeaf *= 3
 	}
 
 	if len(node.Children) == 0 {
