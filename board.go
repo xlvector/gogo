@@ -30,7 +30,7 @@ func init() {
 	for i := 0; i < NPOINT; i++ {
 		PointDisMap[i] = make([][]int, PATTERN_SIZE)
 		for j := 0; j < PATTERN_SIZE; j++ {
-			PointDisMap[i][j] = make([]int, 0, j*4+5)
+			PointDisMap[i][j] = make([]int, 0, 10)
 		}
 	}
 	for i := 0; i < NPOINT; i++ {
@@ -90,20 +90,20 @@ func IndexPos(k int) (int, int) {
 	return k % SIZE, k / SIZE
 }
 
-func Neigh4(k int) []int {
+func Neigh4(k int) uint64 {
 	x, y := IndexPos(k)
-	ret := make([]int, 0, 4)
+	ret := uint64(0)
 	if !PosOutBoard(x-1, y) {
-		ret = append(ret, PosIndex(x-1, y))
+		ret = (ret << 9) + uint64(PosIndex(x-1, y))
 	}
 	if !PosOutBoard(x+1, y) {
-		ret = append(ret, PosIndex(x+1, y))
+		ret = (ret << 9) + uint64(PosIndex(x+1, y))
 	}
 	if !PosOutBoard(x, y-1) {
-		ret = append(ret, PosIndex(x, y-1))
+		ret = (ret << 9) + uint64(PosIndex(x, y-1))
 	}
 	if !PosOutBoard(x, y+1) {
-		ret = append(ret, PosIndex(x, y+1))
+		ret = (ret << 9) + uint64(PosIndex(x, y+1))
 	}
 	return ret
 }
@@ -204,8 +204,8 @@ func (b *Board) Copy() *Board {
 	ret := &Board{
 		Points:      make([]Color, NPOINT),
 		KoIndex:     b.KoIndex,
-		PointHash:   make([]int64, len(b.PointHash)),
-		PatternHash: make([][]int64, len(b.PatternHash)),
+		PointHash:   make([]int64, NPOINT),
+		PatternHash: make([][]int64, NPOINT),
 		Actions:     make([]int, len(b.Actions)),
 		LastPattern: make([]int64, len(b.LastPattern)),
 		Model:       b.Model,
@@ -224,7 +224,7 @@ func (b *Board) Copy() *Board {
 		ret.LastPattern[i] = v
 	}
 	for i, a := range b.PatternHash {
-		tmp := make([]int64, len(a))
+		tmp := make([]int64, PATTERN_SIZE)
 		for j, v := range a {
 			tmp[j] = v
 		}
@@ -233,9 +233,31 @@ func (b *Board) Copy() *Board {
 	return ret
 }
 
+func (b *Board) ExtendLiberty(ps PointMap) PointMap {
+	ret := ZeroPointMap()
+	for _, p := range ps.Points {
+		n4 := Neigh4(p)
+		for n4 > 0 {
+			k := int(n4 & 0x1ff)
+			n4 = (n4 >> 9)
+			if ps.Exist(k) {
+				continue
+			}
+			if b.Points[k] == GRAY {
+				ret.Add(k)
+			}
+		}
+	}
+	return ret
+}
+
 func (b *Board) StableEye(k int, c Color) bool {
 	n4 := Neigh4(k)
-	for _, p := range n4 {
+	len4 := 0
+	for n4 > 0 {
+		p := int(n4 & 0x1ff)
+		n4 = (n4 >> 9)
+		len4 += 1
 		if b.Points[p] != c {
 			return false
 		}
@@ -248,10 +270,10 @@ func (b *Board) StableEye(k int, c Color) bool {
 			n += 1
 		}
 	}
-	if len(n4) == 4 && n < 2 {
+	if len4 == 4 && n < 2 {
 		return true
 	}
-	if len(n4) < 4 && n < 1 {
+	if len4 < 4 && n < 1 {
 		return true
 	}
 	return false
@@ -341,20 +363,20 @@ func (b *Board) LastMove() (int, Color) {
 }
 
 type Worm struct {
-	Points        *PointMap
-	LibertyPoints *PointMap
+	Points        PointMap
+	LibertyPoints PointMap
 	Liberty       int
 	Color         Color
 	BorderColor   Color
 }
 
-func NewWorm(c Color) *Worm {
-	return &Worm{
-		Points:        NewPointMap(10),
+func ZeroWorm(c Color) Worm {
+	return Worm{
+		Points:        ZeroPointMap(),
 		Liberty:       0,
 		Color:         c,
 		BorderColor:   INVALID_COLOR,
-		LibertyPoints: NewPointMap(5),
+		LibertyPoints: ZeroPointMap(),
 	}
 }
 
@@ -381,9 +403,9 @@ func (b *Board) EmptyWormFromPoint(k int, maxDepth int) []int64 {
 
 	minBlack := -1
 	minWhite := -1
-	black := NewPointMap(10)
-	white := NewPointMap(10)
-	gray := NewPointMap(10)
+	black := ZeroPointMap()
+	white := ZeroPointMap()
+	gray := ZeroPointMap()
 	for {
 		if start >= len(queue) {
 			break
@@ -400,7 +422,9 @@ func (b *Board) EmptyWormFromPoint(k int, maxDepth int) []int64 {
 		gray.Add(pos)
 		ret[depth] ^= b.PointHash[pos]
 		n4 := Neigh4(pos)
-		for _, nv := range n4 {
+		for n4 > 0 {
+			nv := int(n4 & 0x1ff)
+			n4 = (n4 >> 9)
 			if gray.Exist(nv) {
 				continue
 			}
@@ -430,18 +454,20 @@ func (b *Board) EmptyWormFromPoint(k int, maxDepth int) []int64 {
 	return ret
 }
 
-func (b *Board) WormNeighWorms(w *Worm, c Color, stopLiberty int) []*Worm {
+func (b *Board) WormNeighWorms(w Worm, c Color, stopLiberty int) []Worm {
 	neigh := make(map[int]byte)
 	for _, k := range w.Points.Points {
 		n4 := Neigh4(k)
-		for _, nv := range n4 {
+		for n4 > 0 {
+			nv := int(n4 & 0x1ff)
+			n4 = (n4 >> 9)
 			if b.Points[nv] == c {
 				neigh[nv] = 1
 			}
 		}
 	}
 
-	ret := []*Worm{}
+	ret := []Worm{}
 	for k, _ := range neigh {
 		ok := true
 		for _, w2 := range ret {
@@ -458,13 +484,13 @@ func (b *Board) WormNeighWorms(w *Worm, c Color, stopLiberty int) []*Worm {
 	return ret
 }
 
-func (b *Board) WormFromPoint(k int, c Color, stopLiberty int) *Worm {
+func (b *Board) WormFromPoint(k int, c Color, stopLiberty int) Worm {
 	// if pass invalid color, means use color in point k of board, otherwise, use specified color c
 	if c == INVALID_COLOR {
 		c = b.Points[k]
 	}
-	worm := NewWorm(c)
-	queue := make([]int, 0, 10)
+	worm := ZeroWorm(c)
+	queue := make([]int, 0, 5)
 	start := 0
 	queue = append(queue, k)
 	for {
@@ -481,7 +507,9 @@ func (b *Board) WormFromPoint(k int, c Color, stopLiberty int) *Worm {
 		}
 		worm.AddPoint(v)
 		n4 := Neigh4(v)
-		for _, nv := range n4 {
+		for n4 > 0 {
+			nv := int(n4 & 0x1ff)
+			n4 = (n4 >> 9)
 			if worm.IncludePoint(nv) {
 				continue
 			}
@@ -571,7 +599,9 @@ func (b *Board) Dilation(seeds map[int]int) map[int]int {
 	expand := make(map[int]int)
 	for k, _ := range seeds {
 		n4 := Neigh4(k)
-		for _, pn := range n4 {
+		for n4 > 0 {
+			pn := int(n4 & 0x1ff)
+			n4 = (n4 >> 9)
 			if b.Points[pn] == GRAY {
 				expand[pn] = 0
 			}
@@ -588,7 +618,9 @@ func (b *Board) Dilation(seeds map[int]int) map[int]int {
 		n4 := Neigh4(i)
 		add := 0
 		minus := 0
-		for _, pn := range n4 {
+		for n4 > 0 {
+			pn := int(n4 & 0x1ff)
+			n4 = (n4 >> 9)
 			vn, _ := expand[pn]
 			if vn > 0 {
 				add += 1
@@ -611,7 +643,9 @@ func (b *Board) Erase(seeds map[int]int) map[int]int {
 	for i, v := range seeds {
 		n4 := Neigh4(i)
 		add := 0
-		for _, pn := range n4 {
+		for n4 > 0 {
+			pn := int(n4 & 0x1ff)
+			n4 = (n4 >> 9)
 			vn, _ := seeds[pn]
 			if vn*v <= 0 {
 				add += 1

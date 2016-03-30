@@ -391,6 +391,16 @@ func TestSingleSelfBattle(t *testing.T) {
 	t.Log(b.Score())
 }
 
+/*
+func BenchmarkSelfBattle(t *testing.B) {
+	for i := 0; i < t.N; i++ {
+		b := NewBoard()
+		b.SelfBattle(BLACK)
+		b.Score()
+	}
+}
+*/
+
 func TestSelfBattle(t *testing.T) {
 	win := 0
 	for i := 0; i < 100; i++ {
@@ -629,4 +639,11 @@ func TestEmptyWormFromPoint(t *testing.T) {
 	b.PutLabel("WD5")
 
 	b.EmptyWormFromPoint(PosIndex(2, 0), 1)
+}
+
+func BenchmarkPointMap(t *testing.B) {
+	a := 361
+	for i := 0; i < t.N; i++ {
+		_ = make([]int, a)
+	}
 }

@@ -47,8 +47,8 @@ func (b *Board) SelfBattle(c Color) map[int]Color {
 	return amaf
 }
 
-func (b *Board) MakeWorms() []*Worm {
-	ret := []*Worm{}
+func (b *Board) MakeWorms() []Worm {
+	ret := []Worm{}
 	nodes := make(map[int]byte)
 	for k, _ := range b.Points {
 		nodes[k] = 1
@@ -130,7 +130,7 @@ func (b *Board) CandidateMoves(c Color, rank map[int]float64) map[int]float64 {
 	return rank
 }
 
-func (b *Board) SaveAtari(w *Worm) []int {
+func (b *Board) SaveAtari(w Worm) []int {
 	ret := make([]int, 0, 2)
 	if w.Liberty != 1 {
 		return ret
@@ -139,13 +139,13 @@ func (b *Board) SaveAtari(w *Worm) []int {
 		if b.PointLiberty(p) > 1 {
 			ret = append(ret, p)
 		} else {
-			w2 := b.WormFromPoint(p, w.Color, 3)
+			w2 := b.WormFromPoint(p, w.Color, 2)
 			if w2.Liberty > 1 {
 				ret = append(ret, p)
 			}
 		}
 	}
-	n4 := b.WormNeighWorms(w, OpColor(w.Color), 3)
+	n4 := b.WormNeighWorms(w, OpColor(w.Color), 2)
 	for _, w2 := range n4 {
 		if w2.Liberty == 1 {
 			ret = append(ret, w2.LibertyPoints.First())
@@ -177,12 +177,12 @@ func (b *Board) GenSelfBattleMove(c Color) int {
 		}
 	}
 
-	pms := make([]*PointMap, 5)
+	pms := make([]PointMap, 5)
 	for i := 0; i < len(pms); i++ {
-		pms[i] = NewPointMap(3)
+		pms[i] = ZeroPointMap()
 	}
 
-	visited := NewPointMap(len(b.Actions) + 1)
+	visited := ZeroPointMap()
 	for j := len(b.Actions) - 1; j >= 0; j-- {
 		a := b.Actions[j]
 		k, ac := ParseIndexAction(a)

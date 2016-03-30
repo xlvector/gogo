@@ -85,7 +85,9 @@ func (b *Board) OpWormHash(k int, c Color) int64 {
 func (b *Board) PointLiberty(k int) int {
 	n4 := Neigh4(k)
 	ret := 0
-	for _, nk := range n4 {
+	for n4 > 0 {
+		nk := int(n4 & 0x1ff)
+		n4 = (n4 >> 9)
 		if b.Points[nk] == GRAY {
 			ret += 1
 		}
@@ -194,14 +196,22 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 		} else if worm.Liberty > 3 {
 			ret = append(ret, 945876927621)
 		}
+	} else if minLiberty == 3 {
+		if worm.Liberty == 3 {
+			ret = append(ret, 491375013548)
+		} else if worm.Liberty == 4 {
+			ret = append(ret, 394671038610)
+		} else if worm.Liberty == 5 {
+			ret = append(ret, 841591751951)
+		}
 	}
 
 	//op
-	var minLibertyWorm *Worm
+	minLibertyWorm := ZeroWorm(INVALID_COLOR)
 	liberties := []int{}
 	minLibertySize := 0
 	for _, w := range opNWorms {
-		if minLibertyWorm == nil {
+		if minLibertyWorm.Color == INVALID_COLOR {
 			minLibertyWorm = w
 		} else {
 			if minLibertyWorm.Liberty > w.Liberty {
@@ -218,7 +228,7 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 	}
 	fl += 809438508012
 	ret = append(ret, fl)
-	if minLibertyWorm != nil {
+	if minLibertyWorm.Color != INVALID_COLOR {
 		if minLibertyWorm.Liberty == 1 {
 			ret = append(ret, 787401927621+int64(minLibertySize))
 		} else if minLibertyWorm.Liberty == 2 {
@@ -361,10 +371,12 @@ func (b *Board) PatternDxd(p int, c Color, d int) int64 {
 	return ret
 }
 
-func (b *Board) NeighWorms(k int, c, wc Color, stopLiberty int) []*Worm {
+func (b *Board) NeighWorms(k int, c, wc Color, stopLiberty int) []Worm {
 	n4 := Neigh4(k)
-	ret := []*Worm{}
-	for _, nk := range n4 {
+	ret := []Worm{}
+	for n4 > 0 {
+		nk := int(n4 & 0x1ff)
+		n4 = (n4 >> 9)
 		if b.Points[nk] != wc {
 			continue
 		}

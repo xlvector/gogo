@@ -2,36 +2,26 @@ package gogo
 
 import "math/rand"
 
-type BoardBitmap struct {
-	n []uint64
-}
-
-func NewBoardBitmap() *BoardBitmap {
-	return &BoardBitmap{
-		n: []uint64{0, 0, 0, 0, 0, 0},
-	}
-}
-
-func (b *BoardBitmap) Set(k int) {
+func (b *PointMap) Set(k int) {
 	a := uint64(k / 64)
 	r := uint64(k % 64)
 	b.n[a] = b.n[a] | (1 << r)
 }
 
-func (b *BoardBitmap) IsSet(k int) bool {
+func (b *PointMap) IsSet(k int) bool {
 	a, r := uint64(k/64), uint64(k%64)
 	return (b.n[a] & (1 << r)) > 0
 }
 
 type PointMap struct {
-	bitmap *BoardBitmap
+	n      []uint64
 	Points []int
 }
 
-func NewPointMap(capacity int) *PointMap {
-	return &PointMap{
-		bitmap: NewBoardBitmap(),
-		Points: make([]int, 0, capacity),
+func ZeroPointMap() PointMap {
+	return PointMap{
+		n:      []uint64{0, 0, 0, 0, 0, 0},
+		Points: make([]int, 0, 5),
 	}
 }
 
@@ -43,15 +33,15 @@ func (p *PointMap) Random() int {
 }
 
 func (p *PointMap) Add(k int) {
-	if p.bitmap.IsSet(k) {
+	if p.IsSet(k) {
 		return
 	}
 	p.Points = append(p.Points, k)
-	p.bitmap.Set(k)
+	p.Set(k)
 }
 
 func (p *PointMap) Exist(k int) bool {
-	return p.bitmap.IsSet(k)
+	return p.IsSet(k)
 }
 
 func (p *PointMap) Size() int {

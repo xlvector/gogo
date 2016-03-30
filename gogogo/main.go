@@ -245,5 +245,11 @@ func main() {
 			board.Model.LoadModel(*model)
 		}
 		gogo.BatchRLBattle(board)
+	} else if *mode == "test" {
+		for i := 0; i < 1000; i++ {
+			b := gogo.NewBoard()
+			b.SelfBattle(gogo.BLACK)
+			b.Score()
+		}
 	}
 }
