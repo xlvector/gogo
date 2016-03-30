@@ -241,6 +241,13 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 				ret = append(ret, 934571349579)
 				ret = append(ret, 934571349579+int64(minLibertySize))
 			}
+		} else if minLibertyWorm.Liberty == 3 {
+			extendLiberties := b.ExtendLiberty(minLibertyWorm.LibertyPoints)
+			if extendLiberties.Size() == 3 {
+				ret = append(ret, 4315701358105)
+			} else if extendLiberties.Size() == 4 {
+				ret = append(ret, 2915128502158)
+			}
 		}
 
 		if minLibertyWorm.Liberty == 2 && worm.Liberty > 1 {
