@@ -15,6 +15,7 @@ const (
 type GameTreeNode struct {
 	Father       *GameTreeNode
 	Children     []*GameTreeNode
+	CandMoves    []*GameTreeNode
 	prior        float64
 	x, y         int
 	stone        Color
@@ -39,17 +40,18 @@ func (p *GameTreeNode) HasAttr(key string) bool {
 
 func NewGameTreeNode(stone Color, x, y int) *GameTreeNode {
 	return &GameTreeNode{
-		Father:   nil,
-		Children: []*GameTreeNode{},
-		x:        x,
-		y:        y,
-		stone:    stone,
-		attr:     make(map[string]string),
-		visit:    0,
-		win:      0,
-		hit:      0,
-		aVisit:   0,
-		aWin:     0,
+		Father:    nil,
+		Children:  []*GameTreeNode{},
+		CandMoves: []*GameTreeNode{},
+		x:         x,
+		y:         y,
+		stone:     stone,
+		attr:      make(map[string]string),
+		visit:     0,
+		win:       0,
+		hit:       0,
+		aVisit:    0,
+		aWin:      0,
 	}
 }
 
