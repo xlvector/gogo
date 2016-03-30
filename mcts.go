@@ -177,7 +177,7 @@ func (b *Board) GenSelfBattleMove(c Color) int {
 		}
 	}
 
-	pms := make([]PointMap, 5)
+	pms := make([]PointMap, 4)
 	for i := 0; i < len(pms); i++ {
 		pms[i] = ZeroPointMap()
 	}
@@ -189,7 +189,7 @@ func (b *Board) GenSelfBattleMove(c Color) int {
 		if visited.Exist(k) {
 			continue
 		}
-		worm := b.WormFromPoint(k, b.Points[k], 2)
+		worm := b.WormFromPoint(k, b.Points[k], 3)
 		for _, p := range worm.Points.Points {
 			visited.Add(p)
 		}
@@ -200,9 +200,12 @@ func (b *Board) GenSelfBattleMove(c Color) int {
 				for _, p := range worm.LibertyPoints.Points {
 					pms[2].Add(p)
 				}
-			} else if worm.Liberty > 2 {
-				for _, p := range worm.LibertyPoints.Points {
-					pms[3].Add(p)
+			} else if worm.Liberty == 3 {
+				ext := b.ExtendLiberty(worm.LibertyPoints)
+				if ext.Size() <= 3 {
+					for _, p := range worm.LibertyPoints.Points {
+						pms[2].Add(p)
+					}
 				}
 			}
 
@@ -218,9 +221,12 @@ func (b *Board) GenSelfBattleMove(c Color) int {
 						pms[3].Add(p)
 					}
 				}
-			} else if worm.Liberty > 2 {
-				for _, p := range worm.LibertyPoints.Points {
-					pms[4].Add(p)
+			} else if worm.Liberty == 3 {
+				ext := b.ExtendLiberty(worm.LibertyPoints)
+				if ext.Size() <= 3 {
+					for _, p := range worm.LibertyPoints.Points {
+						pms[3].Add(p)
+					}
 				}
 			}
 		}
