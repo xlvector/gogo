@@ -339,9 +339,9 @@ func TestSingleSelfBattle(t *testing.T) {
 		19  . . . . . . . . . . . . . . . . . . .
 		18  . . . . . . . . . . . . . . . . . . .
 		17  . . . . . . . . . . . . . . . . . . .
-		16  . . O . X . . . . . . . . . . . . . .
-		15  . . . X O . . . . . . . . . . . . . .
-		14  . . . . . . . . . . . . . . . . . . .
+		16  . . . . X . . . . . . . . . . . . . .
+		15  . . . X O X . . . . . . . . . . . . .
+		14  . . . X . . . . . . . . . . . . . . .
 		13  . . . . . . . . . . . . . . . . . . .
 		12  . . . . . . . . . . . . . . . . . . .
 		11  . . . . . . . . . . . . . . . . . . .
@@ -358,14 +358,15 @@ func TestSingleSelfBattle(t *testing.T) {
 		    A B C D E F G H J K L M N O P Q R S T
 	*/
 	b := NewBoard()
-	b.PutLabel("WC16")
-	b.PutLabel("BE16")
-	b.PutLabel("WE15")
 	b.PutLabel("BD15")
+	b.PutLabel("BD14")
+	b.PutLabel("BE16")
+	b.PutLabel("BF15")
+	b.PutLabel("WE15")
 
 	n := 0
 	rand.Seed(time.Now().UnixNano())
-	f := 10
+	f := 30
 	for n < 350 {
 		pass := 0
 		p := b.GenSelfBattleMove(WHITE)
