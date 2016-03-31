@@ -248,7 +248,7 @@ func main() {
 	} else if *mode == "test" {
 		for i := 0; i < 1000; i++ {
 			b := gogo.NewBoard()
-			b.SelfBattle(gogo.BLACK)
+			b.SelfBattle(gogo.BLACK, nil)
 			b.Score()
 		}
 	}
