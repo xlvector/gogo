@@ -366,10 +366,11 @@ func TestSingleSelfBattle(t *testing.T) {
 
 	n := 0
 	rand.Seed(time.Now().UnixNano())
+	lgr := NewLastGoodReply()
 	f := 30
 	for n < 350 {
 		pass := 0
-		p := b.GenSelfBattleMove(WHITE)
+		p := b.GenSelfBattleMove(WHITE, lgr)
 		if p < 0 {
 			pass += 1
 		}
@@ -377,7 +378,7 @@ func TestSingleSelfBattle(t *testing.T) {
 			t.Log(b.String(nil))
 		}
 
-		p = b.GenSelfBattleMove(BLACK)
+		p = b.GenSelfBattleMove(BLACK, lgr)
 		if p < 0 {
 			pass += 1
 		}
@@ -404,9 +405,10 @@ func BenchmarkSelfBattle(t *testing.B) {
 
 func TestSelfBattle(t *testing.T) {
 	win := 0
+	lgr := NewLastGoodReply()
 	for i := 0; i < 100; i++ {
 		b := NewBoard()
-		b.SelfBattle(BLACK)
+		b.SelfBattle(BLACK, lgr)
 		s := b.Score()
 		if s > 0 {
 			win += 1

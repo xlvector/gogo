@@ -13,7 +13,7 @@ import (
 
 var MCTSLock = &sync.Mutex{}
 
-func (b *Board) SelfBattle(c Color) map[int]Color {
+func (b *Board) SelfBattle(c Color, lgr *LastGoodReply) map[int]Color {
 	rand.Seed(time.Now().UnixNano())
 	amaf := make(map[int]Color)
 	//rank := make(map[int]float64)
@@ -22,7 +22,7 @@ func (b *Board) SelfBattle(c Color) map[int]Color {
 	for n < 350 {
 		pass := 0
 		//p, rank = b.GenMove(c, rank)
-		p = b.GenSelfBattleMove(c)
+		p = b.GenSelfBattleMove(c, lgr)
 		if p < 0 {
 			pass += 1
 		} else {
@@ -31,7 +31,7 @@ func (b *Board) SelfBattle(c Color) map[int]Color {
 			}
 		}
 		//p, rank = b.GenMove(OpColor(c), rank)
-		p = b.GenSelfBattleMove(OpColor(c))
+		p = b.GenSelfBattleMove(OpColor(c), lgr)
 		if p < 0 {
 			pass += 1
 		} else {
@@ -160,9 +160,20 @@ func (b *Board) SaveAtari(w Worm) []int {
 	return ret2
 }
 
-func (b *Board) GenSelfBattleMove(c Color) int {
+func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 	last, _ := b.LastMove()
 	if last >= 0 {
+
+		if lgr != nil {
+			p := lgr.Move(c, last)
+			if p > 0 {
+				if ok, _ := b.CanPut(p, c); ok {
+					b.Put(p, c)
+					return p
+				}
+			}
+		}
+
 		ret := make([]int, 0, 2)
 		worms := b.NeighWorms(last, OpColor(c), c, 2)
 		for _, w := range worms {
@@ -320,6 +331,47 @@ func (p *GameTreeNode) UCTValue() float64 {
 	return ret
 }
 
+type LastGoodReply struct {
+	black map[int]int
+	white map[int]int
+	lock  *sync.RWMutex
+}
+
+func (p *LastGoodReply) Move(c Color, last int) int {
+	p.lock.RLock()
+	defer p.lock.RUnlock()
+	if c == BLACK {
+		k, ok := p.black[last]
+		if ok {
+			return k
+		}
+	} else if c == WHITE {
+		k, ok := p.black[last]
+		if ok {
+			return k
+		}
+	}
+	return -1
+}
+
+func (p *LastGoodReply) Set(c Color, k1, k2 int) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	if c == BLACK {
+		p.black[k1] = k2
+	} else if c == WHITE {
+		p.white[k1] = k2
+	}
+}
+
+func NewLastGoodReply() *LastGoodReply {
+	return &LastGoodReply{
+		black: make(map[int]int),
+		white: make(map[int]int),
+		lock:  &sync.RWMutex{},
+	}
+}
+
 func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) (bool, int) {
 	wg := &sync.WaitGroup{}
 	root := gt.Current
@@ -329,12 +381,13 @@ func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) (bool, int) {
 			log.Println(PointString(child.x, child.y, child.stone), child.win, child.visit)
 		}
 	}
+	lgr := NewLastGoodReply()
 	for i := 0; i < n; i++ {
 		if i%1000 == 0 {
 			fmt.Print(".")
 		}
 		node := MCTSSelection(gt)
-		MCTSExpand(node, b, expand, c, wg)
+		MCTSExpand(node, b, expand, c, lgr, wg)
 	}
 	fmt.Println()
 	wg.Wait()
@@ -392,7 +445,7 @@ func NewBoardFromPath(path []*GameTreeNode) *Board {
 	return ret
 }
 
-func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf int, wc Color, wg *sync.WaitGroup) {
+func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf int, wc Color, lgr *LastGoodReply, wg *sync.WaitGroup) {
 	board := NewBoardFromPath(node.Path2Root())
 	board.Model = oBoard.Model
 	oc := BLACK
@@ -418,25 +471,25 @@ func MCTSExpand(node *GameTreeNode, oBoard *Board, nLeaf int, wc Color, wg *sync
 	_, cnode = node.AddChild(cnode)
 	cnode.visit += 3
 	wg.Add(1)
-	go MCTSSimulation(board.Copy(), cnode, wg)
+	go MCTSSimulation(board.Copy(), cnode, lgr, wg)
 }
 
-func MCTSSimulation(b *Board, next *GameTreeNode, wg *sync.WaitGroup) {
+func MCTSSimulation(b *Board, next *GameTreeNode, lgr *LastGoodReply, wg *sync.WaitGroup) {
 	defer func() {
 		wg.Done()
 	}()
 	b.Put(PosIndex(next.x, next.y), next.stone)
-	amaf := b.SelfBattle(OpColor(next.stone))
+	amaf := b.SelfBattle(OpColor(next.stone), lgr)
 	s := b.Score()
 
 	if s > 0 {
-		MCTSBackProp(next, BLACK, amaf)
+		MCTSBackProp(next, BLACK, amaf, lgr)
 	} else {
-		MCTSBackProp(next, WHITE, amaf)
+		MCTSBackProp(next, WHITE, amaf, lgr)
 	}
 }
 
-func MCTSBackProp(node *GameTreeNode, wc Color, amaf map[int]Color) {
+func MCTSBackProp(node *GameTreeNode, wc Color, amaf map[int]Color, lgr *LastGoodReply) {
 	MCTSLock.Lock()
 	defer MCTSLock.Unlock()
 	v := node
@@ -461,6 +514,9 @@ func MCTSBackProp(node *GameTreeNode, wc Color, amaf map[int]Color) {
 			}
 		}
 
+		if v.stone == wc && v.Father != nil {
+			lgr.Set(wc, PosIndex(v.Father.x, v.Father.y), PosIndex(v.x, v.y))
+		}
 		v = v.Father
 	}
 }
