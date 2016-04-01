@@ -129,15 +129,17 @@ func (b *Board) EvaluateRollout(sgf string) []float64 {
 		if PosOutBoard(cur.x, cur.y) {
 			continue
 		}
-		b2 := b.Copy()
-		b2.SelfBattle(cur.stone, nil)
-		s := b2.Score()
-		if s > 0 {
-			s = 1.0
-		} else {
-			s = 0.0
+		win := 0.0
+		for k := 0; k < 100; k++ {
+			b2 := b.Copy()
+			b2.SelfBattle(cur.stone, nil)
+			s := b2.Score()
+			if s > 0 {
+				win += 1.0
+			}
 		}
-		rank[j] += math.Abs(wc - s)
+		win /= 100.0
+		rank[j] += math.Abs(wc - win)
 		ok := b.Put(PosIndex(cur.x, cur.y), cur.stone)
 		if !ok {
 			break
