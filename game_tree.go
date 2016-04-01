@@ -295,6 +295,8 @@ func (t *GameTree) WriteSGF() string {
 }
 
 func (t *GameTree) ParseSGF(buf string) {
+	buf = ToUTF8(buf)
+	log.Println(buf)
 	t.Root = nil
 	t.Current = nil
 	stack := list.New()

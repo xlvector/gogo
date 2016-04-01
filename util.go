@@ -2,11 +2,26 @@ package gogo
 
 import (
 	"container/list"
+	"github.com/axgle/mahonia"
+	"github.com/saintfish/chardet"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 )
+
+func ToUTF8(buf string) string {
+	d := chardet.NewTextDetector()
+	best, err := d.DetectBest([]byte(buf))
+	if err != nil {
+		return buf
+	}
+	if strings.HasPrefix(best.Charset, "gb") || strings.HasPrefix(best.Charset, "GB") {
+		enc := mahonia.NewDecoder("gb18030")
+		return enc.ConvertString(buf)
+	}
+	return buf
+}
 
 func TreeDir(root, ext string) []string {
 	q := list.New()
