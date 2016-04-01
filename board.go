@@ -108,20 +108,20 @@ func Neigh4(k int) uint64 {
 	return ret
 }
 
-func NeighD(k int) []int {
+func NeighD(k int) uint64 {
 	x, y := IndexPos(k)
-	ret := make([]int, 0, 4)
+	ret := uint64(0)
 	if !PosOutBoard(x-1, y-1) {
-		ret = append(ret, PosIndex(x-1, y-1))
+		ret = (ret << 9) + uint64(PosIndex(x-1, y-1))
 	}
 	if !PosOutBoard(x+1, y-1) {
-		ret = append(ret, PosIndex(x+1, y-1))
+		ret = (ret << 9) + uint64(PosIndex(x+1, y-1))
 	}
 	if !PosOutBoard(x-1, y+1) {
-		ret = append(ret, PosIndex(x-1, y+1))
+		ret = (ret << 9) + uint64(PosIndex(x-1, y+1))
 	}
 	if !PosOutBoard(x+1, y+1) {
-		ret = append(ret, PosIndex(x+1, y+1))
+		ret = (ret << 9) + uint64(PosIndex(x+1, y+1))
 	}
 	return ret
 }
@@ -265,7 +265,9 @@ func (b *Board) StableEye(k int, c Color) bool {
 	nd := NeighD(k)
 	oc := OpColor(c)
 	n := 0
-	for _, p := range nd {
+	for nd > 0 {
+		p := int(nd & 0x1ff)
+		nd = (nd >> 9)
 		if b.Points[p] == oc {
 			n += 1
 		}

@@ -4,6 +4,113 @@ import (
 	"sort"
 )
 
+var pat3x3 = []string{
+	"XOX...???",
+	"XO....?.?",
+	"XO?X..?.?",
+	"XO?O.o?o?",
+	"XO?O.X???",
+	"?X?O.Oooo",
+	"?X?o.O???",
+	"OX?X.O   ",
+	"?XOx.x   ",
+	"?OXX.O   ",
+}
+
+var pat3x3Dict = PatExpand()
+
+var rotateMatrix = [][]int{
+	[]int{3, 2, 1, 6, 5, 4, 9, 8, 7},
+	[]int{7, 8, 9, 4, 5, 6, 1, 2, 3},
+	[]int{7, 4, 1, 8, 5, 2, 9, 6, 3},
+	[]int{9, 8, 7, 6, 5, 4, 3, 2, 1},
+	[]int{3, 6, 9, 2, 5, 8, 1, 4, 7},
+	[]int{9, 6, 3, 8, 5, 2, 7, 4, 1},
+	[]int{1, 4, 7, 2, 5, 8, 3, 6, 9},
+}
+
+func ColorRotatePat(pat string) string {
+	ret := ""
+	for _, c := range pat {
+		if c == 'X' {
+			ret += "O"
+		} else if c == 'O' {
+			ret += "X"
+		} else if c == 'x' {
+			ret += "o"
+		} else if c == 'o' {
+			ret += "x"
+		} else {
+			ret += string(c)
+		}
+	}
+	return ret
+}
+
+func RotatePats(pat string) []string {
+	ret := []string{}
+	for _, r := range rotateMatrix {
+		tmp := ""
+		for _, k := range r {
+			tmp += string(pat[k-1])
+		}
+		ret = append(ret, tmp)
+	}
+	return ret
+}
+
+func SinglePatExpand(pat string) []string {
+	ret := []string{""}
+	for _, c := range pat {
+		ret2 := []string{}
+		if c == '?' {
+			for _, buf := range ret {
+				ret2 = append(ret2, buf+"X")
+				ret2 = append(ret2, buf+"O")
+				ret2 = append(ret2, buf+".")
+				ret2 = append(ret2, buf+" ")
+			}
+		} else if c == 'X' || c == 'O' || c == '.' || c == ' ' {
+			for _, buf := range ret {
+				ret2 = append(ret2, buf+string(c))
+			}
+		} else if c == 'x' {
+			for _, buf := range ret {
+				ret2 = append(ret2, buf+"O")
+				ret2 = append(ret2, buf+" ")
+				ret2 = append(ret2, buf+".")
+			}
+		} else if c == 'o' {
+			for _, buf := range ret {
+				ret2 = append(ret2, buf+"X")
+				ret2 = append(ret2, buf+" ")
+				ret2 = append(ret2, buf+".")
+			}
+		}
+		ret = ret2
+	}
+	return ret
+}
+
+func PatExpand() map[string]byte {
+	ret := make(map[string]byte)
+	for _, pat := range pat3x3 {
+		rpats := RotatePats(pat)
+		for _, rpat := range rpats {
+			epats := SinglePatExpand(rpat)
+			for _, e := range epats {
+				ret[e] = 1
+			}
+
+			epats2 := SinglePatExpand(ColorRotatePat(rpat))
+			for _, e := range epats2 {
+				ret[e] = 1
+			}
+		}
+	}
+	return ret
+}
+
 func ExtendPosIndex(x, y int) int {
 	return (y+SIZE)*(SIZE*3) + x + SIZE
 }
@@ -343,6 +450,23 @@ func (b *Board) RotateNeigh(x, y, dx, dy, r int) (int, int) {
 	} else {
 		return y - dy, x - dx
 	}
+}
+
+func (b *Board) Pattern3x3String(p int) string {
+	x, y := IndexPos(p)
+	ret := ""
+	for dy := -1; dy <= 1; dy++ {
+		for dx := -1; dx <= 1; dx++ {
+			x1, y1 := x+dx, y+dy
+			if !PosOutBoard(x1, y1) {
+				c := b.Points[PosIndex(x1, y1)]
+				ret += ColorMark(c)
+			} else {
+				ret += " "
+			}
+		}
+	}
+	return ret
 }
 
 func (b *Board) PatternDxd(p int, c Color, d int) int64 {

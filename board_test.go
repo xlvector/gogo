@@ -336,12 +336,12 @@ func TestHash(t *testing.T) {
 func TestSingleSelfBattle(t *testing.T) {
 	/*
 			A B C D E F G H J K L M N O P Q R S T
-		19  . . . . . . . . . . . . . . . . . . .
-		18  . . . . . . . . . . . . . . . . . . .
-		17  . . . . . . . . . . . . . . . . . . .
-		16  . . . . X . . . . . . . . . . . . . .
-		15  . . . X O X . . . . . . . . . . . . .
-		14  . . . X . . . . . . . . . . . . . . .
+		19  . O . . . . . . . . . . . . . . . . .
+		18  X . O . . X . . . . . . . . . . . . .
+		17  . . . O . X . . . . . . . . . . . . .
+		16  X . X . X . . . . . . . . . . . . . .
+		15  . X . . . . . . . . . . . . . . . . .
+		14  . . . . . . . . . . . . . . . . . . .
 		13  . . . . . . . . . . . . . . . . . . .
 		12  . . . . . . . . . . . . . . . . . . .
 		11  . . . . . . . . . . . . . . . . . . .
@@ -358,19 +358,23 @@ func TestSingleSelfBattle(t *testing.T) {
 		    A B C D E F G H J K L M N O P Q R S T
 	*/
 	b := NewBoard()
-	b.PutLabel("BD15")
-	b.PutLabel("BD14")
+	b.PutLabel("BA16")
+	b.PutLabel("WB19")
+	b.PutLabel("BC16")
+	b.PutLabel("WC18")
 	b.PutLabel("BE16")
-	b.PutLabel("BF15")
-	b.PutLabel("WE15")
+	b.PutLabel("WD17")
+	b.PutLabel("BF17")
+	b.PutLabel("BA18")
+	b.PutLabel("BF18")
+	b.PutLabel("BB15")
 
 	n := 0
 	rand.Seed(time.Now().UnixNano())
-	lgr := NewLastGoodReply()
-	f := 30
+	f := 10
 	for n < 350 {
 		pass := 0
-		p := b.GenSelfBattleMove(WHITE, lgr)
+		p := b.GenSelfBattleMove(WHITE, nil)
 		if p < 0 {
 			pass += 1
 		}
@@ -378,7 +382,7 @@ func TestSingleSelfBattle(t *testing.T) {
 			t.Log(b.String(nil))
 		}
 
-		p = b.GenSelfBattleMove(BLACK, lgr)
+		p = b.GenSelfBattleMove(BLACK, nil)
 		if p < 0 {
 			pass += 1
 		}
@@ -390,6 +394,7 @@ func TestSingleSelfBattle(t *testing.T) {
 		}
 		n += 1
 	}
+	t.Log(b.String(nil))
 	t.Log(b.Score())
 }
 
@@ -406,16 +411,67 @@ func BenchmarkSelfBattle(t *testing.B) {
 func TestSelfBattle(t *testing.T) {
 	win := 0
 	lgr := NewLastGoodReply()
-	for i := 0; i < 100; i++ {
-		b := NewBoard()
-		b.SelfBattle(BLACK, lgr)
-		s := b.Score()
+	b := NewBoard()
+	/*
+			A B C D E F G H J K L M N O P Q R S T
+		19  . O . . . . . . . . . . . . . . . . .
+		18  X . O . . X . . . . . . . . . . . . .
+		17  . . . O . X . . . . . . . . . . . . .
+		16  X . X . X . . . . . . . . . . . . . .
+		15  . . . . . . . . . . . . . . . . . . .
+		14  . . . . . . . . . . . . . . . . . . .
+		13  . . . . . . . . . . . . . . . . . . .
+		12  . . . . . . . . . . . . . . . . . . .
+		11  . . . . . . . . . . . . . . . . . . .
+		10  . . . . . . . . . . . . . . . . . . .
+		 9  . . . . . . . . . . . . . . . . . . .
+		 8  . . . . . . . . . . . . . . . . . . .
+		 7  . . . . . . . . . . . . . . . . . . .
+		 6  . . . . . . . . . . . . . . . . . . .
+		 5  . . . . . . . . . . . . . . . . . . .
+		 4  . . . . . . . . . . . . . . . . . . .
+		 3  . . . . . . . . . . . . . . . . . . .
+		 2  . . . . . . . . . . . . . . . . . . .
+		 1  . . . . . . . . . . . . . . . . . . .
+		    A B C D E F G H J K L M N O P Q R S T
+	*/
+	b.PutLabel("BA16")
+	b.PutLabel("WB19")
+	b.PutLabel("BC16")
+	b.PutLabel("WC18")
+	b.PutLabel("BE16")
+	b.PutLabel("WD17")
+	b.PutLabel("BF17")
+	b.PutLabel("BA18")
+	b.PutLabel("BF18")
+	for i := 0; i < 500; i++ {
+		b2 := b.Copy()
+		b2.SelfBattle(WHITE, nil)
+		s := b2.Score()
 		if s > 0 {
 			win += 1
+			for j := 0; j < len(b2.Actions)-1; j++ {
+				k1, c1 := ParseIndexAction(b2.Actions[j])
+				k2, c2 := ParseIndexAction(b2.Actions[j+1])
+				if c1 == WHITE && c2 == BLACK {
+					lgr.Set(BLACK, k1, k2)
+				}
+			}
+		} else {
+			for j := 0; j < len(b2.Actions)-1; j++ {
+				k1, c1 := ParseIndexAction(b2.Actions[j])
+				k2, c2 := ParseIndexAction(b2.Actions[j+1])
+				if c1 == BLACK && c2 == WHITE {
+					lgr.Set(WHITE, k1, k2)
+				}
+			}
 		}
-		t.Log(win, s)
-		t.Log(b.String(nil))
+		if i == 0 {
+			t.Log(s)
+			t.Log(b2.String(nil))
+		}
 	}
+	t.Log(win * 100 / 500)
 }
 
 func TestInfluence(t *testing.T) {
@@ -648,5 +704,53 @@ func BenchmarkPointMap(t *testing.B) {
 	a := 361
 	for i := 0; i < t.N; i++ {
 		_ = make([]int, a)
+	}
+}
+
+func TestSinglePatExpand(t *testing.T) {
+	b := NewBoard()
+	/*
+			A B C D E F G H J K L M N O P Q R S T
+		19  . . . . . . . . . . . . . . . . . . .
+		18  . . . . . . . . . . . . . . . . . . .
+		17  . . . . . . . . . . . . . . . . . . .
+		16  . . . . . . . . . . . . . . . . . . .
+		15  . . . . . . . . . . . . . . . . . . .
+		14  . . . . . . . . . . . . . . . . . . .
+		13  . . . . . . . . . . . . . . . . . . .
+		12  . . . . . . . . . . . . . . . . . . .
+		11  . . . . . . . . . . . . . . . . . . .
+		10  . . . . . . . . . . . . . . . . . . .
+		 9  . . . . . . . . . . . . . . . . . . .
+		 8  . . . . . . . . . . . . . . . . . . .
+		 7  . . . . . . . . . . . . . . . . . . .
+		 6  . . . . . . . . . . . . . . . . . . .
+		 5  . . O X . . . O X . . . . . . . . . .
+		 4  . . X . . . . X . X . . . . . . . . .
+		 3  . . . . . . . . . . . . . . . . . . .
+		 2  . . . . . . . . . . . . . . . . . . .
+		 1  . . . . . . . . . . . . . . . . . . .
+		    A B C D E F G H J K L M N O P Q R S T
+	*/
+	//t.Log(pat3x3Dict)
+	b.PutLabel("BC4")
+	b.PutLabel("WC5")
+	b.PutLabel("BD5")
+	b.PutLabel("BH4")
+	b.PutLabel("WH5")
+	b.PutLabel("BJ5")
+	b.PutLabel("BK4")
+
+	buf := b.Pattern3x3String(PosIndex(3, 3))
+	t.Log(buf)
+
+	if _, ok := pat3x3Dict[buf]; !ok {
+		t.Error()
+	}
+
+	buf = b.Pattern3x3String(PosIndex(8, 3))
+	t.Log(buf)
+	if _, ok := pat3x3Dict[buf]; ok {
+		t.Error()
 	}
 }
