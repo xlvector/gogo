@@ -1,9 +1,5 @@
 package gogo
 
-import (
-	"sort"
-)
-
 var pat3x3 = []string{
 	"XOX...???",
 	"XO....?.?",
@@ -270,165 +266,58 @@ func (b *Board) Urgency(k int, c Color) float64 {
 	return 1.0
 }
 
+func FeatureEncode(key string, v ...int) int64 {
+	h := int64(0)
+	for _, c := range key {
+		h *= 16777619
+		h ^= int64(c)
+	}
+
+	for _, c := range v {
+		h *= 16777619
+		h ^= int64(c)
+	}
+	if h < 0 {
+		h *= -1
+	}
+	return h
+}
+
 func (b *Board) LocalFeature(k int, c Color) []int64 {
-	myNWorms := b.NeighWorms(k, c, c, 3)
-	opNWorms := b.NeighWorms(k, c, OpColor(c), 3)
-	worm := b.WormFromPoint(k, c, 3)
+	myNWorms := b.NeighWorms(k, c, c, 2)
+	opNWorms := b.NeighWorms(k, c, OpColor(c), 2)
+	worm := b.WormFromPoint(k, c, 2)
 	ret := make([]int64, 0, 5)
 
-	minLiberty := 10000
+	cm1 := 0
+	cm2 := 0
+	cm3 := 0
 	for _, w := range myNWorms {
-		if minLiberty > w.Liberty {
-			minLiberty = w.Liberty
+		if w.Liberty == 1 {
+			cm1 += 1
+		} else if w.Liberty == 2 {
+			cm2 += 1
+		} else if w.Liberty == 3 {
+			cm3 += 1
 		}
 	}
 
-	if minLiberty == 1 {
-		if worm.Liberty == 1 {
-			ret = append(ret, 493570158105)
-		} else if worm.Liberty == 2 {
-			ret = append(ret, 159084081432)
-		} else if worm.Liberty == 3 {
-			ret = append(ret, 897325971018)
-		} else if worm.Liberty > 3 {
-			ret = append(ret, 291850148415)
-		}
-	} else if minLiberty == 2 {
-		if worm.Liberty == 1 {
-			ret = append(ret, 932759347016)
-		} else if worm.Liberty == 2 {
-			ret = append(ret, 758724359874)
-		} else if worm.Liberty == 3 {
-			ret = append(ret, 238146923179)
-		} else if worm.Liberty > 3 {
-			ret = append(ret, 945876927621)
-		}
-	} else if minLiberty == 3 {
-		if worm.Liberty == 3 {
-			ret = append(ret, 491375013548)
-		} else if worm.Liberty == 4 {
-			ret = append(ret, 394671038610)
-		} else if worm.Liberty == 5 {
-			ret = append(ret, 841591751951)
-		}
-	}
-
-	//op
-	minLibertyWorm := ZeroWorm(INVALID_COLOR)
-	liberties := []int{}
-	minLibertySize := 0
+	co1 := 0
+	co2 := 0
+	co3 := 0
 	for _, w := range opNWorms {
-		if minLibertyWorm.Color == INVALID_COLOR {
-			minLibertyWorm = w
-		} else {
-			if minLibertyWorm.Liberty > w.Liberty {
-				minLibertyWorm = w
-			}
-		}
-		liberties = append(liberties, w.Liberty)
-	}
-	sort.Ints(liberties)
-	fl := int64(0)
-	for _, l := range liberties {
-		fl *= 5
-		fl += int64(l + 1)
-	}
-	fl += 809438508012
-	ret = append(ret, fl)
-	if minLibertyWorm.Color != INVALID_COLOR {
-		if minLibertyWorm.Liberty == 1 {
-			ret = append(ret, 787401927621+int64(minLibertySize))
-		} else if minLibertyWorm.Liberty == 2 {
-			if worm.Liberty == 1 {
-				ret = append(ret, 304580158101)
-			} else if worm.Liberty == 2 {
-				ret = append(ret, 843759137519)
-				ret = append(ret, 843759137519+int64(minLibertySize))
-			} else if worm.Liberty >= 3 {
-				ret = append(ret, 934571349579)
-				ret = append(ret, 934571349579+int64(minLibertySize))
-			}
-		} else if minLibertyWorm.Liberty == 3 {
-			extendLiberties := b.ExtendLiberty(minLibertyWorm.LibertyPoints)
-			if extendLiberties.Size() == 3 {
-				ret = append(ret, 4315701358105)
-			} else if extendLiberties.Size() == 4 {
-				ret = append(ret, 2915128502158)
-			}
-		}
-
-		if minLibertyWorm.Liberty == 2 && worm.Liberty > 1 {
-			opMyWorms := b.WormNeighWorms(minLibertyWorm, c, 2)
-			ml := 10000
-			for _, w := range opMyWorms {
-				if ml > w.Liberty {
-					ml = w.Liberty
-				}
-			}
-			if ml == 2 {
-				ret = append(ret, 148759154791191)
-			}
+		if w.Liberty == 1 {
+			co1 += 1
+		} else if w.Liberty == 2 {
+			co2 += 1
+		} else if w.Liberty == 3 {
+			co3 += 1
 		}
 	}
 
-	ret = append(ret, b.EdgeDisHash(k))
-
-	nMy := int64(0)
-	nOp := int64(0)
-	for _, p := range PointDisMap[k][1] {
-		if b.Points[p] == c {
-			nMy += 1
-		} else if b.Points[p] == OpColor(c) {
-			nOp += 1
-		}
-	}
-
-	ret = append(ret, 257012801851+nMy*710517801)
-	ret = append(ret, 314501851003+nOp*837104719)
-
-	nMy = 0
-	nOp = 0
-	for _, p := range PointDisMap[k][2] {
-		if b.Points[p] == c {
-			nMy += 1
-		} else if b.Points[p] == OpColor(c) {
-			nOp += 1
-		}
-	}
-	ret = append(ret, 839457015011+nMy*834561911)
-	ret = append(ret, 954876687874+nOp*231971295)
-
-	wormHash := b.EmptyWormFromPoint(k, 5)
-	for _, h := range wormHash {
-		ret = append(ret, h^78860975057501)
-	}
-	ret = append(ret, b.PatternDxd(k, c, 1))
-
-	ret = append(ret, 970803460911+751*int64(len(b.Actions)/10))
-
-	/*
-		influ := b.InfluenceVal[k]
-		if c == WHITE {
-			influ *= -1
-		}
-		ret = append(ret, 491570147501+11*int64(influ))
-	*/
-
-	fret := make([]int64, 0, 3*len(ret))
-	for _, f1 := range ret {
-		fret = append(fret, f1)
-		for _, f2 := range ret {
-			if f1 < f2 {
-				fret = append(fret, f1^f2)
-				for _, f3 := range ret {
-					if f2 < f3 {
-						fret = append(fret, f1^f2^f3)
-					}
-				}
-			}
-		}
-	}
-
+	ret = append(ret, FeatureEncode("liberty", cm1, cm2, cm3, co1, co2, co3, worm.Liberty))
+	pat3 := b.Pattern3x3String(k, c)
+	ret = append(ret, FeatureEncode("pat3x3"+pat3))
 	return ret
 }
 
@@ -452,7 +341,21 @@ func (b *Board) RotateNeigh(x, y, dx, dy, r int) (int, int) {
 	}
 }
 
-func (b *Board) Pattern3x3String(p int) string {
+func ColorMark2(c1, c2 Color) string {
+	if c2 == INVALID_COLOR {
+		return ColorMark(c1)
+	} else {
+		if c1 == c2 {
+			return "X"
+		} else if c1 == OpColor(c2) {
+			return "O"
+		} else {
+			return ColorMark(c1)
+		}
+	}
+}
+
+func (b *Board) Pattern3x3String(p int, stone Color) string {
 	x, y := IndexPos(p)
 	ret := ""
 	for dy := -1; dy <= 1; dy++ {
@@ -460,7 +363,7 @@ func (b *Board) Pattern3x3String(p int) string {
 			x1, y1 := x+dx, y+dy
 			if !PosOutBoard(x1, y1) {
 				c := b.Points[PosIndex(x1, y1)]
-				ret += ColorMark(c)
+				ret += ColorMark2(c, stone)
 			} else {
 				ret += " "
 			}

@@ -194,7 +194,7 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 		for n4 > 0 {
 			p := int(n4 & 0x1ff)
 			n4 = (n4 >> 9)
-			pat := b.Pattern3x3String(p)
+			pat := b.Pattern3x3String(p, INVALID_COLOR)
 			if _, ok := pat3x3Dict[pat]; ok {
 				if ok2, _ := b.CanPut(p, c); ok2 {
 					ret = append(ret, p)
@@ -205,7 +205,7 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 		for nd > 0 {
 			p := int(nd & 0x1ff)
 			nd = (nd >> 9)
-			pat := b.Pattern3x3String(p)
+			pat := b.Pattern3x3String(p, INVALID_COLOR)
 			if _, ok := pat3x3Dict[pat]; ok {
 				if ok2, _ := b.CanPut(p, c); ok2 {
 					ret = append(ret, p)
