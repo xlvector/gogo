@@ -419,13 +419,13 @@ func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) (bool, int) {
 			log.Println(PointString(child.x, child.y, child.stone), child.win, child.visit)
 		}
 	}
-	lgr := NewLastGoodReply()
+	//lgr := NewLastGoodReply()
 	for i := 0; i < n; i++ {
 		if i%1000 == 0 {
 			fmt.Print(".")
 		}
 		node := MCTSSelection(gt)
-		MCTSExpand(node, b, expand, c, lgr, wg)
+		MCTSExpand(node, b, expand, c, nil, wg)
 	}
 	fmt.Println()
 	wg.Wait()
@@ -552,8 +552,10 @@ func MCTSBackProp(node *GameTreeNode, wc Color, amaf map[int]Color, lgr *LastGoo
 			}
 		}
 
-		if v.stone == wc && v.Father != nil {
-			lgr.Set(wc, PosIndex(v.Father.x, v.Father.y), PosIndex(v.x, v.y))
+		if lgr != nil {
+			if v.stone == wc && v.Father != nil {
+				lgr.Set(wc, PosIndex(v.Father.x, v.Father.y), PosIndex(v.x, v.y))
+			}
 		}
 		v = v.Father
 	}
