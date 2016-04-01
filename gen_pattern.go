@@ -3,6 +3,7 @@ package gogo
 import (
 	"io/ioutil"
 	"log"
+	"math"
 	"math/rand"
 	"sort"
 	"strconv"
@@ -109,6 +110,36 @@ func (b *Board) GenPattern(sgf string, rotate int) []PatternSample {
 		b.RefreshInfluenceAndTerritory()
 	}
 	return ret
+}
+
+func (b *Board) EvaluateRollout(sgf string) []float64 {
+	buf, _ := ioutil.ReadFile(sgf)
+	gt := NewGameTree(SIZE)
+	gt.ParseSGF(string(buf))
+	if gt.HasHandicap() {
+		return nil
+	}
+	wc := gt.Winner()
+	log.Println(wc)
+	path := gt.Path2Root()
+	rank := make([]float64, len(path)-1)
+	j := 0
+	for i := len(path) - 2; i >= 0; i-- {
+		cur := path[i]
+		if PosOutBoard(cur.x, cur.y) {
+			continue
+		}
+		b2 := b.Copy()
+		b2.SelfBattle(cur.stone, nil)
+		s := b2.Score()
+		rank[j] += math.Abs(wc - s)
+		ok := b.Put(PosIndex(cur.x, cur.y), cur.stone)
+		if !ok {
+			break
+		}
+		j += 1
+	}
+	return rank
 }
 
 func (b *Board) EvaluateModel(sgf string, withLog bool) (int, int) {

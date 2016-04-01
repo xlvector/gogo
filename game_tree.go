@@ -210,15 +210,14 @@ func NewGameTree(size int) *GameTree {
 	return ret
 }
 
-func (t *GameTree) Winner() Color {
+func (t *GameTree) Winner() float64 {
 	ret, _ := t.Root.GetAttr("RE")
-	log.Println(ret)
 	if strings.HasPrefix(ret, "W") || strings.HasPrefix(ret, "白") {
-		return WHITE
+		return 0.0
 	} else if strings.HasPrefix(ret, "B") || strings.HasPrefix(ret, "黑") {
-		return BLACK
+		return 1.0
 	}
-	return INVALID_COLOR
+	return 0.5
 }
 
 func (t *GameTree) HasHandicap() bool {

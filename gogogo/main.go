@@ -138,6 +138,30 @@ func main() {
 			total += t
 			log.Println(h, t, hit, total, float64(hit)/float64(total))
 		}
+	} else if *mode == "eval-rollout" {
+		m := &lr.LogisticRegression{}
+		m.LoadModel(*model)
+		rank := make([]float64, 1000)
+		total := make([]float64, 1000)
+		paths := gogo.TreeDir(*input, "sgf")
+
+		for k, path := range paths {
+			log.Println(path)
+			board := gogo.NewBoard()
+			board.Model = m
+			mse := board.EvaluateRollout(path)
+			for i, v := range mse {
+				rank[i] += v
+				total[i] += 1.0
+			}
+			if k%10 == 0 {
+				for i, v := range rank {
+					if total[i] > 0 {
+						log.Println(i, v/total[i])
+					}
+				}
+			}
+		}
 	} else if *mode == "simple" {
 		board := gogo.NewBoard()
 		if len(*model) > 0 {
