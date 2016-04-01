@@ -118,6 +118,8 @@ func (b *Board) EvaluateModel(sgf string, withLog bool) (int, int) {
 	if gt.HasHandicap() {
 		return 0, 0
 	}
+	wc := gt.Winner()
+	log.Println(wc)
 	path := gt.Path2Root()
 	lastPat := []int64{}
 	hit := 0

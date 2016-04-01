@@ -210,6 +210,17 @@ func NewGameTree(size int) *GameTree {
 	return ret
 }
 
+func (t *GameTree) Winner() Color {
+	ret, _ := t.Root.GetAttr("RE")
+	log.Println(ret)
+	if strings.HasPrefix(ret, "W") || strings.HasPrefix(ret, "白") {
+		return WHITE
+	} else if strings.HasPrefix(ret, "B") || strings.HasPrefix(ret, "黑") {
+		return BLACK
+	}
+	return INVALID_COLOR
+}
+
 func (t *GameTree) HasHandicap() bool {
 	if t.Root == nil {
 		return false
@@ -296,7 +307,6 @@ func (t *GameTree) WriteSGF() string {
 
 func (t *GameTree) ParseSGF(buf string) {
 	buf = ToUTF8(buf)
-	log.Println(buf)
 	t.Root = nil
 	t.Current = nil
 	stack := list.New()
