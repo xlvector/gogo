@@ -118,7 +118,7 @@ func (b *Board) EvaluateRollout(sgf string) float64 {
 	gt := NewGameTree(SIZE)
 	gt.ParseSGF(string(buf))
 	if gt.HasHandicap() {
-		return nil
+		return 0.5
 	}
 	wc := gt.Winner()
 	log.Println(wc)
