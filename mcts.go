@@ -319,7 +319,7 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 
 	for i := 0; i < NPOINT*2; i++ {
 		k := rand.Intn(NPOINT)
-		if i < 10 && !b.EmptyWithinDis(k, 3) {
+		if i < 10 && b.EmptyWithinDis(k, 3) {
 			continue
 		}
 		if ok, _ := b.CanPut(k, c); ok {
