@@ -161,140 +161,141 @@ func (b *Board) SaveAtari(w Worm) []int {
 }
 
 func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
-	last, _ := b.LastMove()
-	if last >= 0 {
-
-		if lgr != nil {
-			p := lgr.Move(c, last)
-			if p > 0 {
-				if ok, _ := b.CanPut(p, c); ok {
-					b.Put(p, c)
-					return p
-				}
-			}
-		}
-
-		//fix atari
-		ret := make([]int, 0, 2)
-		worms := b.NeighWorms(last, OpColor(c), c, 2)
-		for _, w := range worms {
-			if w.Liberty == 1 {
-				ret = append(ret, b.SaveAtari(w)...)
-			}
-		}
-		if len(ret) > 0 {
-			p := ret[rand.Intn(len(ret))]
-			b.Put(p, c)
-			return p
-		}
-
-		//pat3
-		ret = make([]int, 0, 8)
-		n4 := Neigh4(last)
-		for n4 > 0 {
-			p := int(n4 & 0x1ff)
-			n4 = (n4 >> 9)
-			pat := b.Pattern3x3String(p, INVALID_COLOR)
-			if _, ok := pat3x3Dict[pat]; ok {
-				if ok2, _ := b.CanPut(p, c); ok2 {
-					ret = append(ret, p)
-				}
-			}
-		}
-		nd := NeighD(last)
-		for nd > 0 {
-			p := int(nd & 0x1ff)
-			nd = (nd >> 9)
-			pat := b.Pattern3x3String(p, INVALID_COLOR)
-			if _, ok := pat3x3Dict[pat]; ok {
-				if ok2, _ := b.CanPut(p, c); ok2 {
-					ret = append(ret, p)
-				}
-			}
-		}
-		if len(ret) > 0 {
-			p := ret[rand.Intn(len(ret))]
-			b.Put(p, c)
-			return p
-		}
-	}
-
 	/*
-		pms := make([]PointMap, 6)
-		for i := 0; i < len(pms); i++ {
-			pms[i] = ZeroPointMap()
+		last, _ := b.LastMove()
+		if last >= 0 {
+
+			if lgr != nil {
+				p := lgr.Move(c, last)
+				if p > 0 {
+					if ok, _ := b.CanPut(p, c); ok {
+						b.Put(p, c)
+						return p
+					}
+				}
+			}
+
+			//fix atari
+			ret := make([]int, 0, 2)
+			worms := b.NeighWorms(last, OpColor(c), c, 2)
+			for _, w := range worms {
+				if w.Liberty == 1 {
+					ret = append(ret, b.SaveAtari(w)...)
+				}
+			}
+			if len(ret) > 0 {
+				p := ret[rand.Intn(len(ret))]
+				b.Put(p, c)
+				return p
+			}
+
+			//pat3
+			ret = make([]int, 0, 8)
+			n4 := Neigh4(last)
+			for n4 > 0 {
+				p := int(n4 & 0x1ff)
+				n4 = (n4 >> 9)
+				pat := b.Pattern3x3String(p, INVALID_COLOR)
+				if _, ok := pat3x3Dict[pat]; ok {
+					if ok2, _ := b.CanPut(p, c); ok2 {
+						ret = append(ret, p)
+					}
+				}
+			}
+			nd := NeighD(last)
+			for nd > 0 {
+				p := int(nd & 0x1ff)
+				nd = (nd >> 9)
+				pat := b.Pattern3x3String(p, INVALID_COLOR)
+				if _, ok := pat3x3Dict[pat]; ok {
+					if ok2, _ := b.CanPut(p, c); ok2 {
+						ret = append(ret, p)
+					}
+				}
+			}
+			if len(ret) > 0 {
+				p := ret[rand.Intn(len(ret))]
+				b.Put(p, c)
+				return p
+			}
 		}
 
-		visited := ZeroPointMap()
-		for j := len(b.Actions) - 1; j >= 0; j-- {
-			a := b.Actions[j]
-			k, ac := ParseIndexAction(a)
-			if visited.Exist(k) {
-				continue
+
+			pms := make([]PointMap, 6)
+			for i := 0; i < len(pms); i++ {
+				pms[i] = ZeroPointMap()
 			}
-			worm := b.WormFromPoint(k, b.Points[k], 3)
-			for _, p := range worm.Points.Points {
-				visited.Add(p)
-			}
-			if ac == OpColor(c) {
-				if worm.Liberty == 1 {
-					pms[0].Add(worm.LibertyPoints.First())
-				} else if worm.Liberty == 2 {
-					for _, p := range worm.LibertyPoints.Points {
-						if b.PointLiberty(p) == 3 {
-							pms[2].Add(p)
-						}
-						pms[3].Add(p)
-					}
-				} else if worm.Liberty == 3 {
-					ext := b.ExtendLiberty(worm.LibertyPoints)
-					if ext.Size() <= 3 {
+
+			visited := ZeroPointMap()
+			for j := len(b.Actions) - 1; j >= 0; j-- {
+				a := b.Actions[j]
+				k, ac := ParseIndexAction(a)
+				if visited.Exist(k) {
+					continue
+				}
+				worm := b.WormFromPoint(k, b.Points[k], 3)
+				for _, p := range worm.Points.Points {
+					visited.Add(p)
+				}
+				if ac == OpColor(c) {
+					if worm.Liberty == 1 {
+						pms[0].Add(worm.LibertyPoints.First())
+					} else if worm.Liberty == 2 {
 						for _, p := range worm.LibertyPoints.Points {
+							if b.PointLiberty(p) == 3 {
+								pms[2].Add(p)
+							}
 							pms[3].Add(p)
 						}
-					}
-				}
-
-			} else if ac == c {
-				if worm.Liberty == 1 {
-					ps := b.SaveAtari(worm)
-					for _, p := range ps {
-						pms[1].Add(p)
-					}
-				} else if worm.Liberty == 2 {
-					for _, p := range worm.LibertyPoints.Points {
-						if b.PointLiberty(p) > 2 {
-							pms[4].Add(p)
+					} else if worm.Liberty == 3 {
+						ext := b.ExtendLiberty(worm.LibertyPoints)
+						if ext.Size() <= 3 {
+							for _, p := range worm.LibertyPoints.Points {
+								pms[3].Add(p)
+							}
 						}
 					}
-				} else if worm.Liberty == 3 {
-					ext := b.ExtendLiberty(worm.LibertyPoints)
-					if ext.Size() <= 3 {
+
+				} else if ac == c {
+					if worm.Liberty == 1 {
+						ps := b.SaveAtari(worm)
+						for _, p := range ps {
+							pms[1].Add(p)
+						}
+					} else if worm.Liberty == 2 {
 						for _, p := range worm.LibertyPoints.Points {
-							pms[4].Add(p)
+							if b.PointLiberty(p) > 2 {
+								pms[4].Add(p)
+							}
+						}
+					} else if worm.Liberty == 3 {
+						ext := b.ExtendLiberty(worm.LibertyPoints)
+						if ext.Size() <= 3 {
+							for _, p := range worm.LibertyPoints.Points {
+								pms[4].Add(p)
+							}
+						}
+					}
+				}
+
+				for _, p := range worm.LibertyPoints.Points {
+					if b.PointLiberty(p) == 2 {
+						pms[5].Add(p)
+					}
+				}
+			}
+
+			for _, pm := range pms {
+				if pm.Size() > 0 {
+					for i := 0; i < 3; i++ {
+						k := pm.Random()
+						if ok, _ := b.CanPut(k, c); ok {
+							b.Put(k, c)
+							return k
 						}
 					}
 				}
 			}
-
-			for _, p := range worm.LibertyPoints.Points {
-				if b.PointLiberty(p) == 2 {
-					pms[5].Add(p)
-				}
-			}
-		}
-
-		for _, pm := range pms {
-			if pm.Size() > 0 {
-				for i := 0; i < 3; i++ {
-					k := pm.Random()
-					if ok, _ := b.CanPut(k, c); ok {
-						b.Put(k, c)
-						return k
-					}
-				}
-			}
-		}
 	*/
 	for i := 0; i < NPOINT*2; i++ {
 		k := rand.Intn(NPOINT)
