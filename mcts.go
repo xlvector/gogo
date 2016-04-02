@@ -220,7 +220,7 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 		}
 	}
 
-	pms := make([]PointMap, 6)
+	pms := make([]PointMap, 7)
 	for i := 0; i < len(pms); i++ {
 		pms[i] = ZeroPointMap()
 	}
@@ -238,20 +238,25 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 		}
 		if ac == OpColor(c) {
 			if worm.Liberty == 1 {
-				pms[0].Add(worm.LibertyPoints.First())
+				p := worm.LibertyPoints.First()
+				if worm.Size() > 1 {
+					pms[0].Add(p)
+				} else {
+					pms[1].Add(p)
+				}
 			} else if worm.Liberty == 2 {
 				for _, p := range worm.LibertyPoints.Points {
 					if b.PointLiberty(p) == 3 {
-						pms[2].Add(p)
-					} else {
 						pms[3].Add(p)
+					} else {
+						pms[4].Add(p)
 					}
 				}
 			} else if worm.Liberty == 3 {
 				ext := b.ExtendLiberty(worm.LibertyPoints)
 				if ext.Size() <= 3 {
 					for _, p := range worm.LibertyPoints.Points {
-						pms[3].Add(p)
+						pms[4].Add(p)
 					}
 				}
 			}
@@ -260,19 +265,19 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 			if worm.Liberty == 1 {
 				ps := b.SaveAtari(worm)
 				for _, p := range ps {
-					pms[1].Add(p)
+					pms[2].Add(p)
 				}
 			} else if worm.Liberty == 2 {
 				for _, p := range worm.LibertyPoints.Points {
 					if b.PointLiberty(p) > 2 {
-						pms[4].Add(p)
+						pms[5].Add(p)
 					}
 				}
 			} else if worm.Liberty == 3 {
 				ext := b.ExtendLiberty(worm.LibertyPoints)
 				if ext.Size() <= 3 {
 					for _, p := range worm.LibertyPoints.Points {
-						pms[4].Add(p)
+						pms[5].Add(p)
 					}
 				}
 			}
@@ -280,7 +285,7 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 
 		for _, p := range worm.LibertyPoints.Points {
 			if b.PointLiberty(p) == 2 {
-				pms[5].Add(p)
+				pms[6].Add(p)
 			}
 		}
 	}
