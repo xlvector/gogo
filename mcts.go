@@ -181,7 +181,7 @@ func (b *Board) LibertyWithColor(c Color, k int) int {
 }
 
 func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
-
+	rank := make(map[int]float64)
 	last, _ := b.LastMove()
 	if last >= 0 {
 
@@ -238,9 +238,15 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 			b.Put(p, c)
 			return p
 		}
-	}
 
-	rank := make(map[int]float64)
+		for _, p := range PointDisMap[last][2] {
+			rank[p] = 0.1
+		}
+
+		for _, p := range PointDisMap[last][3] {
+			rank[p] = 0.05
+		}
+	}
 
 	visited := ZeroPointMap()
 
