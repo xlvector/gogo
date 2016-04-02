@@ -220,10 +220,12 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 		}
 	}
 
-	rank := make(map[int]float64)
+	pms := make([]PointMap, 6)
+	for i := 0; i < len(pms); i++ {
+		pms[i] = ZeroPointMap()
+	}
 
 	visited := ZeroPointMap()
-
 	for j := len(b.Actions) - 1; j >= 0; j-- {
 		a := b.Actions[j]
 		k, ac := ParseIndexAction(a)
@@ -236,20 +238,21 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 		}
 		if ac == OpColor(c) {
 			if worm.Liberty == 1 {
-				rank[worm.LibertyPoints.First()] += 10000000.0 + float64(1000*worm.Size())
+				p := worm.LibertyPoints.First()
+				pms[0].Add(p)
 			} else if worm.Liberty == 2 {
 				for _, p := range worm.LibertyPoints.Points {
 					if b.PointLiberty(p) == 3 {
-						rank[p] += 10000.0 + float64(worm.Size()*10)
+						pms[2].Add(p)
 					} else {
-						rank[p] += 500.0 + float64(worm.Size())
+						pms[3].Add(p)
 					}
 				}
 			} else if worm.Liberty == 3 {
 				ext := b.ExtendLiberty(worm.LibertyPoints)
 				if ext.Size() <= 3 {
 					for _, p := range worm.LibertyPoints.Points {
-						rank[p] += 100.0 + float64(worm.Size())
+						pms[3].Add(p)
 					}
 				}
 			}
@@ -258,19 +261,19 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 			if worm.Liberty == 1 {
 				ps := b.SaveAtari(worm)
 				for _, p := range ps {
-					rank[p] += 100000.0 + float64(worm.Size()*100)
+					pms[1].Add(p)
 				}
 			} else if worm.Liberty == 2 {
 				for _, p := range worm.LibertyPoints.Points {
 					if b.PointLiberty(p) > 2 {
-						rank[p] += 10.0
+						pms[4].Add(p)
 					}
 				}
 			} else if worm.Liberty == 3 {
 				ext := b.ExtendLiberty(worm.LibertyPoints)
 				if ext.Size() <= 3 {
 					for _, p := range worm.LibertyPoints.Points {
-						rank[p] += 10.0
+						pms[4].Add(p)
 					}
 				}
 			}
@@ -278,22 +281,19 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 
 		for _, p := range worm.LibertyPoints.Points {
 			if b.PointLiberty(p) == 2 {
-				rank[p] += 1.0
+				pms[5].Add(p)
 			}
 		}
 	}
 
-	psum := 0.0
-	for _, v := range rank {
-		psum += v
-	}
-
-	psum *= rand.Float64()
-	for k, v := range rank {
-		psum -= v
-		if psum <= 0.0 {
-			if ok, _ := b.CanPut(k, c); ok {
-				return k
+	for _, pm := range pms {
+		if pm.Size() > 0 {
+			for i := 0; i < 3; i++ {
+				k := pm.Random()
+				if ok, _ := b.CanPut(k, c); ok {
+					b.Put(k, c)
+					return k
+				}
 			}
 		}
 	}
