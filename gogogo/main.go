@@ -157,7 +157,7 @@ func main() {
 			if k%10 == 0 {
 				for i, v := range rank {
 					if total[i] > 0 {
-						log.Println(i, v/total[i])
+						log.Println(i, v, total[i], v/total[i])
 					}
 				}
 			}
