@@ -308,7 +308,7 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 
 func (b *Board) GenMove(c Color, rank map[int]float64) (int, map[int]float64) {
 	rank = b.CandidateMoves(c, rank)
-	cands := TopN(rank, 2)
+	cands := TopN(rank, 10)
 	if len(cands) == 0 {
 		return -1, rank
 	}
