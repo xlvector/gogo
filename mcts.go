@@ -283,7 +283,7 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 	}
 
 	psum := 0.0
-	for k, v := range rank {
+	for _, v := range rank {
 		psum += v
 	}
 
