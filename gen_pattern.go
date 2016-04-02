@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"sort"
 	"strconv"
+	"sync"
 
 	"github.com/xlvector/hector/core"
 )
@@ -130,14 +131,19 @@ func (b *Board) EvaluateRollout(sgf string) []float64 {
 			continue
 		}
 		win := 0.0
+		wg := &sync.WaitGroup{}
 		for k := 0; k < 100; k++ {
-			b2 := b.Copy()
-			b2.SelfBattle(cur.stone, nil)
-			s := b2.Score()
-			if s > 0 {
-				win += 1.0
-			}
+			go func() {
+				wg.Add(1)
+				b2 := b.Copy()
+				b2.SelfBattle(cur.stone, nil)
+				s := b2.Score()
+				if s > 0 {
+					win += 1.0
+				}
+			}()
 		}
+		wg.Done()
 		win /= 100.0
 		rank[j] += math.Abs(wc - win)
 		ok := b.Put(PosIndex(cur.x, cur.y), cur.stone)
