@@ -223,6 +223,7 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 	rank := make(map[int]float64)
 
 	visited := ZeroPointMap()
+
 	for j := len(b.Actions) - 1; j >= 0; j-- {
 		a := b.Actions[j]
 		k, ac := ParseIndexAction(a)
@@ -235,13 +236,13 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 		}
 		if ac == OpColor(c) {
 			if worm.Liberty == 1 {
-				rank[worm.LibertyPoints.First()] += 100000.0 + float64(1000*worm.Size())
+				rank[worm.LibertyPoints.First()] += 10000000.0 + float64(1000*worm.Size())
 			} else if worm.Liberty == 2 {
 				for _, p := range worm.LibertyPoints.Points {
 					if b.PointLiberty(p) == 3 {
-						rank[p] += 1000.0 + float64(worm.Size()*10)
+						rank[p] += 10000.0 + float64(worm.Size()*10)
 					} else {
-						rank[p] += 100.0 + float64(worm.Size())
+						rank[p] += 500.0 + float64(worm.Size())
 					}
 				}
 			} else if worm.Liberty == 3 {
@@ -257,19 +258,19 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 			if worm.Liberty == 1 {
 				ps := b.SaveAtari(worm)
 				for _, p := range ps {
-					rank[p] += 10000.0 + float64(worm.Size()*100)
+					rank[p] += 100000.0 + float64(worm.Size()*100)
 				}
 			} else if worm.Liberty == 2 {
 				for _, p := range worm.LibertyPoints.Points {
 					if b.PointLiberty(p) > 2 {
-						rank[p] += 10.0 + float64(worm.Size())
+						rank[p] += 10.0
 					}
 				}
 			} else if worm.Liberty == 3 {
 				ext := b.ExtendLiberty(worm.LibertyPoints)
 				if ext.Size() <= 3 {
 					for _, p := range worm.LibertyPoints.Points {
-						rank[p] += 10.0 + float64(worm.Size())
+						rank[p] += 10.0
 					}
 				}
 			}
