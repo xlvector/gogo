@@ -133,17 +133,18 @@ func (b *Board) EvaluateRollout(sgf string) []float64 {
 		win := 0.0
 		wg := &sync.WaitGroup{}
 		for k := 0; k < 100; k++ {
+			wg.Add(1)
 			go func() {
-				wg.Add(1)
 				b2 := b.Copy()
 				b2.SelfBattle(cur.stone, nil)
 				s := b2.Score()
 				if s > 0 {
 					win += 1.0
 				}
+				wg.Done()
 			}()
 		}
-		wg.Done()
+		wg.Wait()
 		win /= 100.0
 		rank[j] += math.Abs(wc - win)
 		ok := b.Put(PosIndex(cur.x, cur.y), cur.stone)
