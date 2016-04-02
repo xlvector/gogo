@@ -220,12 +220,10 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 		}
 	}
 
-	pms := make([]PointMap, 7)
-	for i := 0; i < len(pms); i++ {
-		pms[i] = ZeroPointMap()
-	}
+	rank := make(map[int]float64)
 
 	visited := ZeroPointMap()
+
 	for j := len(b.Actions) - 1; j >= 0; j-- {
 		a := b.Actions[j]
 		k, ac := ParseIndexAction(a)
@@ -238,25 +236,20 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 		}
 		if ac == OpColor(c) {
 			if worm.Liberty == 1 {
-				p := worm.LibertyPoints.First()
-				if worm.Size() > 1 {
-					pms[0].Add(p)
-				} else {
-					pms[1].Add(p)
-				}
+				rank[worm.LibertyPoints.First()] += 10000000.0 + float64(1000*worm.Size())
 			} else if worm.Liberty == 2 {
 				for _, p := range worm.LibertyPoints.Points {
 					if b.PointLiberty(p) == 3 {
-						pms[3].Add(p)
+						rank[p] += 10000.0 + float64(worm.Size()*10)
 					} else {
-						pms[4].Add(p)
+						rank[p] += 500.0 + float64(worm.Size())
 					}
 				}
 			} else if worm.Liberty == 3 {
 				ext := b.ExtendLiberty(worm.LibertyPoints)
 				if ext.Size() <= 3 {
 					for _, p := range worm.LibertyPoints.Points {
-						pms[4].Add(p)
+						rank[p] += 100.0 + float64(worm.Size())
 					}
 				}
 			}
@@ -265,19 +258,19 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 			if worm.Liberty == 1 {
 				ps := b.SaveAtari(worm)
 				for _, p := range ps {
-					pms[2].Add(p)
+					rank[p] += 100000.0 + float64(worm.Size()*100)
 				}
 			} else if worm.Liberty == 2 {
 				for _, p := range worm.LibertyPoints.Points {
 					if b.PointLiberty(p) > 2 {
-						pms[5].Add(p)
+						rank[p] += 10.0
 					}
 				}
 			} else if worm.Liberty == 3 {
 				ext := b.ExtendLiberty(worm.LibertyPoints)
 				if ext.Size() <= 3 {
 					for _, p := range worm.LibertyPoints.Points {
-						pms[5].Add(p)
+						rank[p] += 10.0
 					}
 				}
 			}
@@ -285,19 +278,22 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 
 		for _, p := range worm.LibertyPoints.Points {
 			if b.PointLiberty(p) == 2 {
-				pms[6].Add(p)
+				rank[p] += 1.0
 			}
 		}
 	}
 
-	for _, pm := range pms {
-		if pm.Size() > 0 {
-			for i := 0; i < 3; i++ {
-				k := pm.Random()
-				if ok, _ := b.CanPut(k, c); ok {
-					b.Put(k, c)
-					return k
-				}
+	psum := 0.0
+	for _, v := range rank {
+		psum += v
+	}
+
+	psum *= rand.Float64()
+	for k, v := range rank {
+		psum -= v
+		if psum <= 0.0 {
+			if ok, _ := b.CanPut(k, c); ok {
+				return k
 			}
 		}
 	}
