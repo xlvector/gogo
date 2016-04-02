@@ -142,12 +142,15 @@ func main() {
 		m := &lr.LogisticRegression{}
 		m.LoadModel(*model)
 		paths := gogo.TreeDir(*input, "sgf")
-
+		ave := 0.0
+		n := 0.0
 		for _, path := range paths {
 			log.Println(path)
 			board := gogo.NewBoard()
 			board.Model = m
-			log.Println(board.EvaluateRollout(path))
+			ave += board.EvaluateRollout(path)
+			n += 1.0
+			log.Println(ave / n)
 		}
 	} else if *mode == "simple" {
 		board := gogo.NewBoard()

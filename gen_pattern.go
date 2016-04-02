@@ -130,7 +130,7 @@ func (b *Board) EvaluateRollout(sgf string) float64 {
 		if PosOutBoard(cur.x, cur.y) {
 			continue
 		}
-		if i%20 == 0 {
+		if i%30 == 0 {
 			win := 0.0
 			wg := &sync.WaitGroup{}
 			for k := 0; k < 100; k++ {
