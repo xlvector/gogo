@@ -136,7 +136,7 @@ func (b *Board) SaveAtari(w Worm) []int {
 		return ret
 	}
 	for _, p := range w.LibertyPoints.Points {
-		if b.PointLiberty(p) > 1 {
+		if b.PointLiberty(p) > 2 {
 			ret = append(ret, p)
 		} else {
 			w2 := b.WormFromPoint(p, w.Color, 2)
@@ -243,8 +243,9 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 				for _, p := range worm.LibertyPoints.Points {
 					if b.PointLiberty(p) == 3 {
 						pms[2].Add(p)
+					} else {
+						pms[3].Add(p)
 					}
-					pms[3].Add(p)
 				}
 			} else if worm.Liberty == 3 {
 				ext := b.ExtendLiberty(worm.LibertyPoints)
