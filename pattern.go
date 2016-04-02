@@ -2,6 +2,7 @@ package gogo
 
 var pat3x3 = []string{
 	"XOX...???",
+	"X.X......",
 	"XO....?.?",
 	"XO?X..?.?",
 	"XO?O.o?o?",

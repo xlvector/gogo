@@ -160,6 +160,26 @@ func (b *Board) SaveAtari(w Worm) []int {
 	return ret2
 }
 
+func (b *Board) LibertyWithColor(c Color, k int) int {
+	n4 := Neigh4(k)
+	ret := 0
+	for n4 > 0 {
+		p := int(n4 & 0x1ff)
+		n4 = (n4 >> 9)
+		if IndexOutBoard(p) {
+			continue
+		}
+		if b.Points[p] == GRAY {
+			ret += 1
+			continue
+		}
+		if b.Points[p] != c {
+			return -1
+		}
+	}
+	return ret
+}
+
 func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 
 	last, _ := b.LastMove()
