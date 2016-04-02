@@ -141,11 +141,9 @@ func main() {
 	} else if *mode == "eval-rollout" {
 		m := &lr.LogisticRegression{}
 		m.LoadModel(*model)
-		rank := make([]float64, 1000)
-		total := make([]float64, 1000)
 		paths := gogo.TreeDir(*input, "sgf")
 
-		for k, path := range paths {
+		for _, path := range paths {
 			log.Println(path)
 			board := gogo.NewBoard()
 			board.Model = m
