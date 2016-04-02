@@ -113,7 +113,7 @@ func (b *Board) GenPattern(sgf string, rotate int) []PatternSample {
 	return ret
 }
 
-func (b *Board) EvaluateRollout(sgf string) []float64 {
+func (b *Board) EvaluateRollout(sgf string) float64 {
 	buf, _ := ioutil.ReadFile(sgf)
 	gt := NewGameTree(SIZE)
 	gt.ParseSGF(string(buf))
@@ -123,8 +123,8 @@ func (b *Board) EvaluateRollout(sgf string) []float64 {
 	wc := gt.Winner()
 	log.Println(wc)
 	path := gt.Path2Root()
-	rank := make([]float64, len(path)-1)
-	j := 0
+	mse := 0.0
+	j := 0.0
 	for i := len(path) - 2; i >= 0; i-- {
 		cur := path[i]
 		if PosOutBoard(cur.x, cur.y) {
@@ -146,14 +146,15 @@ func (b *Board) EvaluateRollout(sgf string) []float64 {
 		}
 		wg.Wait()
 		win /= 100.0
-		rank[j] += math.Abs(wc - win)
+		mse += math.Abs(wc - win)
+		j += 1
 		ok := b.Put(PosIndex(cur.x, cur.y), cur.stone)
 		if !ok {
 			break
 		}
-		j += 1
+
 	}
-	return rank
+	return mse / j
 }
 
 func (b *Board) EvaluateModel(sgf string, withLog bool) (int, int) {

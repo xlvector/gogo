@@ -149,18 +149,7 @@ func main() {
 			log.Println(path)
 			board := gogo.NewBoard()
 			board.Model = m
-			mse := board.EvaluateRollout(path)
-			for i, v := range mse {
-				rank[i] += v
-				total[i] += 1.0
-			}
-			if k%10 == 0 {
-				for i, v := range rank {
-					if total[i] > 0 {
-						log.Println(i, v, total[i], v/total[i])
-					}
-				}
-			}
+			log.Println(board.EvaluateRollout(path))
 		}
 	} else if *mode == "simple" {
 		board := gogo.NewBoard()
