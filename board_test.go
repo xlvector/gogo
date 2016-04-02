@@ -417,7 +417,7 @@ func TestSelfBattle(t *testing.T) {
 		19  . O . . . . . . . . . . . . . . . . .
 		18  X . O . . X . . . . . . . . . . . . .
 		17  . . . O . X . . . . . . . . . . . . .
-		16  X X X . X X . . . . . . . . . . . . .
+		16  X . X . X X . . . . . . . . . . . . .
 		15  . . . . . . . . . . . . . . . . . . .
 		14  . . . . . . . . . . . . . . . . . . .
 		13  . . . . . . . . . . . . . . . . . . .
@@ -444,7 +444,6 @@ func TestSelfBattle(t *testing.T) {
 	b.PutLabel("BF17")
 	b.PutLabel("BA18")
 	b.PutLabel("BF18")
-	b.PutLabel("BB16")
 	b.PutLabel("BF16")
 	for i := 0; i < 500; i++ {
 		b2 := b.Copy()
@@ -743,14 +742,14 @@ func TestSinglePatExpand(t *testing.T) {
 	b.PutLabel("BJ5")
 	b.PutLabel("BK4")
 
-	buf := b.Pattern3x3String(PosIndex(3, 3))
+	buf := b.Pattern3x3String(PosIndex(3, 3), INVALID_COLOR)
 	t.Log(buf)
 
 	if _, ok := pat3x3Dict[buf]; !ok {
 		t.Error()
 	}
 
-	buf = b.Pattern3x3String(PosIndex(8, 3))
+	buf = b.Pattern3x3String(PosIndex(8, 3), INVALID_COLOR)
 	t.Log(buf)
 	if _, ok := pat3x3Dict[buf]; ok {
 		t.Error()

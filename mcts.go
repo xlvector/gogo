@@ -238,14 +238,6 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 			b.Put(p, c)
 			return p
 		}
-
-		for _, p := range PointDisMap[last][2] {
-			rank[p] = 0.1
-		}
-
-		for _, p := range PointDisMap[last][3] {
-			rank[p] = 0.05
-		}
 	}
 
 	visited := ZeroPointMap()
@@ -327,12 +319,26 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 
 	for i := 0; i < NPOINT*2; i++ {
 		k := rand.Intn(NPOINT)
+		if i < 10 && !b.EmptyWithinDis(k, 3) {
+			continue
+		}
 		if ok, _ := b.CanPut(k, c); ok {
 			b.Put(k, c)
 			return k
 		}
 	}
 	return -1
+}
+
+func (b *Board) EmptyWithinDis(k, d int) bool {
+	for i := 0; i <= d; i++ {
+		for _, p := range PointDisMap[k][i] {
+			if b.Points[p] != GRAY {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func (b *Board) GenMove(c Color, rank map[int]float64) (int, map[int]float64) {
