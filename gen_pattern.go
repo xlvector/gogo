@@ -130,24 +130,26 @@ func (b *Board) EvaluateRollout(sgf string) float64 {
 		if PosOutBoard(cur.x, cur.y) {
 			continue
 		}
-		win := 0.0
-		wg := &sync.WaitGroup{}
-		for k := 0; k < 100; k++ {
-			wg.Add(1)
-			go func() {
-				b2 := b.Copy()
-				b2.SelfBattle(cur.stone, nil)
-				s := b2.Score()
-				if s > 0 {
-					win += 1.0
-				}
-				wg.Done()
-			}()
+		if i%20 == 0 {
+			win := 0.0
+			wg := &sync.WaitGroup{}
+			for k := 0; k < 100; k++ {
+				wg.Add(1)
+				go func() {
+					b2 := b.Copy()
+					b2.SelfBattle(cur.stone, nil)
+					s := b2.Score()
+					if s > 0 {
+						win += 1.0
+					}
+					wg.Done()
+				}()
+			}
+			wg.Wait()
+			win /= 100.0
+			mse += math.Abs(wc - win)
+			j += 1.0
 		}
-		wg.Wait()
-		win /= 100.0
-		mse += math.Abs(wc - win)
-		j += 1
 		ok := b.Put(PosIndex(cur.x, cur.y), cur.stone)
 		if !ok {
 			break
