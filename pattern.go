@@ -306,17 +306,24 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 	co1 := 0
 	co2 := 0
 	co3 := 0
+	com1 := 0
 	for _, w := range opNWorms {
 		if w.Liberty == 1 {
 			co1 += 1
+			opNeighs := b.WormNeighWorms(w, c, 2)
+			for _, w2 := range opNeighs {
+				if w2.Liberty == 1 {
+					com1 += 1
+				}
+			}
 		} else if w.Liberty == 2 {
 			co2 += 1
 		} else if w.Liberty == 3 {
 			co3 += 1
 		}
 	}
-
-	ret = append(ret, FeatureEncode("liberty", cm1, cm2, cm3, co1, co2, co3, worm.Liberty))
+	ret = append(ret, FeatureEncode("liberty0", co1, com1, worm.Liberty))
+	ret = append(ret, FeatureEncode("liberty1", cm1, cm2, cm3, co1, co2, co3, com1, worm.Liberty))
 	pat3 := b.Pattern3x3String(k, c)
 	ret = append(ret, FeatureEncode("pat3x3"+pat3))
 	return ret
