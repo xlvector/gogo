@@ -326,6 +326,8 @@ func (b *Board) LocalFeature(k int, c Color) []int64 {
 	ret = append(ret, FeatureEncode("liberty1", cm1, cm2, cm3, co1, co2, co3, com1, worm.Liberty))
 	pat3 := b.Pattern3x3String(k, c)
 	ret = append(ret, FeatureEncode("pat3x3"+pat3))
+	pat5 := b.Pattern5x5String(k, c)
+	ret = append(ret, FeatureEncode("pat5x5"+pat5))
 	return ret
 }
 
@@ -368,6 +370,23 @@ func (b *Board) Pattern3x3String(p int, stone Color) string {
 	ret := ""
 	for dy := -1; dy <= 1; dy++ {
 		for dx := -1; dx <= 1; dx++ {
+			x1, y1 := x+dx, y+dy
+			if !PosOutBoard(x1, y1) {
+				c := b.Points[PosIndex(x1, y1)]
+				ret += ColorMark2(c, stone)
+			} else {
+				ret += " "
+			}
+		}
+	}
+	return ret
+}
+
+func (b *Board) Pattern5x5String(p int, stone Color) string {
+	x, y := IndexPos(p)
+	ret := ""
+	for dy := -2; dy <= 2; dy++ {
+		for dx := -2; dx <= 2; dx++ {
 			x1, y1 := x+dx, y+dy
 			if !PosOutBoard(x1, y1) {
 				c := b.Points[PosIndex(x1, y1)]
