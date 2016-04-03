@@ -233,6 +233,16 @@ func (b *Board) Copy() *Board {
 	return ret
 }
 
+func (b *Board) PrintActions() {
+	line := ""
+	for _, a := range b.Actions {
+		x, y, c := ParseAction(a)
+		line += PointString(x, y, c)
+		line += ","
+	}
+	fmt.Println(line)
+}
+
 func (b *Board) ExtendLiberty(ps PointMap) PointMap {
 	ret := ZeroPointMap()
 	for _, p := range ps.Points {

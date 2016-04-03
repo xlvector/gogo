@@ -219,6 +219,8 @@ func main() {
 				lastX, lastY := gogo.IndexPos(last)
 				gt.Add(gogo.NewGameTreeNode(gogo.WHITE, lastX, lastY))
 			}
+
+			board.PrintActions()
 		}
 	} else if *mode == "self" {
 		board := gogo.NewBoard()

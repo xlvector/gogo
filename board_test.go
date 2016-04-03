@@ -475,6 +475,83 @@ func TestSelfBattle(t *testing.T) {
 	t.Log(win * 100 / 500)
 }
 
+func TestSelfBattle2(t *testing.T) {
+	win := 0
+	lgr := NewLastGoodReply()
+	b := NewBoard()
+	/*
+			A B C D E F G H J K L M N O P Q R S T
+		19  . . . . . . . . . . . . . . . . . . .
+		18  . O O O O O O O O O O . . . . . . . .
+		17  . X X X X X X X X X X . . . . . . . .
+		16  . . . . . . . . . . . . . . . . . . .
+		15  . . . . . . . . . . . . . . . . . . .
+		14  . . . . . . . . . . . . . . . . . . .
+		13  . . . . . . . . . . . . . . . . . . .
+		12  . . . . . . . . . . . . . . . . . . .
+		11  . . . . . . . . . . . . . . . . . . .
+		10  . . . . . . . . . . . . . . . . . . .
+		 9  . . . . . . . . . . . . . . . . . . .
+		 8  . . . . . . . . . . . . . . . . . . .
+		 7  . . . . . . . . . . . . . . . . . . .
+		 6  . . . . . . . . . . . . . . . . . . .
+		 5  . . . . . . . . . . . . . . . . . . .
+		 4  . . . . . . . . . . . . . . . . . . .
+		 3  . . . . . . . . . . . . . . . . . . .
+		 2  . . . . . . . . . . . . . . . . . . .
+		 1  . . . . . . . . . . . . . . . . . . .
+		    A B C D E F G H J K L M N O P Q R S T
+	*/
+	b.PutLabel("BB18")
+	b.PutLabel("WB17")
+	b.PutLabel("BC18")
+	b.PutLabel("WC17")
+	b.PutLabel("BD18")
+	b.PutLabel("WD17")
+	b.PutLabel("BE18")
+	b.PutLabel("WE17")
+	b.PutLabel("BF18")
+	b.PutLabel("WF17")
+	b.PutLabel("BG18")
+	b.PutLabel("WG17")
+	b.PutLabel("BH18")
+	b.PutLabel("WH17")
+	b.PutLabel("BJ18")
+	b.PutLabel("WJ17")
+	b.PutLabel("BK18")
+	b.PutLabel("WK17")
+	b.PutLabel("BL18")
+	b.PutLabel("WL17")
+	for i := 0; i < 500; i++ {
+		b2 := b.Copy()
+		b2.SelfBattle(BLACK, nil)
+		s := b2.Score()
+		if s > 0 {
+			win += 1
+			for j := 0; j < len(b2.Actions)-1; j++ {
+				k1, c1 := ParseIndexAction(b2.Actions[j])
+				k2, c2 := ParseIndexAction(b2.Actions[j+1])
+				if c1 == WHITE && c2 == BLACK {
+					lgr.Set(BLACK, k1, k2)
+				}
+			}
+		} else {
+			for j := 0; j < len(b2.Actions)-1; j++ {
+				k1, c1 := ParseIndexAction(b2.Actions[j])
+				k2, c2 := ParseIndexAction(b2.Actions[j+1])
+				if c1 == BLACK && c2 == WHITE {
+					lgr.Set(WHITE, k1, k2)
+				}
+			}
+		}
+		if i == 0 {
+			t.Log(s)
+			t.Log(b2.String(nil))
+		}
+	}
+	t.Log(win * 100 / 500)
+}
+
 func TestInfluence(t *testing.T) {
 	/*
 			A B C D E F G H J K L M N O P Q R S T
