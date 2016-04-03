@@ -416,20 +416,29 @@ func (w *Worm) Size() int {
 	return w.Points.Size()
 }
 
-func (b *Board) EmptyWormFromPoint(k int, maxDepth int) []int64 {
+type EmptyWorm struct {
+	Points       PointMap
+	BorderPoints PointMap
+	BorderColor  Color
+}
+
+func ZeroEmptyWorm() EmptyWorm {
+	return EmptyWorm{
+		Points:       ZeroPointMap(),
+		BorderPoints: ZeroPointMap(),
+		BorderColor:  GRAY,
+	}
+}
+
+func (b *Board) EmptyWormFromPoint(k int, maxDepth int) EmptyWorm {
+	ret := ZeroEmptyWorm()
 	if b.Points[k] != GRAY {
-		return []int64{}
+		return ret
 	}
 	queue := make([]int, 0, 10)
 	start := 0
 	queue = append(queue, k*100)
-	ret := make([]int64, maxDepth+1)
 
-	minBlack := -1
-	minWhite := -1
-	black := ZeroPointMap()
-	white := ZeroPointMap()
-	gray := ZeroPointMap()
 	for {
 		if start >= len(queue) {
 			break
@@ -440,41 +449,36 @@ func (b *Board) EmptyWormFromPoint(k int, maxDepth int) []int64 {
 		if depth > maxDepth {
 			continue
 		}
-		if gray.Exist(pos) {
+		if ret.Points.Exist(pos) {
 			continue
 		}
-		gray.Add(pos)
-		ret[depth] ^= b.PointHash[pos]
+		ret.Points.Add(pos)
 		n4 := Neigh4(pos)
 		for n4 > 0 {
 			nv := int(n4 & 0x1ff)
 			n4 = (n4 >> 9)
-			if gray.Exist(nv) {
-				continue
-			}
-			if b.Points[nv] == BLACK && depth < maxDepth {
-				ret[depth] ^= b.PointHash[nv]
-				black.Add(nv)
-				if minBlack < 0 {
-					minBlack = depth + 1
-				}
-			} else if b.Points[nv] == WHITE && depth < maxDepth {
-				ret[depth] ^= b.PointHash[nv]
-				white.Add(nv)
-				if minWhite < 0 {
-					minWhite = depth + 1
-				}
+			if b.Points[nv] == BLACK || b.Points[nv] == WHITE {
+				ret.BorderPoints.Add(nv)
 			} else if b.Points[nv] == GRAY {
-				queue = append(queue, nv*100+depth+1)
+				if depth < maxDepth {
+					queue = append(queue, nv*100+depth+1)
+				} else {
+					ret.BorderPoints.Add(nv)
+				}
 			}
 		}
 	}
-	for i := 1; i < maxDepth; i++ {
-		ret[i] ^= ret[i-1]
+	if ret.BorderPoints.Size() == 0 {
+		ret.BorderColor = GRAY
+	} else {
+		ret.BorderColor = b.Points[ret.BorderPoints.First()]
+		for _, p := range ret.BorderPoints.Points {
+			if ret.BorderColor != b.Points[p] {
+				ret.BorderColor = GRAY
+				break
+			}
+		}
 	}
-
-	ret = append(ret, 9345710457107515+int64(black.Size()*171)+int64(white.Size()*17)+int64(gray.Size()))
-	ret = append(ret, 4915719347501510+int64(minBlack)*71+int64(minWhite)*7)
 	return ret
 }
 

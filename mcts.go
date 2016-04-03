@@ -184,7 +184,6 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 	rank := make(map[int]float64)
 	last, _ := b.LastMove()
 	if last >= 0 {
-
 		if lgr != nil {
 			p := lgr.Move(c, last)
 			if p > 0 {
@@ -259,7 +258,7 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 				for _, p := range worm.LibertyPoints.Points {
 					if b.PointLiberty(p) == 3 {
 						rank[p] += 10000.0 + float64(worm.Size()*10)
-					} else {
+					} else if b.PointLiberty(p) == 2 {
 						rank[p] += 500.0 + float64(worm.Size())
 					}
 				}
@@ -281,14 +280,16 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 			} else if worm.Liberty == 2 {
 				for _, p := range worm.LibertyPoints.Points {
 					if b.PointLiberty(p) > 2 {
-						rank[p] += 10.0
+						px, py := IndexPos(p)
+						rank[p] += 10.0 + float64(EdgeDis(px, py))*10.0
 					}
 				}
 			} else if worm.Liberty == 3 {
 				ext := b.ExtendLiberty(worm.LibertyPoints)
 				if ext.Size() <= 3 {
 					for _, p := range worm.LibertyPoints.Points {
-						rank[p] += 10.0
+						px, py := IndexPos(p)
+						rank[p] += 10.0 + float64(EdgeDis(px, py))*10.0
 					}
 				}
 			}
@@ -297,6 +298,12 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 		for _, p := range worm.LibertyPoints.Points {
 			if b.PointLiberty(p) == 2 {
 				rank[p] += 1.0
+			}
+		}
+
+		if worm.Liberty*3 < worm.Size() {
+			for _, p := range worm.LibertyPoints.Points {
+				rank[p] += 0.1
 			}
 		}
 	}
@@ -416,7 +423,7 @@ func (p *LastGoodReply) Move(c Color, last int) int {
 			return k
 		}
 	} else if c == WHITE {
-		k, ok := p.black[last]
+		k, ok := p.white[last]
 		if ok {
 			return k
 		}
@@ -451,13 +458,13 @@ func (b *Board) MCTSMove(c Color, gt *GameTree, expand, n int) (bool, int) {
 			log.Println(PointString(child.x, child.y, child.stone), child.win, child.visit)
 		}
 	}
-	//lgr := NewLastGoodReply()
+	lgr := NewLastGoodReply()
 	for i := 0; i < n; i++ {
 		if i%1000 == 0 {
 			fmt.Print(".")
 		}
 		node := MCTSSelection(gt)
-		MCTSExpand(node, b, expand, c, nil, wg)
+		MCTSExpand(node, b, expand, c, lgr, wg)
 	}
 	fmt.Println()
 	wg.Wait()
