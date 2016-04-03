@@ -326,6 +326,17 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 
 	for i := 0; i < NPOINT*2; i++ {
 		k := rand.Intn(NPOINT)
+		/*
+			if b.Model != nil {
+				pat := b.FinalPatternHash(k, c)
+				smp := b.PatternFeature(k, c, b.LastPattern, pat)
+				sample := core.NewSample()
+				for _, v := range smp {
+					sample.AddFeature(core.Feature{v, 1.0})
+				}
+				pr = b.Model.Predict(sample)
+			}
+		*/
 		if ok, _ := b.CanPut(k, c); ok {
 			b.Put(k, c)
 			return k
