@@ -219,6 +219,17 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 				if ok2, _ := b.CanPut(p, c); ok2 {
 					ret = append(ret, p)
 				}
+			} else {
+				pat := b.FinalPatternHash(p, c)
+				smp := b.PatternFeature(p, c, b.LastPattern, pat)
+				sample := core.NewSample()
+				for _, v := range smp {
+					sample.AddFeature(core.Feature{v, 1.0})
+				}
+				pr := b.Model.Predict(sample)
+				if pr > 0.2 {
+					ret = append(ret, p)
+				}
 			}
 		}
 		nd := NeighD(last)
@@ -228,6 +239,17 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 			pat := b.Pattern3x3String(p, INVALID_COLOR)
 			if _, ok := pat3x3Dict[pat]; ok {
 				if ok2, _ := b.CanPut(p, c); ok2 {
+					ret = append(ret, p)
+				}
+			} else {
+				pat := b.FinalPatternHash(p, c)
+				smp := b.PatternFeature(p, c, b.LastPattern, pat)
+				sample := core.NewSample()
+				for _, v := range smp {
+					sample.AddFeature(core.Feature{v, 1.0})
+				}
+				pr := b.Model.Predict(sample)
+				if pr > 0.2 {
 					ret = append(ret, p)
 				}
 			}
