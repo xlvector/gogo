@@ -34,12 +34,16 @@ func TestSelfBattleCase(t *testing.T) {
 		b2.SelfBattle(BLACK, lgr)
 		s := b2.Score()
 		if s > 0 {
-			win += 1
+			if i > 500 {
+				win += 1
+			}
 			for j := 0; j < len(b2.Actions)-1; j++ {
 				k1, c1 := ParseIndexAction(b2.Actions[j])
 				k2, c2 := ParseIndexAction(b2.Actions[j+1])
 				if c1 == WHITE && c2 == BLACK {
 					lgr.Set(BLACK, k1, k2)
+				} else if c1 == BLACK && c2 == WHITE {
+					lgr.Del(WHITE, k1, k2)
 				}
 			}
 		} else {
@@ -48,11 +52,13 @@ func TestSelfBattleCase(t *testing.T) {
 				k2, c2 := ParseIndexAction(b2.Actions[j+1])
 				if c1 == BLACK && c2 == WHITE {
 					lgr.Set(WHITE, k1, k2)
+				} else if c1 == WHITE && c2 == BLACK {
+					lgr.Del(BLACK, k1, k2)
 				}
 			}
 		}
 
-		if i == 0 {
+		if i == 500 {
 			t.Log(b2.String(nil))
 		}
 	}

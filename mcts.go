@@ -455,6 +455,20 @@ func (p *LastGoodReply) Set(c Color, k1, k2 int) {
 	}
 }
 
+func (p *LastGoodReply) Del(c Color, k1, k2 int) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	if c == BLACK {
+		if p.black[k1] == k2 {
+			delete(p.black, k1)
+		}
+	} else if c == WHITE {
+		if p.white[k1] == k2 {
+			delete(p.white, k1)
+		}
+	}
+}
+
 func NewLastGoodReply() *LastGoodReply {
 	return &LastGoodReply{
 		black: make(map[int]int),
@@ -608,6 +622,8 @@ func MCTSBackProp(node *GameTreeNode, wc Color, amaf map[int]Color, lgr *LastGoo
 		if lgr != nil {
 			if v.stone == wc && v.Father != nil {
 				lgr.Set(wc, PosIndex(v.Father.x, v.Father.y), PosIndex(v.x, v.y))
+			} else if v.stone == OpColor(wc) && v.Father != nil {
+				lgr.Del(v.stone, PosIndex(v.Father.x, v.Father.y), PosIndex(v.x, v.y))
 			}
 		}
 		v = v.Father
