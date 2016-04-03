@@ -237,7 +237,7 @@ func (b *Board) PrintActions() {
 	line := ""
 	for _, a := range b.Actions {
 		x, y, c := ParseAction(a)
-		line += PointString(x, y, c)
+		line += GenPutLabel(x, y, c)
 		line += ","
 	}
 	fmt.Println(line)
@@ -338,6 +338,18 @@ func (b *Board) PutLabel(buf string) bool {
 	y -= 1
 	log.Println(buf, x, y, c)
 	return b.Put(PosIndex(x, y), c)
+}
+
+func GenPutLabel(x, y int, c Color) string {
+	ret := ""
+	if c == WHITE {
+		ret += "W"
+	} else if c == BLACK {
+		ret += "B"
+	}
+	ret += string(LX[x])
+	ret += strconv.Itoa(y + 1)
+	return ret
 }
 
 func (b *Board) Put(k int, c Color) bool {
