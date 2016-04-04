@@ -218,21 +218,12 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 			if ok, _ := b.CanPut(p, c); !ok {
 				continue
 			}
-			if b.Model == nil {
-				if _, ok := pat3x3Dict[pat]; ok {
-					ret = append(ret, p)
-				}
-			} else {
-				pat := b.FinalPatternHash(p, c)
-				smp := b.PatternFeature(p, c, b.LastPattern, pat)
-				sample := core.NewSample()
-				for _, v := range smp {
-					sample.AddFeature(core.Feature{v, 1.0})
-				}
-				pr := b.Model.Predict(sample)
-				if pr > 0.2 {
-					ret = append(ret, p)
-				}
+			if b.IsNakade(p, OpColor(c)) {
+				b.Put(p, c)
+				return p
+			}
+			if _, ok := pat3x3Dict[pat]; ok {
+				ret = append(ret, p)
 			}
 		}
 		nd := NeighD(last)
@@ -243,21 +234,12 @@ func (b *Board) GenSelfBattleMove(c Color, lgr *LastGoodReply) int {
 			if ok, _ := b.CanPut(p, c); !ok {
 				continue
 			}
-			if b.Model == nil {
-				if _, ok := pat3x3Dict[pat]; ok {
-					ret = append(ret, p)
-				}
-			} else {
-				pat := b.FinalPatternHash(p, c)
-				smp := b.PatternFeature(p, c, b.LastPattern, pat)
-				sample := core.NewSample()
-				for _, v := range smp {
-					sample.AddFeature(core.Feature{v, 1.0})
-				}
-				pr := b.Model.Predict(sample)
-				if pr > 0.2 {
-					ret = append(ret, p)
-				}
+			if b.IsNakade(p, OpColor(c)) {
+				b.Put(p, c)
+				return p
+			}
+			if _, ok := pat3x3Dict[pat]; ok {
+				ret = append(ret, p)
 			}
 		}
 		if len(ret) > 0 {

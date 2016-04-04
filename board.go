@@ -430,6 +430,21 @@ func ZeroEmptyWorm() EmptyWorm {
 	}
 }
 
+func (b *Board) IsNakade(k int, c Color) bool {
+	pl := b.PointLiberty(k)
+	if pl < 2 {
+		return false
+	}
+	ew := b.EmptyWormFromPoint(k, 3)
+	if ew.Points.Size() > 6 {
+		return false
+	}
+	if ew.BorderColor == c {
+		return true
+	}
+	return false
+}
+
 func (b *Board) EmptyWormFromPoint(k int, maxDepth int) EmptyWorm {
 	ret := ZeroEmptyWorm()
 	if b.Points[k] != GRAY {

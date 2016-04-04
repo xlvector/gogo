@@ -435,6 +435,53 @@ func TestHash(t *testing.T) {
 
 }
 
+func TestNakade(t *testing.T) {
+	/*
+			A B C D E F G H J K L M N O P Q R S T
+		19  . . . . . . . . . . . . . . . . . . .
+		18  . . . . . . . . . . . . . . . . . . .
+		17  . . . . . . . . . . . . . . . . . . .
+		16  . . . X X X X X . . . . . . . . . . .
+		15  . . . X . . . X . . . . . . . . . . .
+		14  . . . X X X X X . . . . . . . . . . .
+		13  . . . . . . . . . . . . . . . . . . .
+		12  . . . . . . . . . . . . . . . . . . .
+		11  . . . . . . . . . . . . . . . . . . .
+		10  . . . . . . . . . . . . . . . . . . .
+		 9  . . . . . . . . . . . . . . . . . . .
+		 8  . . . . . . . . . . . . . . . . . . .
+		 7  . . . . . . . . . . . . . . . . . . .
+		 6  . . . . . . . . . . . . . . . . . . .
+		 5  . . . . . . . . . . . . . . . . . . .
+		 4  . . . . . . . . . . . . . . . . . . .
+		 3  . . . . . . . . . . . . . . . . . . .
+		 2  . . . . . . . . . . . . . . . . . . .
+		 1  . . . . . . . . . . . . . . . . . . .
+		    A B C D E F G H J K L M N O P Q R S T
+	*/
+	b := NewBoard()
+	b.PutLabel("BD14")
+	b.PutLabel("BD15")
+	b.PutLabel("BD16")
+	b.PutLabel("BE14")
+	b.PutLabel("BE16")
+	b.PutLabel("BF14")
+	b.PutLabel("BF16")
+	b.PutLabel("BG14")
+	b.PutLabel("BG16")
+	b.PutLabel("BH14")
+	b.PutLabel("BH15")
+	b.PutLabel("BH16")
+
+	if !b.IsNakade(PosIndex(5, 14), BLACK) {
+		t.Error()
+	}
+
+	if b.IsNakade(PosIndex(4, 14), BLACK) {
+		t.Error()
+	}
+}
+
 func TestSingleSelfBattle(t *testing.T) {
 	/*
 			A B C D E F G H J K L M N O P Q R S T
